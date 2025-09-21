@@ -25,12 +25,21 @@ header h1 {
   letter-spacing: 1px;
 }
 
-nav {
-  margin-top: 15px;
+/* Navigation bar */
+nav ul {
+  list-style: none;          /* removes the dots */
+  padding: 0;
+  margin: 15px 0 0 0;
+  display: flex;             /* makes items go side by side */
+  justify-content: center;   /* centers the buttons */
+  gap: 15px;                 /* space between buttons */
+}
+
+nav li {
+  display: inline;           /* inline so list items don’t stack */
 }
 
 nav button {
-  margin: 5px;
   padding: 12px 24px;
   border: none;
   background: #444;
@@ -46,6 +55,7 @@ nav button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,102,255,0.3);
 }
+
 
 /* Main content */
 main {
