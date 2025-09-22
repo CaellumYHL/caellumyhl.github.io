@@ -99,3 +99,31 @@ footer a {
 footer a:hover {
   text-decoration: underline;
 }
+
+/* Reusable content card */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.card h3 {
+  margin-top: 0;
+  color: #222;
+}
+
+.card p {
+  margin: 8px 0;
+}
+
+/* Highlight tags (like "Java" or "Lua") */
+.tag {
+  background: #0066ff;
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+}
