@@ -13,14 +13,14 @@ const sections = {
   projects: `
     <h2>Projects</h2>
     <ul>
-      <li>Project 1 – A simple demo site</li>
-      <li>Project 2 – A fun JavaScript experiment</li>
-      <li>Project 3 – Coming soon!</li>
+      <li>Head of IT, RHHS Computer Science Club</li>
+      <li>Head of Programming/Co-founder, RHHS Game Design Club</li>
+      <li>Owner and Software Lead, Bronze Bat Studio</li>
     </ul>
   `,
   contact: `
     <h2>Contact</h2>
-    <p>You can reach me at: <a href="mailto:myemail@example.com">myemail@example.com</a></p>
+    <p>You can reach me at: <a href="mailto:caecaeyhl@gmail.com">caecaeyhl@gmail.com</a></p>
   `
 };
 
