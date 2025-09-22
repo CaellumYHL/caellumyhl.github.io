@@ -8,7 +8,7 @@ const sections = {
   `,
   about: `
     <h2>About Me</h2>
-    <p>Hello! I'm a web enthusiast learning to build cool websites.</p>
+    <p>Hello! Im a passionate computer science student looking for opportunities to work on projects and learn new languages.</p>
   `,
   projects: `
     <h2>Projects</h2>
