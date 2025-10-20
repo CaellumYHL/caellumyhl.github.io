@@ -1,19 +1,25 @@
-/* Base styles */
+/* ========== Base Styles ========== */
 body {
   font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   margin: 0;
-  background: linear-gradient(135deg, #f9fafb, #eef1f6);
+  background: linear-gradient(135deg, #f0f4ff, #e6ebf5, #fdfdff);
   color: #222;
-  line-height: 1.6;
+  line-height: 1.7;
+  transition: background 0.5s ease;
 }
 
-/* Header / Navbar */
+/* Smooth fade-in animation for everything */
+* {
+  transition: all 0.3s ease;
+}
+
+/* ========== Header / Navbar ========== */
 header {
-  background: linear-gradient(135deg, #1a1a1a, #333);
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
   color: white;
-  padding: 25px;
+  padding: 30px 20px;
   text-align: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -21,109 +27,129 @@ header {
 
 header h1 {
   margin: 0;
-  font-size: 2rem;
-  letter-spacing: 1px;
+  font-size: 2.2rem;
+  letter-spacing: 1.2px;
+  background: linear-gradient(to right, #4facfe, #00f2fe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-/* Navigation bar */
+/* ========== Navigation ========== */
 nav ul {
-  list-style: none;          /* removes the dots */
+  list-style: none;
   padding: 0;
-  margin: 15px 0 0 0;
-  display: flex;             /* makes items go side by side */
-  justify-content: center;   /* centers the buttons */
-  gap: 15px;                 /* space between buttons */
+  margin: 18px 0 0 0;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
 }
 
 nav li {
-  display: inline;           /* inline so list items don’t stack */
+  display: inline;
 }
 
 nav button {
-  padding: 12px 24px;
+  padding: 12px 28px;
   border: none;
-  background: #444;
+  border-radius: 40px;
+  background: linear-gradient(135deg, #1f1c2c, #928dab);
   color: white;
-  cursor: pointer;
-  border-radius: 30px;
   font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
   transition: all 0.3s ease;
 }
 
 nav button:hover {
-  background: #0066ff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,102,255,0.3);
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4);
 }
 
-
-/* Main content */
+/* ========== Main Content ========== */
 main {
-  padding: 30px;
+  padding: 40px;
   min-height: 350px;
-  background: white;
-  margin: 30px auto;
-  border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  background: linear-gradient(145deg, #ffffff, #f7f9ff);
+  margin: 40px auto;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   max-width: 900px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 main:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.15);
 }
 
 main h2 {
   margin-top: 0;
-  font-size: 1.6rem;
-  color: #0066ff;
+  font-size: 1.8rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #0072ff, #00c6ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-/* Footer */
-footer {
-  text-align: center;
-  padding: 15px;
-  background: #1a1a1a;
-  color: #aaa;
-  font-size: 0.9rem;
-  margin-top: 40px;
-  box-shadow: 0 -4px 10px rgba(0,0,0,0.2);
-}
-
-footer a {
-  color: #0066ff;
-  text-decoration: none;
-}
-
-footer a:hover {
-  text-decoration: underline;
-}
-
-/* Reusable content card */
+/* ========== Card Component ========== */
 .card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  margin: 20px 0;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  background: linear-gradient(160deg, #ffffff, #f3f6ff);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 24px 0;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+  background: linear-gradient(160deg, #f9fbff, #e6f0ff);
 }
 
 .card h3 {
   margin-top: 0;
-  color: #222;
+  color: #111;
+  font-size: 1.3rem;
 }
 
 .card p {
-  margin: 8px 0;
+  margin: 10px 0;
+  color: #444;
 }
 
-/* Highlight tags (like "Java" or "Lua") */
+/* ========== Tags ========== */
 .tag {
-  background: #0066ff;
+  display: inline-block;
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
   color: #fff;
   font-size: 0.8rem;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 12px;
   margin-left: 8px;
+  box-shadow: 0 2px 6px rgba(0, 102, 255, 0.3);
+}
+
+/* ========== Footer ========== */
+footer {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #1f1c2c, #2c5364);
+  color: #ccc;
+  font-size: 0.9rem;
+  margin-top: 50px;
+  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.25);
+}
+
+footer a {
+  color: #00c6ff;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+footer a:hover {
+  text-decoration: underline;
+  color: #fff;
 }
