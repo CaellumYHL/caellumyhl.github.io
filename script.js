@@ -1,6 +1,6 @@
 const content = document.getElementById("content");
 
-// Predefined portfolio sections
+// Predefined portfolio sections (same as before)
 const sections = {
   home: `
     <h2>Welcome!</h2>
@@ -85,6 +85,18 @@ const sections = {
 document.querySelectorAll("nav button").forEach(btn => {
   btn.addEventListener("click", () => {
     const section = btn.getAttribute("data-section");
-    content.innerHTML = sections[section];
+
+    // Add active class
+    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    // Smooth fade animation
+    content.classList.add("fade-out");
+    setTimeout(() => {
+      content.innerHTML = sections[section];
+      content.classList.remove("fade-out");
+      content.classList.add("fade-in");
+      setTimeout(() => content.classList.remove("fade-in"), 300);
+    }, 300);
   });
 });
