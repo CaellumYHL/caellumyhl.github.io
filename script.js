@@ -9,8 +9,8 @@ const sections = {
     <h2>About Me</h2>
     <div class="card">
       <p>Hey, I'm <strong>Caellum Yip Hoi-Lee</strong> </p>
-      <p>Outside of programming, I enjoy experimenting with digital art, producing music,
-      and exploring new frameworks. My approach: <em>learn by building weird stuff</em>.</p>
+      <p>Outside of programming, I enjoy playing the piano, making games,
+      and working out. </p>
     </div>
   `,
   skills: `
@@ -34,7 +34,7 @@ const sections = {
     <h2>Projects</h2>
     <div class="card">
       <h3>Twin Universe Space Simulator <span class="tag">Lua</span></h3>
-      <p>Massive space exploration game with 2.8M+ player visits and custom physics systems.</p>
+      <p>Space exploration game with 2.8M+ player visits and custom physics systems.</p>
     </div>
     <div class="card">
       <h3>OPUS eLibrary <span class="tag">Java</span></h3>
@@ -80,7 +80,7 @@ const sections = {
   `,
   contact: `
     <h2>Contact</h2>
-    <p>Want to collaborate or just chat? Reach out at 
+    <p>Reach out at 
     <a href="mailto:caecaeyhl@gmail.com">caecaeyhl@gmail.com</a></p>
   `
 };
