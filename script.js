@@ -1,60 +1,71 @@
 const content = document.getElementById("content");
 
-// Predefined portfolio sections (same as before)
 const sections = {
   home: `
-    <h2>Welcome!</h2>
-    <p>This is my portfolio website. Use the navigation above to explore.</p>
+    <h2>Home</h2>
+    <p>Welcome to my Neo-Brutalist portfolio! Explore to learn about my skills, work, and background.</p>
   `,
   about: `
     <h2>About Me</h2>
-    <p>Hello! I'm a passionate computer science student looking for opportunities 
-    to work on projects and learn new languages.</p>
+    <div class="card">
+      <p>Hey, I'm <strong>Caellum Yip Hoi-Lee</strong> — a passionate computer science student
+      with a mix of creativity, curiosity, and caffeine. I love turning abstract ideas into
+      tangible code and blending technology with design.</p>
+      <p>Outside of programming, I enjoy experimenting with digital art, producing music,
+      and exploring new frameworks. My approach: <em>learn by building weird stuff</em>.</p>
+    </div>
+  `,
+  skills: `
+    <h2>Skills & Frameworks</h2>
+    <div class="skills-grid">
+      <div class="skill-item">Python</div>
+      <div class="skill-item">Java</div>
+      <div class="skill-item">C++</div>
+      <div class="skill-item">Lua</div>
+      <div class="skill-item">HTML/CSS</div>
+      <div class="skill-item">JavaScript</div>
+      <div class="skill-item">React</div>
+      <div class="skill-item">Git</div>
+      <div class="skill-item">Figma</div>
+      <div class="skill-item">Unity (C#)</div>
+      <div class="skill-item">Arduino</div>
+      <div class="skill-item">SQL</div>
+    </div>
   `,
   projects: `
     <h2>Projects</h2>
     <div class="card">
       <h3>Twin Universe Space Simulator <span class="tag">Lua</span></h3>
-      <p>Developed a space exploration game with rocket launches, progression systems, 
-      and multiplayer missions. Drove over <strong>2.8 million player visits</strong>.</p>
+      <p>Massive space exploration game with 2.8M+ player visits and custom physics systems.</p>
     </div>
     <div class="card">
       <h3>OPUS eLibrary <span class="tag">Java</span></h3>
-      <p>Built a school library management system with logins for students and librarians, 
-      supporting borrowing/lending books, managing accounts, and browsing eBooks.</p>
+      <p>Java desktop system for managing book loans and student accounts with authentication.</p>
     </div>
     <div class="card">
-      <h3>Custom PCB Game System <span class="tag">KiCad, Arduino C++</span></h3>
-      <p>Designed and wired a PCB with an RGB LED matrix to play Tic Tac Toe and Connect 4. 
-      Programmed interactive game logic, input handling, and simple AI in C++ for the Arduino Uno.</p>
+      <h3>Custom PCB Game System <span class="tag">C++ / KiCad</span></h3>
+      <p>Built an LED-matrix game board from scratch, with C++ logic on Arduino.</p>
     </div>
   `,
   experience: `
     <h2>Experience</h2>
     <div class="card">
       <h3>Head of IT — RHHS Computer Science Club</h3>
-      <p><em>Sep 2024 – Jun 2025</em></p>
       <ul>
-        <li>Maintained and troubleshot technical infrastructure (TypeScript, SCSS) for club events.</li>
-        <li>Provided technical support to members during meetings, workshops, and competitions.</li>
-        <li>Created designs for events using Canva and Figma.</li>
+        <li>Maintained club website and event systems (TypeScript, SCSS).</li>
+        <li>Supported members and ran coding workshops.</li>
       </ul>
     </div>
     <div class="card">
-      <h3>Head of Programming / Co-founder — RHHS Game Design Club</h3>
-      <p><em>Sep 2023 – Jun 2025</em></p>
+      <h3>Head of Programming — RHHS Game Design Club</h3>
       <ul>
-        <li>Developed and delivered Unity lessons in C# (Flappy Bird–style game).</li>
-        <li>Taught programming concepts (conditionals, functions, OOP) and Unity physics.</li>
-        <li>Integrated modular gameplay systems for learning purposes.</li>
+        <li>Taught Unity/C# and built demos for new developers.</li>
       </ul>
     </div>
     <div class="card">
-      <h3>Owner & Software Lead — Bronze Bat Studio</h3>
-      <p><em>Aug 2023 – Present</em></p>
+      <h3>Owner — Bronze Bat Studio</h3>
       <ul>
-        <li>Founded a small indie game studio publishing games on Steam and Roblox.</li>
-        <li>Games in Lua and C# generated ~$2,000 revenue and 3M+ plays.</li>
+        <li>Published games to Steam and Roblox with 3M+ total plays.</li>
       </ul>
     </div>
   `,
@@ -62,35 +73,27 @@ const sections = {
     <h2>Education</h2>
     <div class="card">
       <h3>University of Toronto</h3>
-      <p><em>Honours Bachelor of Science (2025–2029)</em></p>
-      <p>Computer Science Admission Program. Planning to enroll in the Computer Science Specialist Program.</p>
+      <p>Honours BSc in Computer Science (2025–2029)</p>
     </div>
     <div class="card">
       <h3>Richmond Hill High School</h3>
-      <p><em>Ontario Secondary School Diploma — 97% Average</em></p>
-      <ul>
-        <li>AP Student</li>
-        <li>Received RHHS English Subject Course Award</li>
-        <li>Gold Band Certificate of Merit</li>
-      </ul>
+      <p>97% average, AP student, multiple awards.</p>
     </div>
   `,
   contact: `
     <h2>Contact</h2>
-    <p>You can reach me at: <a href="mailto:caecaeyhl@gmail.com">caecaeyhl@gmail.com</a></p>
+    <p>Want to collaborate or just chat? Reach out at 
+    <a href="mailto:caecaeyhl@gmail.com">caecaeyhl@gmail.com</a></p>
   `
 };
 
-// Attach click handlers to buttons
 document.querySelectorAll("nav button").forEach(btn => {
   btn.addEventListener("click", () => {
     const section = btn.getAttribute("data-section");
 
-    // Add active class
     document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
 
-    // Smooth fade animation
     content.classList.add("fade-out");
     setTimeout(() => {
       content.innerHTML = sections[section];
@@ -100,19 +103,3 @@ document.querySelectorAll("nav button").forEach(btn => {
     }, 300);
   });
 });
-
-
-// === Add floating glowing bubbles ===
-const bg = document.querySelector('.background-effects');
-if (bg) {
-  for (let i = 0; i < 7; i++) {
-    const orb = document.createElement('div');
-    orb.classList.add('orb');
-    orb.style.width = `${80 + Math.random() * 120}px`;
-    orb.style.height = orb.style.width;
-    orb.style.left = `${Math.random() * 100}%`;
-    orb.style.top = `${Math.random() * 100}%`;
-    orb.style.animationDelay = `${Math.random() * 5}s`;
-    bg.appendChild(orb);
-  }
-}
