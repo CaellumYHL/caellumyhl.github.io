@@ -3,14 +3,12 @@ const content = document.getElementById("content");
 const sections = {
   home: `
     <h2>Home</h2>
-    <p>Welcome to my Neo-Brutalist portfolio! Explore to learn about my skills, work, and background.</p>
+    <p>Welcome to my portfolio! </p>
   `,
   about: `
     <h2>About Me</h2>
     <div class="card">
-      <p>Hey, I'm <strong>Caellum Yip Hoi-Lee</strong> — a passionate computer science student
-      with a mix of creativity, curiosity, and caffeine. I love turning abstract ideas into
-      tangible code and blending technology with design.</p>
+      <p>Hey, I'm <strong>Caellum Yip Hoi-Lee</strong> </p>
       <p>Outside of programming, I enjoy experimenting with digital art, producing music,
       and exploring new frameworks. My approach: <em>learn by building weird stuff</em>.</p>
     </div>
