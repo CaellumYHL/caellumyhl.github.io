@@ -3,7 +3,7 @@ function scrollToSection(id) {
   document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
 }
 
-// Skills Data
+// Skills
 const skills = [
   { name: "React", level: "Expert", icon: "⚛️", levelValue: 95 },
   { name: "TypeScript", level: "Advanced", icon: "📘", levelValue: 90 },
@@ -15,21 +15,18 @@ const skills = [
   { name: "MongoDB", level: "Intermediate", icon: "🍃", levelValue: 70 },
 ];
 
-// Render Skills
 const skillsContainer = document.getElementById('skills-chart');
 skills.forEach(skill => {
   const skillEl = document.createElement('div');
   skillEl.className = 'skill-bar';
   skillEl.innerHTML = `
-    <div style="flex:1;">${skill.icon} ${skill.name}</div>
-    <div style="flex:3; background:#eee; border:1px solid #000; border-radius:9999px;">
-      <div style="width:${skill.levelValue}%; background:#A4D65E; text-align:right; padding-right:0.5rem;">${skill.level}</div>
-    </div>
+    <div>${skill.icon} ${skill.name}</div>
+    <div><div style="width:${skill.levelValue}%">${skill.level}</div></div>
   `;
   skillsContainer.appendChild(skillEl);
 });
 
-// Projects Data
+// Projects
 const projects = [
   {
     title: "AI-Powered Chat Platform",
@@ -37,18 +34,14 @@ const projects = [
     tech: ["React", "Node.js", "Socket.io", "OpenAI"],
     github: "https://github.com/yourusername/project1",
     demo: "https://demo.example.com",
-    number: "01"
-  },
-  // ... Add remaining projects here
+  }
 ];
 
-// Render Projects
 const projectsContainer = document.getElementById('projects-grid');
 projects.forEach(p => {
   const card = document.createElement('div');
   card.className = 'project-card';
   card.innerHTML = `
-    <div class="project-number">${p.number}</div>
     <h3>${p.title}</h3>
     <p>${p.description}</p>
     <div class="tech">${p.tech.join(', ')}</div>
@@ -60,20 +53,17 @@ projects.forEach(p => {
   projectsContainer.appendChild(card);
 });
 
-// Experiences Data
+// Experiences
 const experiences = [
   {
     role: "Senior Full Stack Developer",
     company: "Tech Innovations Inc.",
     period: "2022 - Present",
-    code: "SE-01",
     description: "Led development of microservices architecture serving 100k+ users.",
     achievements: ["Reduced API response time by 60%", "Implemented automated testing", "Led team of 5 developers"]
-  },
-  // ... Add remaining experiences
+  }
 ];
 
-// Render Experiences
 const expContainer = document.getElementById('experience-grid');
 experiences.forEach(exp => {
   const card = document.createElement('div');
