@@ -1,4 +1,4 @@
-/* === Neo-Brutalist Reset === */
+/* === Neo-Brutalist x UNIT Green === */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -7,12 +7,11 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background: #fffbf3;
+  background: #F8F9ED; /* off-white background */
   color: #000;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  overflow-x: hidden;
 }
 
 /* === Header === */
@@ -20,7 +19,7 @@ header {
   text-align: center;
   padding: 40px 20px 10px;
   border-bottom: 4px solid #000;
-  background: #ffeb3b;
+  background: #C7EF55; /* lime green */
   box-shadow: 6px 6px 0 #000;
 }
 
@@ -42,7 +41,7 @@ header h1 {
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-  background: #fff;
+  background: #FDFDF8;
   padding: 20px;
   border-bottom: 4px solid #000;
   box-shadow: 6px 6px 0 #000;
@@ -52,7 +51,7 @@ header h1 {
   font-weight: 700;
   padding: 14px 24px;
   border: 3px solid #000;
-  background: #00e5ff;
+  background: #8FC73E; /* primary lime */
   cursor: pointer;
   transition: transform 0.1s ease;
   box-shadow: 4px 4px 0 #000;
@@ -60,13 +59,13 @@ header h1 {
 
 .side-nav button:hover {
   transform: translate(-3px, -3px);
-  background: #ff4081;
+  background: #6AA52C; /* darker lime for hover */
   color: #fff;
 }
 
 .side-nav button.active {
   background: #000;
-  color: #fff;
+  color: #F8F9ED;
 }
 
 /* === Main Section === */
@@ -74,11 +73,10 @@ main {
   flex: 1;
   max-width: 1000px;
   margin: 40px auto;
-  background: #fff;
+  background: #FDFDF8;
   padding: 40px;
   border: 4px solid #000;
   box-shadow: 10px 10px 0 #000;
-  transition: 0.3s;
 }
 
 main h2 {
@@ -86,16 +84,17 @@ main h2 {
   font-weight: 800;
   margin-bottom: 20px;
   text-transform: uppercase;
-  background: #ff4081;
-  color: #fff;
+  background: #F2B749; /* orange accent for headers */
+  color: #000;
   display: inline-block;
   padding: 4px 12px;
   border: 3px solid #000;
   box-shadow: 4px 4px 0 #000;
 }
 
+/* === Cards === */
 .card {
-  background: #fff;
+  background: #FDFDF8;
   border: 3px solid #000;
   box-shadow: 6px 6px 0 #000;
   padding: 20px;
@@ -109,7 +108,7 @@ main h2 {
 
 .tag {
   display: inline-block;
-  background: #00e676;
+  background: #C7EF55;
   border: 2px solid #000;
   padding: 2px 8px;
   font-size: 0.8rem;
@@ -126,17 +125,18 @@ main h2 {
 
 .skill-item {
   border: 3px solid #000;
-  background: #ffd740;
+  background: #8FC73E;
   padding: 20px;
   text-align: center;
   font-weight: 700;
+  color: #000;
   box-shadow: 4px 4px 0 #000;
 }
 
 /* === Footer === */
 footer {
   text-align: center;
-  background: #ffeb3b;
+  background: #C7EF55;
   border-top: 4px solid #000;
   padding: 20px;
   box-shadow: 0 -6px 0 #000;
