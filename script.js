@@ -100,3 +100,19 @@ document.querySelectorAll("nav button").forEach(btn => {
     }, 300);
   });
 });
+
+
+// === Add floating glowing bubbles ===
+const bg = document.querySelector('.background-effects');
+if (bg) {
+  for (let i = 0; i < 7; i++) {
+    const orb = document.createElement('div');
+    orb.classList.add('orb');
+    orb.style.width = `${80 + Math.random() * 120}px`;
+    orb.style.height = orb.style.width;
+    orb.style.left = `${Math.random() * 100}%`;
+    orb.style.top = `${Math.random() * 100}%`;
+    orb.style.animationDelay = `${Math.random() * 5}s`;
+    bg.appendChild(orb);
+  }
+}
