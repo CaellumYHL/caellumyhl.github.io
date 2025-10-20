@@ -1,118 +1,90 @@
-const content = document.getElementById("content");
+// Scroll to section
+function scrollToSection(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
 
-// Predefined portfolio sections (same as before)
-const sections = {
-  home: `
-    <h2>Welcome!</h2>
-    <p>This is my portfolio website. Use the navigation above to explore.</p>
-  `,
-  about: `
-    <h2>About Me</h2>
-    <p>Hello! I'm a passionate computer science student looking for opportunities 
-    to work on projects and learn new languages.</p>
-  `,
-  projects: `
-    <h2>Projects</h2>
-    <div class="card">
-      <h3>Twin Universe Space Simulator <span class="tag">Lua</span></h3>
-      <p>Developed a space exploration game with rocket launches, progression systems, 
-      and multiplayer missions. Drove over <strong>2.8 million player visits</strong>.</p>
-    </div>
-    <div class="card">
-      <h3>OPUS eLibrary <span class="tag">Java</span></h3>
-      <p>Built a school library management system with logins for students and librarians, 
-      supporting borrowing/lending books, managing accounts, and browsing eBooks.</p>
-    </div>
-    <div class="card">
-      <h3>Custom PCB Game System <span class="tag">KiCad, Arduino C++</span></h3>
-      <p>Designed and wired a PCB with an RGB LED matrix to play Tic Tac Toe and Connect 4. 
-      Programmed interactive game logic, input handling, and simple AI in C++ for the Arduino Uno.</p>
-    </div>
-  `,
-  experience: `
-    <h2>Experience</h2>
-    <div class="card">
-      <h3>Head of IT — RHHS Computer Science Club</h3>
-      <p><em>Sep 2024 – Jun 2025</em></p>
-      <ul>
-        <li>Maintained and troubleshot technical infrastructure (TypeScript, SCSS) for club events.</li>
-        <li>Provided technical support to members during meetings, workshops, and competitions.</li>
-        <li>Created designs for events using Canva and Figma.</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3>Head of Programming / Co-founder — RHHS Game Design Club</h3>
-      <p><em>Sep 2023 – Jun 2025</em></p>
-      <ul>
-        <li>Developed and delivered Unity lessons in C# (Flappy Bird–style game).</li>
-        <li>Taught programming concepts (conditionals, functions, OOP) and Unity physics.</li>
-        <li>Integrated modular gameplay systems for learning purposes.</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3>Owner & Software Lead — Bronze Bat Studio</h3>
-      <p><em>Aug 2023 – Present</em></p>
-      <ul>
-        <li>Founded a small indie game studio publishing games on Steam and Roblox.</li>
-        <li>Games in Lua and C# generated ~$2,000 revenue and 3M+ plays.</li>
-      </ul>
-    </div>
-  `,
-  education: `
-    <h2>Education</h2>
-    <div class="card">
-      <h3>University of Toronto</h3>
-      <p><em>Honours Bachelor of Science (2025–2029)</em></p>
-      <p>Computer Science Admission Program. Planning to enroll in the Computer Science Specialist Program.</p>
-    </div>
-    <div class="card">
-      <h3>Richmond Hill High School</h3>
-      <p><em>Ontario Secondary School Diploma — 97% Average</em></p>
-      <ul>
-        <li>AP Student</li>
-        <li>Received RHHS English Subject Course Award</li>
-        <li>Gold Band Certificate of Merit</li>
-      </ul>
-    </div>
-  `,
-  contact: `
-    <h2>Contact</h2>
-    <p>You can reach me at: <a href="mailto:caecaeyhl@gmail.com">caecaeyhl@gmail.com</a></p>
-  `
-};
+// Skills Data
+const skills = [
+  { name: "React", level: "Expert", icon: "⚛️", levelValue: 95 },
+  { name: "TypeScript", level: "Advanced", icon: "📘", levelValue: 90 },
+  { name: "Node.js", level: "Advanced", icon: "🟢", levelValue: 85 },
+  { name: "Python", level: "Expert", icon: "🐍", levelValue: 95 },
+  { name: "Docker", level: "Intermediate", icon: "🐳", levelValue: 75 },
+  { name: "AWS", level: "Advanced", icon: "☁️", levelValue: 80 },
+  { name: "GraphQL", level: "Advanced", icon: "◈", levelValue: 85 },
+  { name: "MongoDB", level: "Intermediate", icon: "🍃", levelValue: 70 },
+];
 
-// Attach click handlers to buttons
-document.querySelectorAll("nav button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const section = btn.getAttribute("data-section");
-
-    // Add active class
-    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    // Smooth fade animation
-    content.classList.add("fade-out");
-    setTimeout(() => {
-      content.innerHTML = sections[section];
-      content.classList.remove("fade-out");
-      content.classList.add("fade-in");
-      setTimeout(() => content.classList.remove("fade-in"), 300);
-    }, 300);
-  });
+// Render Skills
+const skillsContainer = document.getElementById('skills-chart');
+skills.forEach(skill => {
+  const skillEl = document.createElement('div');
+  skillEl.className = 'skill-bar';
+  skillEl.innerHTML = `
+    <div style="flex:1;">${skill.icon} ${skill.name}</div>
+    <div style="flex:3; background:#eee; border:1px solid #000; border-radius:9999px;">
+      <div style="width:${skill.levelValue}%; background:#A4D65E; text-align:right; padding-right:0.5rem;">${skill.level}</div>
+    </div>
+  `;
+  skillsContainer.appendChild(skillEl);
 });
 
+// Projects Data
+const projects = [
+  {
+    title: "AI-Powered Chat Platform",
+    description: "Built a real-time messaging platform with AI-powered features using WebSockets and GPT-4",
+    tech: ["React", "Node.js", "Socket.io", "OpenAI"],
+    github: "https://github.com/yourusername/project1",
+    demo: "https://demo.example.com",
+    number: "01"
+  },
+  // ... Add remaining projects here
+];
 
-// === Add floating glowing bubbles ===
-const bg = document.querySelector('.background-effects');
-if (bg) {
-  for (let i = 0; i < 7; i++) {
-    const orb = document.createElement('div');
-    orb.classList.add('orb');
-    orb.style.width = `${80 + Math.random() * 120}px`;
-    orb.style.height = orb.style.width;
-    orb.style.left = `${Math.random() * 100}%`;
-    orb.style.top = `${Math.random() * 100}%`;
-    orb.style.animationDelay = `${Math.random() * 5}s`;
-    bg.appendChild(orb);
-  }
-}
+// Render Projects
+const projectsContainer = document.getElementById('projects-grid');
+projects.forEach(p => {
+  const card = document.createElement('div');
+  card.className = 'project-card';
+  card.innerHTML = `
+    <div class="project-number">${p.number}</div>
+    <h3>${p.title}</h3>
+    <p>${p.description}</p>
+    <div class="tech">${p.tech.join(', ')}</div>
+    <div class="links">
+      ${p.github ? `<a href="${p.github}" target="_blank">Code</a>` : ''}
+      ${p.demo ? `<a href="${p.demo}" target="_blank">Demo</a>` : ''}
+    </div>
+  `;
+  projectsContainer.appendChild(card);
+});
+
+// Experiences Data
+const experiences = [
+  {
+    role: "Senior Full Stack Developer",
+    company: "Tech Innovations Inc.",
+    period: "2022 - Present",
+    code: "SE-01",
+    description: "Led development of microservices architecture serving 100k+ users.",
+    achievements: ["Reduced API response time by 60%", "Implemented automated testing", "Led team of 5 developers"]
+  },
+  // ... Add remaining experiences
+];
+
+// Render Experiences
+const expContainer = document.getElementById('experience-grid');
+experiences.forEach(exp => {
+  const card = document.createElement('div');
+  card.className = 'experience-card';
+  card.innerHTML = `
+    <h3>${exp.role}</h3>
+    <p>${exp.company} (${exp.period})</p>
+    <p>${exp.description}</p>
+    <ul>
+      ${exp.achievements.map(a => `<li>${a}</li>`).join('')}
+    </ul>
+  `;
+  expContainer.appendChild(card);
+});
