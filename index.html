@@ -1,37 +1,562 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Caellum Yip Hoi-Lee | Portfolio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Caellum Yip Hoi-Lee - Computer Science Student at University of Toronto. Developer, Game Designer, and AI Enthusiast.">
+    <title>Caellum Yip Hoi-Lee | Developer Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>Caellum Yip Hoi-Lee</h1>
-    <p class="subtitle">First Year Computer Science Student</p>
-  </header>
+    <!-- WebGL Shader Canvas -->
+    <canvas id="shader-canvas"></canvas>
+    
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-brand">
+            <span class="brand-symbol">◈</span>
+            <span class="brand-text">CYH</span>
+        </div>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <ul class="nav-links" id="nav-links">
+            <li><a href="#home" class="nav-link active">Home</a></li>
+            <li><a href="#education" class="nav-link">Education</a></li>
+            <li><a href="#experience" class="nav-link">Experience</a></li>
+            <li><a href="#skills" class="nav-link">Skills</a></li>
+            <li><a href="#projects" class="nav-link">Projects</a></li>
+            <li><a href="#contact" class="nav-link">Contact</a></li>
+        </ul>
+    </nav>
 
-  <nav class="side-nav">
-    <button data-section="home">🏠 Home</button>
-    <button data-section="about">👤 About</button>
-    <button data-section="skills">⚙️ Skills</button>
-    <button data-section="projects">💻 Projects</button>
-    <button data-section="experience">📂 Experience</button>
-    <button data-section="education">🎓 Education</button>
-    <button data-section="contact">✉️ Contact</button>
-  </nav>
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <div class="hero-greeting">Hello, I'm</div>
+            <h1 class="hero-name">
+                <span class="name-line">Caellum</span>
+                <span class="name-line">Yip Hoi-Lee</span>
+            </h1>
+            <p class="hero-tagline">
+                <span class="typing-text">Computer Science Student</span>
+                <span class="cursor">|</span>
+            </p>
+            <div class="hero-location">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>Toronto, Canada</span>
+            </div>
+            <div class="hero-cta">
+                <a href="#projects" class="btn btn-primary">
+                    <span>View Projects</span>
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+                <a href="#contact" class="btn btn-secondary">Get in Touch</a>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <div class="mouse">
+                <div class="wheel"></div>
+            </div>
+            <span>Scroll Down</span>
+        </div>
+    </section>
 
-  <main id="content" class="brutal-box">
-    <h2>Welcome!</h2>
-    <p>This is my portfolio.</p>
-  </main>
+    <!-- Education Section -->
+    <section id="education" class="section">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="title-icon">◇</span>
+                Education
+            </h2>
+            <div class="timeline">
+                <div class="timeline-item reveal">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content card">
+                        <div class="card-header">
+                            <h3 class="card-title">University of Toronto</h3>
+                            <span class="card-date">Sep 2025 — Apr 2029</span>
+                        </div>
+                        <p class="card-subtitle">Honours Bachelor of Science — Computer Science Admission Program</p>
+                        <p class="card-location">Toronto, ON</p>
+                        <ul class="card-list">
+                            <li>Currently in Year 1, planning to enroll in the Computer Science Specialist Program.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  <footer>
-    <p>© 2025 Caellum YHL — Hosted on Github Pages💥</p>
-  </footer>
+    <!-- Experience Section -->
+    <section id="experience" class="section">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="title-icon">◇</span>
+                Experience
+            </h2>
+            <div class="experience-grid">
+                <!-- Blueprint -->
+                <div class="card experience-card reveal">
+                    <div class="card-glow"></div>
+                    <div class="card-header">
+                        <h3 class="card-title">Junior Developer</h3>
+                        <span class="card-date">Sep 2025 — May 2026</span>
+                    </div>
+                    <p class="card-subtitle">U of T Blueprint</p>
+                    <p class="card-location">University of Toronto • Toronto, ON</p>
+                    <ul class="card-list">
+                        <li>Collaborating with a non-profit organization developing software for social change.</li>
+                        <li>Developed a JWT Authentication/Middleware system with <strong>Django REST</strong> and <strong>React</strong> for the Museum of Art and Digital Entertainment in California.</li>
+                    </ul>
+                    <div class="card-tags">
+                        <span class="tag">Django REST</span>
+                        <span class="tag">React</span>
+                        <span class="tag">JWT</span>
+                    </div>
+                </div>
 
-  <script src="script.js"></script>
+                <!-- Bronze Bat Studio -->
+                <div class="card experience-card reveal">
+                    <div class="card-glow"></div>
+                    <div class="card-header">
+                        <h3 class="card-title">Owner & Software Lead</h3>
+                        <span class="card-date">Aug 2023 — Present</span>
+                    </div>
+                    <p class="card-subtitle">Bronze Bat Studio</p>
+                    <p class="card-location">Independent Game Studio</p>
+                    <ul class="card-list">
+                        <li>Founded and led a small game development studio focused on <strong>Lua</strong> and <strong>C#</strong>.</li>
+                        <li>Published titles achieving over <strong>3 million plays</strong> and generating approximately <strong>$2,000</strong> in revenue on Steam and Roblox.</li>
+                    </ul>
+                    <div class="card-tags">
+                        <span class="tag">Lua</span>
+                        <span class="tag">C#</span>
+                        <span class="tag">Game Dev</span>
+                    </div>
+                </div>
+
+                <!-- RHHS Game Design -->
+                <div class="card experience-card reveal">
+                    <div class="card-glow"></div>
+                    <div class="card-header">
+                        <h3 class="card-title">Head of Programming / Co-founder</h3>
+                        <span class="card-date">Sep 2023 — Jun 2025</span>
+                    </div>
+                    <p class="card-subtitle">RHHS Game Design</p>
+                    <p class="card-location">Richmond Hill High School • Richmond Hill, ON</p>
+                    <ul class="card-list">
+                        <li>Developed and taught interactive Unity lessons in <strong>C#</strong> guiding members through creating a Flappy Bird–style game.</li>
+                        <li>Implemented gameplay mechanics in lessons to teach programming concepts such as conditionals, functions, and Unity physics.</li>
+                    </ul>
+                    <div class="card-tags">
+                        <span class="tag">Unity</span>
+                        <span class="tag">C#</span>
+                        <span class="tag">Teaching</span>
+                    </div>
+                </div>
+
+                <!-- RHHS CS Club -->
+                <div class="card experience-card reveal">
+                    <div class="card-glow"></div>
+                    <div class="card-header">
+                        <h3 class="card-title">Head of IT</h3>
+                        <span class="card-date">Sep 2022 — Jun 2025</span>
+                    </div>
+                    <p class="card-subtitle">RHHS Computer Science Club</p>
+                    <p class="card-location">Richmond Hill High School • Richmond Hill, ON</p>
+                    <ul class="card-list">
+                        <li>Led troubleshooting at competitive programming events and maintenance of the club's website (<strong>TypeScript, SCSS</strong>).</li>
+                    </ul>
+                    <div class="card-tags">
+                        <span class="tag">TypeScript</span>
+                        <span class="tag">SCSS</span>
+                        <span class="tag">Web Dev</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="section">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="title-icon">◇</span>
+                Skills & Certifications
+            </h2>
+            <div class="skills-grid">
+                <div class="skill-category card reveal">
+                    <div class="card-glow"></div>
+                    <h3 class="skill-title">
+                        <svg class="skill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="16 18 22 12 16 6"></polyline>
+                            <polyline points="8 6 2 12 8 18"></polyline>
+                        </svg>
+                        Programming Languages
+                    </h3>
+                    <div class="skill-tags">
+                        <span class="skill-tag">Java</span>
+                        <span class="skill-tag">Python</span>
+                        <span class="skill-tag">C#</span>
+                        <span class="skill-tag">C++</span>
+                        <span class="skill-tag">Lua</span>
+                        <span class="skill-tag">R</span>
+                    </div>
+                    <p class="skill-note">Strong in DSA and OOP</p>
+                </div>
+
+                <div class="skill-category card reveal">
+                    <div class="card-glow"></div>
+                    <h3 class="skill-title">
+                        <svg class="skill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="9" y1="21" x2="9" y2="9"></line>
+                        </svg>
+                        Web & Mobile
+                    </h3>
+                    <div class="skill-tags">
+                        <span class="skill-tag">React</span>
+                        <span class="skill-tag">React Native</span>
+                        <span class="skill-tag">Django REST</span>
+                        <span class="skill-tag">Streamlit</span>
+                    </div>
+                </div>
+
+                <div class="skill-category card reveal">
+                    <div class="card-glow"></div>
+                    <h3 class="skill-title">
+                        <svg class="skill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                            <path d="M2 17l10 5 10-5"></path>
+                            <path d="M2 12l10 5 10-5"></path>
+                        </svg>
+                        AI & Machine Learning
+                    </h3>
+                    <div class="skill-tags">
+                        <span class="skill-tag">Scikit-learn</span>
+                        <span class="skill-tag">Hugging Face</span>
+                        <span class="skill-tag">Gemini AI</span>
+                        <span class="skill-tag">Moorcheh AI</span>
+                        <span class="skill-tag">Kaggle</span>
+                    </div>
+                </div>
+
+                <div class="skill-category card reveal">
+                    <div class="card-glow"></div>
+                    <h3 class="skill-title">
+                        <svg class="skill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                        </svg>
+                        Tools & Platforms
+                    </h3>
+                    <div class="skill-tags">
+                        <span class="skill-tag">Git</span>
+                        <span class="skill-tag">Linux</span>
+                        <span class="skill-tag">Postman</span>
+                        <span class="skill-tag">Firebase</span>
+                        <span class="skill-tag">Jupyter</span>
+                        <span class="skill-tag">Quarto MD</span>
+                    </div>
+                </div>
+
+                <div class="skill-category card reveal">
+                    <div class="card-glow"></div>
+                    <h3 class="skill-title">
+                        <svg class="skill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                        </svg>
+                        Database & Concepts
+                    </h3>
+                    <div class="skill-tags">
+                        <span class="skill-tag">SQLite3</span>
+                        <span class="skill-tag">JSON Web Tokens</span>
+                    </div>
+                </div>
+
+                <div class="skill-category card reveal">
+                    <div class="card-glow"></div>
+                    <h3 class="skill-title">
+                        <svg class="skill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+                        Languages
+                    </h3>
+                    <div class="skill-tags">
+                        <span class="skill-tag">English</span>
+                        <span class="skill-tag">French</span>
+                        <span class="skill-tag">Spanish</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certifications & Awards -->
+            <div class="certifications reveal">
+                <h3 class="subsection-title">Certifications & Awards</h3>
+                <div class="cert-grid">
+                    <div class="cert-item">
+                        <div class="cert-icon">🎓</div>
+                        <div class="cert-content">
+                            <h4>Ontario Secondary School Diploma</h4>
+                            <p>AP Student, 97% Average</p>
+                        </div>
+                    </div>
+                    <div class="cert-item">
+                        <div class="cert-icon">🎹</div>
+                        <div class="cert-content">
+                            <h4>Royal Conservatory of Music</h4>
+                            <p>Piano Level 8</p>
+                        </div>
+                    </div>
+                    <div class="cert-item">
+                        <div class="cert-icon">📝</div>
+                        <div class="cert-content">
+                            <h4>RHHS English Subject Course Award</h4>
+                        </div>
+                    </div>
+                    <div class="cert-item">
+                        <div class="cert-icon">🎺</div>
+                        <div class="cert-content">
+                            <h4>RHHS Gold Band Certificate of Merit</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="section">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="title-icon">◇</span>
+                Projects
+            </h2>
+            <div class="projects-grid">
+                <!-- Apogee AI -->
+                <div class="card project-card featured reveal">
+                    <div class="card-glow"></div>
+                    <div class="project-label">Featured</div>
+                    <div class="card-header">
+                        <h3 class="card-title">Apogee AI</h3>
+                        <span class="card-date">DeltaHacks 12 • Jan 2026</span>
+                    </div>
+                    <div class="project-tech">Python, Streamlit, Scikit-learn, Gemini API, Moorcheh AI</div>
+                    <ul class="card-list">
+                        <li>Used <strong>Louvain's clustering algorithm</strong> and <strong>Pyvis</strong> to generate a 3D node map of vectorized news articles.</li>
+                        <li>Scraped articles with <strong>Newspaper3k + NewsAPI</strong>, vectorized text with Hugging Face transformers.</li>
+                        <li>Implemented <strong>Moorcheh AI retrieval-augmented queries</strong> and <strong>Gemini API</strong> for a context-aware chatbot.</li>
+                        <li>Deployed transformers to filter content by political spectrum and emotion using <strong>named-entity recognition</strong>.</li>
+                    </ul>
+                    <div class="card-tags">
+                        <span class="tag">AI/ML</span>
+                        <span class="tag">NLP</span>
+                        <span class="tag">Hackathon</span>
+                    </div>
+                </div>
+
+                <!-- Twin Universe -->
+                <div class="card project-card featured reveal">
+                    <div class="card-glow"></div>
+                    <div class="project-label">2.8M+ Plays</div>
+                    <div class="card-header">
+                        <h3 class="card-title">Twin Universe Space Simulator</h3>
+                        <span class="card-date">Aug 2023 — Present</span>
+                    </div>
+                    <div class="project-tech">Lua • Bronze Bat Studio</div>
+                    <ul class="card-list">
+                        <li>Developed a space exploration game with rocket launches, progression systems, and multiplayer missions.</li>
+                        <li>Created interactive environments and engaging mechanics leading to over <strong>2.8 million player visits</strong>.</li>
+                    </ul>
+                    <div class="card-tags">
+                        <span class="tag">Game Dev</span>
+                        <span class="tag">Roblox</span>
+                        <span class="tag">Multiplayer</span>
+                    </div>
+                </div>
+
+                <!-- JWT Authentication -->
+                <div class="card project-card reveal">
+                    <div class="card-glow"></div>
+                    <div class="card-header">
+                        <h3 class="card-title">JWT Authentication System</h3>
+                        <span class="card-date">Oct 2025 — Present</span>
+                    </div>
+                    <div class="project-tech">Python, Django REST • UofT Blueprint</div>
+                    <ul class="card-list">
+                        <li>Developed volunteer/admin login for the Museum of Art and Digital Entertainment in Oakland, California.</li>
+                        <li>Wrote API endpoints and middleware logic for <strong>JWT-based authentication</strong> with serializer validation.</li>
+                    </ul>
+                    <div class="card-tags">
+                        <span class="tag">Backend</span>
+                        <span class="tag">Auth</span>
+                        <span class="tag">API</span>
+                    </div>
+                </div>
+
+                <!-- Trace Stock -->
+                <div class="card project-card reveal">
+                    <div class="card-glow"></div>
+                    <div class="card-header">
+                        <h3 class="card-title">Trace Stock Market Predictor</h3>
+                        <span class="card-date">Dec 2025</span>
+                    </div>
+                    <div class="project-tech">Python, TensorFlow</div>
+                    <ul class="card-list">
+                        <li>Developed and trained a <strong>Long Short-Term Memory (LSTM)</strong> network for stock price prediction.</li>
+                        <li>Built data pipeline using <strong>Alpha Vantage API</strong> to clean 20+ years of global OHLC data.</li>
+                    </ul>
+                    <div class="card-tags">
+                        <span class="tag">Deep Learning</span>
+                        <span class="tag">Finance</span>
+                        <span class="tag">LSTM</span>
+                    </div>
+                </div>
+
+                <!-- Cellular Automata -->
+                <div class="card project-card reveal">
+                    <div class="card-glow"></div>
+                    <div class="card-header">
+                        <h3 class="card-title">Genetic Code / Cellular Automata</h3>
+                        <span class="card-date">Sep — Dec 2025</span>
+                    </div>
+                    <div class="project-tech">R, Quarto</div>
+                    <ul class="card-list">
+                        <li>Performed computational experiments on SGC mutation tolerance and <strong>Wolfram Rule 110</strong> automata.</li>
+                        <li>Compiled Quarto/Jupyter notebooks documenting findings.</li>
+                    </ul>
+                    <div class="card-tags">
+                        <span class="tag">Research</span>
+                        <span class="tag">Simulation</span>
+                    </div>
+                </div>
+
+                <!-- SMS Spam Detector -->
+                <div class="card project-card reveal">
+                    <div class="card-glow"></div>
+                    <div class="card-header">
+                        <h3 class="card-title">SMS Spam Detector</h3>
+                        <span class="card-date">Aug 2025</span>
+                    </div>
+                    <div class="project-tech">Python, Scikit-learn</div>
+                    <ul class="card-list">
+                        <li>Built and trained an ML Spam/Ham text detector using Kaggle's SMS Spam Collection Dataset.</li>
+                    </ul>
+                    <div class="card-tags">
+                        <span class="tag">ML</span>
+                        <span class="tag">Classification</span>
+                    </div>
+                </div>
+
+                <!-- OPUS eLibrary -->
+                <div class="card project-card reveal">
+                    <div class="card-glow"></div>
+                    <div class="card-header">
+                        <h3 class="card-title">OPUS eLibrary</h3>
+                        <span class="card-date">Jun 2024</span>
+                    </div>
+                    <div class="project-tech">Java</div>
+                    <ul class="card-list">
+                        <li>Built a school library management system with student and librarian login support.</li>
+                        <li>Implemented book borrowing, account management, and eBook browsing functionality.</li>
+                    </ul>
+                    <div class="card-tags">
+                        <span class="tag">Java</span>
+                        <span class="tag">OOP</span>
+                    </div>
+                </div>
+
+                <!-- Custom PCB -->
+                <div class="card project-card reveal">
+                    <div class="card-glow"></div>
+                    <div class="card-header">
+                        <h3 class="card-title">Custom PCB Game System</h3>
+                        <span class="card-date">Oct 2024</span>
+                    </div>
+                    <div class="project-tech">KiCad, Arduino C++</div>
+                    <ul class="card-list">
+                        <li>Designed and wired a PCB and RGB LED matrix for games like Tic Tac Toe and Connect 4.</li>
+                        <li>Programmed interactive game logic and simple AI for <strong>Arduino Uno</strong>.</li>
+                    </ul>
+                    <div class="card-tags">
+                        <span class="tag">Hardware</span>
+                        <span class="tag">Embedded</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="title-icon">◇</span>
+                Get In Touch
+            </h2>
+            <div class="contact-content reveal">
+                <p class="contact-intro">
+                    I'm always interested in hearing about new opportunities, collaborations, or just having a chat about technology and games.
+                </p>
+                <div class="contact-links">
+                    <a href="mailto:cyiphoilee@mail.utoronto.ca" class="contact-link">
+                        <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        <span>cyiphoilee@mail.utoronto.ca</span>
+                    </a>
+                    <a href="https://github.com/CaellumYHL/" target="_blank" rel="noopener" class="contact-link">
+                        <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                        </svg>
+                        <span>github.com/CaellumYHL</span>
+                    </a>
+                    <div class="contact-link">
+                        <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                        <span>(647) 534-9789</span>
+                    </div>
+                </div>
+                <a href="mailto:cyiphoilee@mail.utoronto.ca" class="btn btn-primary btn-large">
+                    <span>Say Hello</span>
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-text">
+                <span class="footer-symbol">◈</span>
+                Designed & Built by Caellum Yip Hoi-Lee
+                <span class="footer-year">2026</span>
+            </p>
+        </div>
+    </footer>
+
+    <script src="shaders.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
