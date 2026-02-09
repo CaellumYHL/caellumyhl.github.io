@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume | Caellum Yip Hoi-Lee</title>
+    <meta name="description"
+        content="Resume of Caellum Yip Hoi-Lee - Developer, Creator, CS Student at University of Toronto">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        /* Resume Page Styles - Clean & Minimal */
+        .resume-page {
+            min-height: 100vh;
+            padding: 40px 80px;
+            position: relative;
+        }
+
+        .resume-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gray);
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--black);
+            gap: 16px;
+        }
+
+        .back-link .arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover .arrow {
+            transform: translateX(-4px);
+        }
+
+        .resume-actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            background: var(--black);
+            color: var(--white);
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .action-btn:hover {
+            background: var(--accent);
+            color: var(--black);
+            transform: translateY(-2px);
+        }
+
+        /* PDF Viewer - Full Height */
+        .resume-viewer {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .resume-viewer iframe {
+            width: 100%;
+            height: calc(100vh - 160px);
+            min-height: 700px;
+            border: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .resume-page {
+                padding: 24px;
+            }
+
+            .resume-header {
+                flex-direction: column;
+                gap: 20px;
+                align-items: flex-start;
+            }
+
+            .resume-actions {
+                flex-wrap: wrap;
+            }
+
+            .resume-viewer iframe {
+                height: calc(100vh - 200px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 3D Background -->
+    <div id="canvas-container"></div>
+
+    <!-- Cursor follower -->
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-follower" id="cursorFollower"></div>
+
+    <!-- Resume Content -->
+    <main class="resume-page">
+        <header class="resume-header">
+            <a href="index.html" class="back-link">
+                <span class="arrow">←</span>
+                <span>Back to Home</span>
+            </a>
+            <div class="resume-actions">
+                <a href="Resume_Latex.pdf" download class="action-btn">
+                    <span>↓</span> Download PDF
+                </a>
+            </div>
+        </header>
+
+        <!-- PDF Viewer - Full Size -->
+        <div class="resume-viewer">
+            <iframe src="Resume_Latex.pdf" title="Resume PDF Viewer"></iframe>
+        </div>
+    </main>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module" src="main.js"></script>
+    <script src="scroll.js"></script>
+</body>
+
+</html>

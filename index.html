@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caellum Yip Hoi-Lee</title>
+    <meta name="description" content="Developer. Creator. Student at University of Toronto.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- 3D Background -->
+    <div id="canvas-container"></div>
+
+    <!-- Cursor -->
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-follower" id="cursorFollower"></div>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Fixed Side Nav -->
+        <nav class="side-nav">
+            <a href="#" class="nav-item active" data-section="home">Index</a>
+            <a href="#works" class="nav-item" data-section="works">Works</a>
+            <a href="#about" class="nav-item" data-section="about">About</a>
+            <a href="#contact" class="nav-item" data-section="contact">Contact</a>
+        </nav>
+
+        <!-- Hero -->
+        <section class="hero" id="home">
+            <div class="hero-inner">
+                <h1 class="mega-title">
+                    <span class="title-word" data-speed="0.9">Caellum</span>
+                    <span class="title-word outline" data-speed="1.1">Yip</span>
+                    <span class="title-word" data-speed="0.8">Hoi-Lee</span>
+                </h1>
+                <div class="hero-info">
+                    <div class="info-block">
+                        <span class="label">Status</span>
+                        <span class="value">CS @ UofT</span>
+                    </div>
+                    <div class="info-block">
+                        <span class="label">Focus</span>
+                        <span class="value">Full-Stack / Games / AI</span>
+                    </div>
+                    <div class="info-block">
+                        <span class="label">Based</span>
+                        <span class="value">Toronto, CA</span>
+                    </div>
+                </div>
+            </div>
+            <div class="scroll-hint">
+                <span>Scroll</span>
+                <div class="scroll-line"></div>
+            </div>
+        </section>
+
+        <!-- Works Section - Horizontal Scroll -->
+        <section class="works-section" id="works">
+            <div class="section-intro">
+                <span class="section-label">01</span>
+                <h2 class="section-title-large">Selected<br />Works</h2>
+            </div>
+
+            <div class="works-horizontal">
+                <!-- Work Item 1 -->
+                <article class="work-item">
+                    <a href="#" class="work-link" data-project="apogee">
+                        <div class="work-image">
+                            <img src="images/apogee.png" alt="Apogee AI" onerror="this.style.display='none'">
+                            <div class="work-placeholder">
+                                <span class="placeholder-num">01</span>
+                            </div>
+                        </div>
+                        <div class="work-info">
+                            <h3 class="work-title">Apogee AI</h3>
+                            <p class="work-category">Hackathon / AI / Visualization</p>
+                            <p class="work-year">2026</p>
+                        </div>
+                    </a>
+                </article>
+
+                <!-- Work Item 2 -->
+                <article class="work-item featured">
+                    <a href="#" class="work-link" data-project="twinuniverse">
+                        <div class="work-image">
+                            <img src="images/twinuniverse.png" alt="Twin Universe" onerror="this.style.display='none'">
+                            <div class="work-placeholder">
+                                <span class="placeholder-num">02</span>
+                            </div>
+                        </div>
+                        <div class="work-info">
+                            <h3 class="work-title">Twin Universe</h3>
+                            <p class="work-category">Game / Roblox / 2.8M+ Plays</p>
+                            <p class="work-year">2023—</p>
+                        </div>
+                        <div class="work-stat">
+                            <span class="stat-num">2.8M+</span>
+                            <span class="stat-desc">Players</span>
+                        </div>
+                    </a>
+                </article>
+
+                <!-- Work Item 3 -->
+                <article class="work-item">
+                    <a href="#" class="work-link" data-project="jwt">
+                        <div class="work-image">
+                            <img src="images/blueprint.png" alt="JWT Auth" onerror="this.style.display='none'">
+                            <div class="work-placeholder">
+                                <span class="placeholder-num">03</span>
+                            </div>
+                        </div>
+                        <div class="work-info">
+                            <h3 class="work-title">JWT Auth System</h3>
+                            <p class="work-category">UofT Blueprint / Django / React</p>
+                            <p class="work-year">2025</p>
+                        </div>
+                    </a>
+                </article>
+
+                <!-- Work Item 4 -->
+                <article class="work-item">
+                    <a href="#" class="work-link" data-project="trace">
+                        <div class="work-image">
+                            <img src="images/trace.jpg" alt="Trace" onerror="this.style.display='none'">
+                            <div class="work-placeholder">
+                                <span class="placeholder-num">04</span>
+                            </div>
+                        </div>
+                        <div class="work-info">
+                            <h3 class="work-title">Trace</h3>
+                            <p class="work-category">ML / LSTM / Stock Prediction</p>
+                            <p class="work-year">2025</p>
+                        </div>
+                    </a>
+                </article>
+
+                <!-- Work Item 5 -->
+                <article class="work-item">
+                    <a href="#" class="work-link" data-project="pcb">
+                        <div class="work-image">
+                            <img src="images/pcb.jpg" alt="PCB Game" onerror="this.style.display='none'">
+                            <div class="work-placeholder">
+                                <span class="placeholder-num">05</span>
+                            </div>
+                        </div>
+                        <div class="work-info">
+                            <h3 class="work-title">PCB Game System</h3>
+                            <p class="work-category">Hardware / Arduino / KiCad</p>
+                            <p class="work-year">2024</p>
+                        </div>
+                    </a>
+                </article>
+
+                <!-- Work Item 6 -->
+                <article class="work-item">
+                    <a href="#" class="work-link" data-project="cellular">
+                        <div class="work-image">
+                            <img src="images/automata.png" alt="Cellular Automata" onerror="this.style.display='none'">
+                            <div class="work-placeholder">
+                                <span class="placeholder-num">06</span>
+                            </div>
+                        </div>
+                        <div class="work-info">
+                            <h3 class="work-title">Rule 110</h3>
+                            <p class="work-category">Cellular Automata / R</p>
+                            <p class="work-year">2025</p>
+                        </div>
+                    </a>
+                </article>
+            </div>
+
+            <!-- Bottom row: nav + view all -->
+            <div class="works-bottom-row">
+                <div class="works-nav">
+                    <button class="works-nav-btn prev" id="worksPrev" aria-label="Previous project">
+                        <span>←</span>
+                    </button>
+                    <button class="works-nav-btn next" id="worksNext" aria-label="Next project">
+                        <span>→</span>
+                    </button>
+                </div>
+                <div class="works-all-link">
+                    <a href="projects.html" class="view-all">View All Projects <span class="arrow">→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experience Section -->
+        <section class="experience-section" id="experience">
+            <div class="section-intro">
+                <span class="section-label">02</span>
+                <h2 class="section-title-large">Experience</h2>
+            </div>
+
+            <div class="exp-list">
+                <div class="exp-item" data-index="01">
+                    <div class="exp-left">
+                        <span class="exp-date">2025—26</span>
+                    </div>
+                    <div class="exp-center">
+                        <h3 class="exp-role">Junior Developer</h3>
+                        <p class="exp-company">UofT Blueprint</p>
+                    </div>
+                    <div class="exp-right">
+                        <p class="exp-desc">Django REST + React for Museum of Art and Digital Entertainment</p>
+                    </div>
+                </div>
+
+                <div class="exp-item" data-index="02">
+                    <div class="exp-left">
+                        <span class="exp-date">2023—</span>
+                    </div>
+                    <div class="exp-center">
+                        <h3 class="exp-role">Owner / Lead</h3>
+                        <p class="exp-company">Bronze Bat Studio</p>
+                    </div>
+                    <div class="exp-right">
+                        <p class="exp-desc">3M+ plays, $2K revenue on Steam/Roblox</p>
+                    </div>
+                </div>
+
+                <div class="exp-item" data-index="03">
+                    <div class="exp-left">
+                        <span class="exp-date">2023—25</span>
+                    </div>
+                    <div class="exp-center">
+                        <h3 class="exp-role">Head of Programming</h3>
+                        <p class="exp-company">RHHS Game Design</p>
+                    </div>
+                    <div class="exp-right">
+                        <p class="exp-desc">Co-founded club, taught Unity/C# game development</p>
+                    </div>
+                </div>
+
+                <div class="exp-item" data-index="04">
+                    <div class="exp-left">
+                        <span class="exp-date">2022—25</span>
+                    </div>
+                    <div class="exp-center">
+                        <h3 class="exp-role">Head of IT</h3>
+                        <p class="exp-company">RHHS CS Club</p>
+                    </div>
+                    <div class="exp-right">
+                        <p class="exp-desc">Competition support, TypeScript/SCSS website</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="about-section" id="about">
+            <div class="about-grid">
+                <div class="about-main">
+                    <span class="section-label">03</span>
+                    <h2 class="about-title">
+                        Computer Science student building
+                        <em>games</em>, <em>web apps</em>, and
+                        <em>AI systems</em>.
+                    </h2>
+                </div>
+                <div class="about-details">
+                    <div class="detail-block">
+                        <h4>Education</h4>
+                        <p>University of Toronto<br />HBSc Computer Science<br />2025—2029</p>
+                    </div>
+                    <div class="detail-block">
+                        <h4>Languages</h4>
+                        <p>English / French / Spanish</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills as marquee -->
+            <div class="skills-marquee">
+                <div class="marquee-content">
+                    <span>Python</span><span>·</span>
+                    <span>Java</span><span>·</span>
+                    <span>C#</span><span>·</span>
+                    <span>C++</span><span>·</span>
+                    <span>Lua</span><span>·</span>
+                    <span>React</span><span>·</span>
+                    <span>Django</span><span>·</span>
+                    <span>TensorFlow</span><span>·</span>
+                    <span>Unity</span><span>·</span>
+                    <span>Git</span><span>·</span>
+                    <span>Firebase</span><span>·</span>
+                    <span>Python</span><span>·</span>
+                    <span>Java</span><span>·</span>
+                    <span>C#</span><span>·</span>
+                    <span>C++</span><span>·</span>
+                    <span>Lua</span><span>·</span>
+                    <span>React</span><span>·</span>
+                    <span>Django</span><span>·</span>
+                    <span>TensorFlow</span><span>·</span>
+                    <span>Unity</span><span>·</span>
+                    <span>Git</span><span>·</span>
+                    <span>Firebase</span><span>·</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="contact-section" id="contact">
+            <div class="contact-content">
+                <span class="section-label">04</span>
+                <h2 class="contact-title">
+                    Let's<br />
+                    <span class="outline">Connect</span>
+                </h2>
+                <div class="contact-links">
+                    <a href="resume.html" class="contact-link">
+                        <span class="link-label">Resume</span>
+                        <span class="link-value">View & Download PDF</span>
+                        <span class="link-arrow">↗</span>
+                    </a>
+                    <a href="mailto:cyiphoilee@mail.utoronto.ca" class="contact-link">
+                        <span class="link-label">Email</span>
+                        <span class="link-value">cyiphoilee@mail.utoronto.ca</span>
+                        <span class="link-arrow">↗</span>
+                    </a>
+                    <a href="https://github.com/CaellumYHL/" target="_blank" class="contact-link">
+                        <span class="link-label">GitHub</span>
+                        <span class="link-value">CaellumYHL</span>
+                        <span class="link-arrow">↗</span>
+                    </a>
+                    <a href="tel:+16475349789" class="contact-link">
+                        <span class="link-label">Phone</span>
+                        <span class="link-value">(647) 534-9789</span>
+                        <span class="link-arrow">↗</span>
+                    </a>
+                </div>
+            </div>
+            <div class="contact-footer">
+                <span>Toronto, Canada</span>
+                <span>© 2026</span>
+            </div>
+        </section>
+    </main>
+
+    <!-- Settings Toggle -->
+    <button class="settings-btn" id="settingsBtn">
+        <span>⚙</span>
+    </button>
+    <div class="settings-panel" id="settingsPanel">
+        <div class="setting-row">
+            <span>Float</span>
+            <input type="range" id="floatIntensity" min="0" max="100" value="50">
+        </div>
+        <div class="setting-row">
+            <span>Rotate</span>
+            <input type="range" id="rotationSpeed" min="0" max="100" value="30">
+        </div>
+        <div class="setting-row">
+            <span>Wave</span>
+            <input type="range" id="waveMotion" min="0" max="100" value="60">
+        </div>
+        <div class="setting-row">
+            <span>Objects</span>
+            <input type="range" id="objectCount" min="3" max="15" value="6">
+        </div>
+        <div class="setting-row">
+            <span>Shine</span>
+            <input type="range" id="materialShine" min="0" max="100" value="70">
+        </div>
+        <div class="fps-counter"><span id="fpsCounter">60</span> FPS</div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module" src="main.js"></script>
+    <script src="scroll.js"></script>
+</body>
+
+</html>
