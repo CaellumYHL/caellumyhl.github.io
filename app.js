@@ -267,7 +267,7 @@
     rootEl: document.getElementById('projSelector'),
     data: PROJECTS,
     renderItem: function (p) {
-      return '<li class="sel-item"><span class="ptr">▶</span><span class="sel-label">' + p.list + '</span></li>';
+      return '<li class="sel-item"><span class="chip-suit">&#9830;</span><span class="sel-label">' + p.list + '</span></li>';
     },
     renderPreview: function (p) {
       return '<div class="sel-card">' +
@@ -281,12 +281,14 @@
     },
     renderDetail: function (p) {
       return '<button class="back-link" data-act="back" type="button">◀ BACK</button>' +
+        '<div class="card detail">' +
         '<div class="detail-shot"><img src="' + p.img + '" alt="' + p.name + '" /></div>' +
         '<h3 class="detail-title">' + p.name + '</h3>' +
         '<p class="sel-event">' + p.event + '</p>' +
         '<p class="detail-sub">' + p.when + '</p>' +
         '<p class="detail-desc">' + p.desc + '</p>' +
-        bullets(p.highlights) + tags(p.tech) + linkRow(p.links);
+        bullets(p.highlights) + tags(p.tech) + linkRow(p.links) +
+        '</div>';
     }
   });
 
@@ -302,7 +304,7 @@
         '<span class="t-when">' + x.when + '</span></li>';
     },
     renderPreview: function (x) {
-      return '<div class="sel-card exp-card">' +
+      return '<div class="card sel-card exp-card">' +
         '<h3 class="sel-title">' + x.role + '</h3>' +
         '<p class="sel-org">' + x.org + '</p>' +
         '<p class="sel-sub">' + x.when + ' &middot; ' + x.where + '</p>' +
@@ -312,10 +314,12 @@
     },
     renderDetail: function (x) {
       return '<button class="back-link" data-act="back" type="button">◀ BACK</button>' +
+        '<div class="card detail">' +
         '<h3 class="detail-title">' + x.role + '</h3>' +
         '<p class="detail-org">' + x.org + ' &middot; ' + x.where + '</p>' +
         '<p class="detail-sub">' + x.when + '</p>' +
-        bullets(x.bullets) + tags(x.tech) + linkRow(x.links);
+        bullets(x.bullets) + tags(x.tech) + linkRow(x.links) +
+        '</div>';
     }
   });
 
@@ -334,7 +338,7 @@
     requestAnimationFrame(function () {
       requestAnimationFrame(function () { app.classList.add('show'); });
     });
-    if (window.Flame) window.Flame.setMode('app');
+    document.body.classList.remove('section-open');
     setSel(0);
   }
 
@@ -354,6 +358,7 @@
       if (on) setSel(j);
     }
     activeName = name;
+    document.body.classList.add('section-open');
     if (name === 'projects') projSel.reset();
     if (name === 'experience') expSel.reset();
 
@@ -366,6 +371,7 @@
     for (var i = 0; i < panels.length; i++) panels[i].classList.remove('active');
     for (var j = 0; j < items.length; j++) items[j].classList.remove('active');
     activeName = null;
+    document.body.classList.remove('section-open');
     if (history.replaceState) history.replaceState(null, '', location.pathname + location.search);
     if (menu) menu.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
@@ -394,11 +400,11 @@
     if (inPanel && activeName === 'experience' && expSel.handleKey(e)) return;
 
     switch (e.key) {
-      case 'ArrowDown':
+      case 'ArrowDown': case 'ArrowRight':
         e.preventDefault(); setSel(selIndex + 1);
         if (inPanel) openPanel(items[selIndex].getAttribute('data-panel'));
         break;
-      case 'ArrowUp':
+      case 'ArrowUp': case 'ArrowLeft':
         e.preventDefault(); setSel(selIndex - 1);
         if (inPanel) openPanel(items[selIndex].getAttribute('data-panel'));
         break;

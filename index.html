@@ -6,27 +6,26 @@
   <title>Caellum Yip Hoi-Lee — Software Engineer</title>
   <meta name="description" content="Caellum Yip Hoi-Lee — Software Engineer & CS student at the University of Toronto. Full-stack, AI/ML, and games." />
 
-  <!-- pixel-flame favicon -->
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2304060e'/%3E%3Crect x='7' y='2' width='2' height='2' fill='%23dff1ff'/%3E%3Crect x='6' y='4' width='4' height='2' fill='%2326c8ff'/%3E%3Crect x='5' y='6' width='6' height='3' fill='%23267bff'/%3E%3Crect x='4' y='9' width='8' height='3' fill='%231640b8'/%3E%3Crect x='6' y='12' width='4' height='2' fill='%230c2380'/%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23f5edda'/%3E%3Ctext x='8' y='12' font-size='12' text-anchor='middle' fill='%23de443b'%3E%E2%99%A0%3C/text%3E%3C/svg%3E" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- ===== background flame ===== -->
-  <canvas id="flame" aria-hidden="true"></canvas>
-  <div id="scanlines" aria-hidden="true"></div>
+  <!-- ===== background swirl (Balatro shader) ===== -->
+  <div id="bg" aria-hidden="true"></div>
   <div id="vignette" aria-hidden="true"></div>
+  <div id="scrim" aria-hidden="true"></div>
 
-  <!-- ===== BOOT / PRESS START ===== -->
+  <!-- ===== BOOT ===== -->
   <section id="boot" class="boot">
     <div class="boot-inner">
-      <p class="boot-tag">PORTFOLIO</p>
+      <p class="boot-tag">Portfolio</p>
       <h1 class="title">CAELLUM<br><span>YIP HOI-LEE</span></h1>
       <p class="subtitle">Software Engineer · Computer Science @ University of Toronto</p>
-      <button id="startBtn" class="press-start" type="button">ENTER &#9654;</button>
+      <button id="startBtn" class="press-start" type="button">DEAL IN &#9654;</button>
       <p class="boot-hint">click &middot; or press <kbd>Enter</kbd></p>
     </div>
   </section>
@@ -35,7 +34,7 @@
   <main id="app" class="app" hidden>
     <header class="topbar">
       <button class="brand" id="brandHome" type="button">
-        <span class="brand-flame">&#9650;</span> CAELLUM
+        <span class="brand-flame">&#9824;</span> CAELLUM
       </button>
       <div class="topbar-status">
         <span class="dot"></span> Toronto, Canada
@@ -43,32 +42,39 @@
     </header>
 
     <div class="stage" id="stage">
-      <!-- ===== POKEMON-STYLE MENU ===== -->
-      <nav id="menu" class="menu" aria-label="Main menu">
-        <p class="menu-title">MENU</p>
-        <ul class="menu-list">
-          <li class="menu-item" data-panel="about" tabindex="0"><span class="ptr">&#9654;</span><span class="lbl">ABOUT</span></li>
-          <li class="menu-item" data-panel="experience" tabindex="0"><span class="ptr">&#9654;</span><span class="lbl">EXPERIENCE</span></li>
-          <li class="menu-item" data-panel="projects" tabindex="0"><span class="ptr">&#9654;</span><span class="lbl">PROJECTS</span></li>
-          <li class="menu-item" data-panel="skills" tabindex="0"><span class="ptr">&#9654;</span><span class="lbl">SKILLS</span></li>
-          <li class="menu-item" data-panel="resume" tabindex="0"><span class="ptr">&#9654;</span><span class="lbl">RESUME</span></li>
-          <li class="menu-item" data-panel="contact" tabindex="0"><span class="ptr">&#9654;</span><span class="lbl">CONTACT</span></li>
-        </ul>
-        <p class="menu-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> move &middot; <kbd>&crarr;</kbd> select</p>
-      </nav>
+      <p class="hand-label">&#9654; pick a card &#9664;</p>
 
-      <!-- ===== CONTENT ===== -->
-      <section class="content" id="content" aria-live="polite">
-        <button class="back-btn" id="backBtn" type="button">&#9664; MENU</button>
+      <!-- ===== HAND OF CARDS (menu) ===== -->
+      <ul class="hand" id="menu" aria-label="Main menu">
+        <li class="menu-item s-dark" data-panel="about" tabindex="0">
+          <span class="corner">A<br>&#9824;</span><span class="suit">&#9824;</span><span class="lbl">ABOUT</span><span class="corner br">A<br>&#9824;</span>
+        </li>
+        <li class="menu-item s-red" data-panel="experience" tabindex="0">
+          <span class="corner">E<br>&#9829;</span><span class="suit">&#9829;</span><span class="lbl">WORK</span><span class="corner br">E<br>&#9829;</span>
+        </li>
+        <li class="menu-item s-red" data-panel="projects" tabindex="0">
+          <span class="corner">P<br>&#9830;</span><span class="suit">&#9830;</span><span class="lbl">PROJECTS</span><span class="corner br">P<br>&#9830;</span>
+        </li>
+        <li class="menu-item s-dark" data-panel="skills" tabindex="0">
+          <span class="corner">S<br>&#9827;</span><span class="suit">&#9827;</span><span class="lbl">SKILLS</span><span class="corner br">S<br>&#9827;</span>
+        </li>
+        <li class="menu-item s-dark" data-panel="resume" tabindex="0">
+          <span class="corner">R<br>&#9824;</span><span class="suit">&#9824;</span><span class="lbl">RESUME</span><span class="corner br">R<br>&#9824;</span>
+        </li>
+        <li class="menu-item s-red" data-panel="contact" tabindex="0">
+          <span class="corner">C<br>&#9829;</span><span class="suit">&#9829;</span><span class="lbl">CONTACT</span><span class="corner br">C<br>&#9829;</span>
+        </li>
+      </ul>
+
+      <!-- ===== BOARD (content) ===== -->
+      <section class="board" id="content" aria-live="polite">
+        <button class="back-btn" id="backBtn" type="button">&#9664; HAND</button>
 
         <!-- ABOUT -->
         <article class="panel" data-panel="about">
-          <header class="panel-head">
-            <span class="panel-tag">01</span>
-            <h2>About</h2>
-          </header>
+          <header class="panel-head"><span class="panel-tag">A&#9824;</span><h2>About</h2></header>
           <div class="about-grid">
-            <div class="about-bio">
+            <div class="card about-bio">
               <p>I'm <strong>Caellum</strong> — a software engineer and Computer Science student at the
                  University of Toronto. I build across the stack: <strong>AI/ML pipelines</strong>,
                  <strong>full-stack web apps</strong>, and <strong>games</strong>. I like turning messy,
@@ -78,7 +84,7 @@
                  <strong>Bronze Bat Studio</strong> — whose titles have crossed <strong>3M+ plays</strong>.
                  In between, I win hackathons.</p>
             </div>
-            <aside class="stat-card">
+            <aside class="card stat-card">
               <p class="stat-card-title">STATS</p>
               <ul class="stats">
                 <li><span>CLASS</span><b>Software Engineer</b></li>
@@ -91,33 +97,27 @@
             </aside>
           </div>
           <div class="badges">
-            <span class="badge">&#127942; 1st Overall &mdash; Cal Hacks</span>
-            <span class="badge">&#127918; 3M+ game plays</span>
+            <span class="badge b-gold">&#127942; 1st Overall &mdash; Cal Hacks</span>
+            <span class="badge b-blue">&#127918; 3M+ game plays</span>
             <span class="badge">&#9733; 97% HS Avg (AP)</span>
-            <span class="badge">&#127929; RCM Piano L8</span>
+            <span class="badge b-blue">&#127929; RCM Piano L8</span>
           </div>
         </article>
 
-        <!-- EXPERIENCE (timeline selector, populated by app.js) -->
+        <!-- EXPERIENCE -->
         <article class="panel" data-panel="experience">
-          <header class="panel-head">
-            <span class="panel-tag">02</span>
-            <h2>Experience</h2>
-          </header>
-          <p class="sel-prompt">Pick a role &mdash; <kbd>&uarr;</kbd><kbd>&darr;</kbd> walk the timeline, <kbd>&crarr;</kbd> open.</p>
+          <header class="panel-head"><span class="panel-tag">E&#9829;</span><h2>Work</h2></header>
+          <p class="sel-prompt">Walk the timeline &mdash; <kbd>&uarr;</kbd><kbd>&darr;</kbd> move, <kbd>&crarr;</kbd> open the entry.</p>
           <div class="selector" id="expSelector">
             <ul class="sel-list timeline-list" id="expList"></ul>
             <div class="sel-stage" id="expStage"></div>
           </div>
         </article>
 
-        <!-- PROJECTS (pokedex selector, populated by app.js) -->
+        <!-- PROJECTS -->
         <article class="panel" data-panel="projects">
-          <header class="panel-head">
-            <span class="panel-tag">03</span>
-            <h2>Projects</h2>
-          </header>
-          <p class="sel-prompt">Pick a build &mdash; <kbd>&uarr;</kbd><kbd>&darr;</kbd> browse, <kbd>&crarr;</kbd> open the entry.</p>
+          <header class="panel-head"><span class="panel-tag">P&#9830;</span><h2>Projects</h2></header>
+          <p class="sel-prompt">Pick a build &mdash; <kbd>&uarr;</kbd><kbd>&darr;</kbd> browse, <kbd>&crarr;</kbd> open the card.</p>
           <div class="selector" id="projSelector">
             <ul class="sel-list" id="projList"></ul>
             <div class="sel-stage" id="projStage"></div>
@@ -126,10 +126,7 @@
 
         <!-- SKILLS -->
         <article class="panel" data-panel="skills">
-          <header class="panel-head">
-            <span class="panel-tag">04</span>
-            <h2>Skills &amp; Certifications</h2>
-          </header>
+          <header class="panel-head"><span class="panel-tag">S&#9827;</span><h2>Skills</h2></header>
           <div class="skills">
             <div class="skill-group">
               <h4>Languages</h4>
@@ -160,46 +157,37 @@
 
         <!-- RESUME -->
         <article class="panel" data-panel="resume">
-          <header class="panel-head">
-            <span class="panel-tag">05</span>
-            <h2>Resume</h2>
-          </header>
+          <header class="panel-head"><span class="panel-tag">R&#9824;</span><h2>Resume</h2></header>
           <div class="resume-actions">
             <a class="btn primary" href="Resume_Latex.pdf" download>&#11015; Download PDF</a>
             <a class="btn" href="Resume_Latex.pdf" target="_blank" rel="noopener">Open in new tab &#8599;</a>
           </div>
-          <div class="resume-frame">
-            <iframe src="Resume_Latex.pdf#view=FitH" title="Caellum Yip Hoi-Lee resume"></iframe>
+          <div class="resume-pages">
+            <img src="images/resume-page-1.png" alt="Caellum Yip Hoi-Lee resume, page 1" loading="lazy" />
+            <img src="images/resume-page-2.png" alt="Caellum Yip Hoi-Lee resume, page 2" loading="lazy" />
           </div>
         </article>
 
         <!-- CONTACT -->
         <article class="panel" data-panel="contact">
-          <header class="panel-head">
-            <span class="panel-tag">06</span>
-            <h2>Contact</h2>
-          </header>
-          <p class="contact-lead">Building something, hiring, or just want to talk shop? Pick a button.</p>
+          <header class="panel-head"><span class="panel-tag">C&#9829;</span><h2>Contact</h2></header>
+          <p class="contact-lead">Building something, hiring, or just want to talk shop? Play a card.</p>
           <div class="contact-grid">
-            <a class="contact-card" href="mailto:cyiphoilee@mail.utoronto.ca">
-              <span class="cc-ico">&#9993;</span>
-              <span class="cc-k">EMAIL</span>
-              <span class="cc-v">cyiphoilee@mail.utoronto.ca</span>
+            <a class="contact-card s-red" href="mailto:cyiphoilee@mail.utoronto.ca">
+              <span class="pc-corner">&#9829;</span><span class="cc-ico">&#9993;</span>
+              <span class="cc-text"><span class="cc-k">EMAIL</span><span class="cc-v">cyiphoilee@mail.utoronto.ca</span></span>
             </a>
-            <a class="contact-card" href="https://github.com/CaellumYHL" target="_blank" rel="noopener">
-              <span class="cc-ico">&#9670;</span>
-              <span class="cc-k">GITHUB</span>
-              <span class="cc-v">@CaellumYHL</span>
+            <a class="contact-card s-dark" href="https://github.com/CaellumYHL" target="_blank" rel="noopener">
+              <span class="pc-corner">&#9824;</span><span class="cc-ico">&#9670;</span>
+              <span class="cc-text"><span class="cc-k">GITHUB</span><span class="cc-v">@CaellumYHL</span></span>
             </a>
-            <a class="contact-card" href="tel:+16475349789">
-              <span class="cc-ico">&#9742;</span>
-              <span class="cc-k">PHONE</span>
-              <span class="cc-v">(647) 534-9789</span>
+            <a class="contact-card s-red" href="tel:+16475349789">
+              <span class="pc-corner">&#9830;</span><span class="cc-ico">&#9742;</span>
+              <span class="cc-text"><span class="cc-k">PHONE</span><span class="cc-v">(647) 534-9789</span></span>
             </a>
-            <span class="contact-card static">
-              <span class="cc-ico">&#9678;</span>
-              <span class="cc-k">LOCATION</span>
-              <span class="cc-v">Toronto, Canada</span>
+            <span class="contact-card s-dark static">
+              <span class="pc-corner">&#9827;</span><span class="cc-ico">&#9678;</span>
+              <span class="cc-text"><span class="cc-k">LOCATION</span><span class="cc-v">Toronto, Canada</span></span>
             </span>
           </div>
         </article>
@@ -213,7 +201,7 @@
     </footer>
   </main>
 
-  <script src="flame.js"></script>
+  <script type="module" src="balatro.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
