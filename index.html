@@ -1,388 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caellum Yip Hoi-Lee</title>
-    <meta name="description" content="Developer. Creator. Student at University of Toronto.">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caellum Yip Hoi-Lee — Software Engineer</title>
+  <meta name="description" content="Caellum Yip Hoi-Lee — Software Engineer & CS student at the University of Toronto. Full-stack, AI/ML, and games." />
+
+  <!-- pixel-flame favicon -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2304060e'/%3E%3Crect x='7' y='2' width='2' height='2' fill='%23dff1ff'/%3E%3Crect x='6' y='4' width='4' height='2' fill='%2326c8ff'/%3E%3Crect x='5' y='6' width='6' height='3' fill='%23267bff'/%3E%3Crect x='4' y='9' width='8' height='3' fill='%231640b8'/%3E%3Crect x='6' y='12' width='4' height='2' fill='%230c2380'/%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
-    <!-- 3D Background -->
-    <div id="canvas-container"></div>
+  <!-- ===== background flame ===== -->
+  <canvas id="flame" aria-hidden="true"></canvas>
+  <div id="scanlines" aria-hidden="true"></div>
+  <div id="vignette" aria-hidden="true"></div>
 
-    <!-- Cursor -->
-    <div class="cursor" id="cursor"></div>
-    <div class="cursor-follower" id="cursorFollower"></div>
+  <!-- ===== BOOT / PRESS START ===== -->
+  <section id="boot" class="boot">
+    <div class="boot-inner">
+      <p class="boot-tag">PORTFOLIO</p>
+      <h1 class="title">CAELLUM<br><span>YIP HOI-LEE</span></h1>
+      <p class="subtitle">Software Engineer · Computer Science @ University of Toronto</p>
+      <button id="startBtn" class="press-start" type="button">ENTER &#9654;</button>
+      <p class="boot-hint">click &middot; or press <kbd>Enter</kbd></p>
+    </div>
+  </section>
 
-    <!-- Main Content -->
-    <main class="main">
-        <!-- Fixed Side Nav -->
-        <nav class="side-nav">
-            <a href="#" class="nav-item active" data-section="home">Index</a>
-            <a href="#works" class="nav-item" data-section="works">Works</a>
-            <a href="#about" class="nav-item" data-section="about">About</a>
-            <a href="#contact" class="nav-item" data-section="contact">Contact</a>
-        </nav>
+  <!-- ===== MAIN APP ===== -->
+  <main id="app" class="app" hidden>
+    <header class="topbar">
+      <button class="brand" id="brandHome" type="button">
+        <span class="brand-flame">&#9650;</span> CAELLUM
+      </button>
+      <div class="topbar-status">
+        <span class="dot"></span> Toronto, Canada
+      </div>
+    </header>
 
-        <!-- Hero -->
-        <section class="hero" id="home">
-            <div class="hero-inner">
-                <h1 class="mega-title">
-                    <span class="title-word" data-speed="0.9">Caellum</span>
-                    <span class="title-word outline" data-speed="1.1">Yip</span>
-                    <span class="title-word" data-speed="0.8">Hoi-Lee</span>
-                </h1>
-                <div class="hero-info">
-                    <div class="info-block">
-                        <span class="label">Status</span>
-                        <span class="value">CS @ UofT</span>
-                    </div>
-                    <div class="info-block">
-                        <span class="label">Focus</span>
-                        <span class="value">Full-Stack / Games / AI</span>
-                    </div>
-                    <div class="info-block">
-                        <span class="label">Based</span>
-                        <span class="value">Toronto, CA</span>
-                    </div>
-                </div>
+    <div class="stage" id="stage">
+      <!-- ===== POKEMON-STYLE MENU ===== -->
+      <nav id="menu" class="menu" aria-label="Main menu">
+        <p class="menu-title">MENU</p>
+        <ul class="menu-list">
+          <li class="menu-item" data-panel="about" tabindex="0"><span class="ptr">&#9654;</span><span class="lbl">ABOUT</span></li>
+          <li class="menu-item" data-panel="experience" tabindex="0"><span class="ptr">&#9654;</span><span class="lbl">EXPERIENCE</span></li>
+          <li class="menu-item" data-panel="projects" tabindex="0"><span class="ptr">&#9654;</span><span class="lbl">PROJECTS</span></li>
+          <li class="menu-item" data-panel="skills" tabindex="0"><span class="ptr">&#9654;</span><span class="lbl">SKILLS</span></li>
+          <li class="menu-item" data-panel="resume" tabindex="0"><span class="ptr">&#9654;</span><span class="lbl">RESUME</span></li>
+          <li class="menu-item" data-panel="contact" tabindex="0"><span class="ptr">&#9654;</span><span class="lbl">CONTACT</span></li>
+        </ul>
+        <p class="menu-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> move &middot; <kbd>&crarr;</kbd> select</p>
+      </nav>
+
+      <!-- ===== CONTENT ===== -->
+      <section class="content" id="content" aria-live="polite">
+        <button class="back-btn" id="backBtn" type="button">&#9664; MENU</button>
+
+        <!-- ABOUT -->
+        <article class="panel" data-panel="about">
+          <header class="panel-head">
+            <span class="panel-tag">01</span>
+            <h2>About</h2>
+          </header>
+          <div class="about-grid">
+            <div class="about-bio">
+              <p>I'm <strong>Caellum</strong> — a software engineer and Computer Science student at the
+                 University of Toronto. I build across the stack: <strong>AI/ML pipelines</strong>,
+                 <strong>full-stack web apps</strong>, and <strong>games</strong>. I like turning messy,
+                 ambitious ideas into things people can actually play with.</p>
+              <p>Most recently I overhauled an AI game-development pipeline at <strong>Chatforce</strong>,
+                 ship for non-profits with <strong>U of T Blueprint</strong>, and run my own indie studio,
+                 <strong>Bronze Bat Studio</strong> — whose titles have crossed <strong>3M+ plays</strong>.
+                 In between, I win hackathons.</p>
             </div>
-            <div class="scroll-hint">
-                <span>Scroll</span>
-                <div class="scroll-line"></div>
+            <aside class="stat-card">
+              <p class="stat-card-title">STATS</p>
+              <ul class="stats">
+                <li><span>CLASS</span><b>Software Engineer</b></li>
+                <li><span>SCHOOL</span><b>U of T &middot; HBSc CS</b></li>
+                <li><span>YEARS</span><b>2025 &ndash; 2029</b></li>
+                <li><span>FOCUS</span><b>Full-Stack &middot; AI/ML &middot; Games</b></li>
+                <li><span>LANGS</span><b>EN &middot; FR &middot; ES</b></li>
+                <li><span>BASE</span><b>Toronto, Canada</b></li>
+              </ul>
+            </aside>
+          </div>
+          <div class="badges">
+            <span class="badge">&#127942; 1st Overall &mdash; Cal Hacks</span>
+            <span class="badge">&#127918; 3M+ game plays</span>
+            <span class="badge">&#9733; 97% HS Avg (AP)</span>
+            <span class="badge">&#127929; RCM Piano L8</span>
+          </div>
+        </article>
+
+        <!-- EXPERIENCE (timeline selector, populated by app.js) -->
+        <article class="panel" data-panel="experience">
+          <header class="panel-head">
+            <span class="panel-tag">02</span>
+            <h2>Experience</h2>
+          </header>
+          <p class="sel-prompt">Pick a role &mdash; <kbd>&uarr;</kbd><kbd>&darr;</kbd> walk the timeline, <kbd>&crarr;</kbd> open.</p>
+          <div class="selector" id="expSelector">
+            <ul class="sel-list timeline-list" id="expList"></ul>
+            <div class="sel-stage" id="expStage"></div>
+          </div>
+        </article>
+
+        <!-- PROJECTS (pokedex selector, populated by app.js) -->
+        <article class="panel" data-panel="projects">
+          <header class="panel-head">
+            <span class="panel-tag">03</span>
+            <h2>Projects</h2>
+          </header>
+          <p class="sel-prompt">Pick a build &mdash; <kbd>&uarr;</kbd><kbd>&darr;</kbd> browse, <kbd>&crarr;</kbd> open the entry.</p>
+          <div class="selector" id="projSelector">
+            <ul class="sel-list" id="projList"></ul>
+            <div class="sel-stage" id="projStage"></div>
+          </div>
+        </article>
+
+        <!-- SKILLS -->
+        <article class="panel" data-panel="skills">
+          <header class="panel-head">
+            <span class="panel-tag">04</span>
+            <h2>Skills &amp; Certifications</h2>
+          </header>
+          <div class="skills">
+            <div class="skill-group">
+              <h4>Languages</h4>
+              <div class="chips"><span>Java</span><span>Python</span><span>C#</span><span>C++</span><span>SQL</span><span>JavaScript</span><span>Lua</span><span>R</span><span class="muted">DSA</span><span class="muted">OOP</span></div>
             </div>
-        </section>
-
-        <!-- Works Section - Horizontal Scroll -->
-        <section class="works-section" id="works">
-            <div class="section-intro">
-                <span class="section-label">01</span>
-                <h2 class="section-title-large">Selected<br />Works</h2>
+            <div class="skill-group">
+              <h4>Web &amp; Mobile</h4>
+              <div class="chips"><span>React</span><span>React Native</span><span>Next.js</span><span>Django REST</span><span>FastAPI</span><span>Streamlit</span><span>HTML/CSS</span></div>
             </div>
-
-            <div class="works-horizontal">
-                <!-- Work Item 1 -->
-                <article class="work-item">
-                    <a href="https://devpost.com/software/clare-gksqp4?ref_content=my-projects-tab&ref_feature=my_projects"
-                        class="work-link" data-project="apogee">
-                        <div class="work-image">
-                            <img src="images/apogee.png" alt="Apogee AI" onerror="this.style.display='none'">
-                            <div class="work-placeholder">
-                                <span class="placeholder-num">01</span>
-                            </div>
-                        </div>
-                        <div class="work-info">
-                            <h3 class="work-title">Apogee AI</h3>
-                            <p class="work-category">Hackathon / AI / Visualization</p>
-                            <p class="work-year">2026</p>
-                        </div>
-                    </a>
-                </article>
-
-                <!-- Work Item 2 -->
-                <article class="work-item featured">
-                    <a href="https://www.roblox.com/games/4818610549/Twin-Universe-Space-Travel-RP-Rocket-Simulator"
-                        class="work-link" data-project="twinuniverse">
-                        <div class="work-image">
-                            <img src="images/twinuniverse.png" alt="Twin Universe" onerror="this.style.display='none'">
-                            <div class="work-placeholder">
-                                <span class="placeholder-num">02</span>
-                            </div>
-                        </div>
-                        <div class="work-info">
-                            <h3 class="work-title">Twin Universe</h3>
-                            <p class="work-category">Game / Roblox / 2.8M+ Plays</p>
-                            <p class="work-year">2023—</p>
-                        </div>
-                        <div class="work-stat">
-                            <span class="stat-num">2.8M+</span>
-                            <span class="stat-desc">Players</span>
-                        </div>
-                    </a>
-                </article>
-
-                <!-- Work Item 3 -->
-                <article class="work-item">
-                    <a href="https://github.com/uoftblueprint/made" class="work-link" data-project="jwt">
-                        <div class="work-image">
-                            <img src="images/blueprint.png" alt="JWT Auth" onerror="this.style.display='none'">
-                            <div class="work-placeholder">
-                                <span class="placeholder-num">03</span>
-                            </div>
-                        </div>
-                        <div class="work-info">
-                            <h3 class="work-title">JWT Auth System</h3>
-                            <p class="work-category">UofT Blueprint / Django / React</p>
-                            <p class="work-year">2025</p>
-                        </div>
-                    </a>
-                </article>
-
-                <!-- Work Item 4 -->
-                <article class="work-item">
-                    <a href="#" class="work-link" data-project="trace">
-                        <div class="work-image">
-                            <img src="images/trace.png" alt="Trace" onerror="this.style.display='none'">
-                            <div class="work-placeholder">
-                                <span class="placeholder-num">04</span>
-                            </div>
-                        </div>
-                        <div class="work-info">
-                            <h3 class="work-title">Trace</h3>
-                            <p class="work-category">ML / LSTM / Stock Prediction</p>
-                            <p class="work-year">2025</p>
-                        </div>
-                    </a>
-                </article>
-
-                <!-- Work Item 5 -->
-                <article class="work-item">
-                    <a href="https://github.com/CaellumYHL/RGBMatrix" class="work-link" data-project="pcb">
-                        <div class="work-image">
-                            <img src="images/pcb.jpg" alt="PCB Game" onerror="this.style.display='none'">
-                            <div class="work-placeholder">
-                                <span class="placeholder-num">05</span>
-                            </div>
-                        </div>
-                        <div class="work-info">
-                            <h3 class="work-title">PCB Game System</h3>
-                            <p class="work-category">Hardware / Arduino / KiCad</p>
-                            <p class="work-year">2024</p>
-                        </div>
-                    </a>
-                </article>
-
-                <!-- Work Item 6 -->
-                <article class="work-item">
-                    <a href="https://github.com/CaellumYHL/CSB195" class="work-link" data-project="cellular">
-                        <div class="work-image">
-                            <img src="images/automata.png" alt="Cellular Automata" onerror="this.style.display='none'">
-                            <div class="work-placeholder">
-                                <span class="placeholder-num">06</span>
-                            </div>
-                        </div>
-                        <div class="work-info">
-                            <h3 class="work-title">Rule 110</h3>
-                            <p class="work-category">Cellular Automata / R</p>
-                            <p class="work-year">2025</p>
-                        </div>
-                    </a>
-                </article>
+            <div class="skill-group">
+              <h4>AI &amp; Machine Learning</h4>
+              <div class="chips"><span>PyTorch</span><span>LangChain</span><span>ChromaDB</span><span>Scikit-learn</span><span>Hugging Face</span><span>SDXL</span><span>LoRA</span><span>RAG</span><span>Gemini 2.5 Pro</span><span>Veo 2</span><span>OpenRouter</span><span>Meshy</span><span>Moorcheh AI</span></div>
             </div>
-
-            <!-- Bottom row: nav + view all -->
-            <div class="works-bottom-row">
-                <div class="works-nav">
-                    <button class="works-nav-btn prev" id="worksPrev" aria-label="Previous project">
-                        <span>←</span>
-                    </button>
-                    <button class="works-nav-btn next" id="worksNext" aria-label="Next project">
-                        <span>→</span>
-                    </button>
-                </div>
-                <div class="works-all-link">
-                    <a href="projects.html" class="view-all">View All Projects <span class="arrow">→</span></a>
-                </div>
+            <div class="skill-group">
+              <h4>Tools &amp; Platforms</h4>
+              <div class="chips"><span>Docker</span><span>Git</span><span>Linux</span><span>AWS Trainium</span><span>Postman</span><span>Playwright</span><span>Cloudinary</span><span>Composio</span><span>CyStack</span><span>Polarity</span><span>Firebase</span><span>Jupyter</span></div>
             </div>
-        </section>
-
-        <!-- Experience Section -->
-        <section class="experience-section" id="experience">
-            <div class="section-intro">
-                <span class="section-label">02</span>
-                <h2 class="section-title-large">Experience</h2>
+            <div class="skill-group">
+              <h4>Databases &amp; Concepts</h4>
+              <div class="chips"><span>PostgreSQL</span><span>Supabase</span><span>Redis</span><span>Neo4j</span><span>SQLite3</span><span>Vector Search</span><span>WebSockets</span><span>JWT</span><span>SSE</span></div>
             </div>
-
-            <div class="exp-list">
-                <div class="exp-item" data-index="01">
-                    <div class="exp-left">
-                        <span class="exp-date">2025—26</span>
-                    </div>
-                    <div class="exp-center">
-                        <h3 class="exp-role">Junior Developer</h3>
-                        <p class="exp-company">UofT Blueprint</p>
-                    </div>
-                    <div class="exp-right">
-                        <p class="exp-desc">Django REST + React for Museum of Art and Digital Entertainment</p>
-                    </div>
-                </div>
-
-                <div class="exp-item" data-index="02">
-                    <div class="exp-left">
-                        <span class="exp-date">2023—</span>
-                    </div>
-                    <div class="exp-center">
-                        <h3 class="exp-role">Owner / Lead</h3>
-                        <p class="exp-company">Bronze Bat Studio</p>
-                    </div>
-                    <div class="exp-right">
-                        <p class="exp-desc">3M+ plays, $2K revenue on Steam/Roblox</p>
-                    </div>
-                </div>
-
-                <div class="exp-item" data-index="03">
-                    <div class="exp-left">
-                        <span class="exp-date">2023—25</span>
-                    </div>
-                    <div class="exp-center">
-                        <h3 class="exp-role">Head of Programming</h3>
-                        <p class="exp-company">RHHS Game Design</p>
-                    </div>
-                    <div class="exp-right">
-                        <p class="exp-desc">Co-founded club, taught Unity/C# game development</p>
-                    </div>
-                </div>
-
-                <div class="exp-item" data-index="04">
-                    <div class="exp-left">
-                        <span class="exp-date">2022—25</span>
-                    </div>
-                    <div class="exp-center">
-                        <h3 class="exp-role">Head of IT</h3>
-                        <p class="exp-company">RHHS CS Club</p>
-                    </div>
-                    <div class="exp-right">
-                        <p class="exp-desc">Competition support, TypeScript/SCSS website</p>
-                    </div>
-                </div>
+            <div class="skill-group">
+              <h4>Certifications &amp; Awards</h4>
+              <div class="chips"><span class="muted">OSSD &mdash; AP, 97% Avg</span><span class="muted">RCM Piano L8</span><span class="muted">RHHS English Award</span><span class="muted">Gold Band Merit</span></div>
             </div>
-        </section>
+          </div>
+        </article>
 
-        <!-- About Section -->
-        <section class="about-section" id="about">
-            <div class="about-grid">
-                <div class="about-main">
-                    <span class="section-label">03</span>
-                    <h2 class="about-title">
-                        Computer Science student building
-                        <em>games</em>, <em>web apps</em>, and
-                        <em>AI systems</em>.
-                    </h2>
-                </div>
-                <div class="about-details">
-                    <div class="detail-block">
-                        <h4>Education</h4>
-                        <p>University of Toronto<br />HBSc Computer Science<br />2025—2029</p>
-                    </div>
-                    <div class="detail-block">
-                        <h4>Languages</h4>
-                        <p>English / French / Spanish</p>
-                    </div>
-                </div>
-            </div>
+        <!-- RESUME -->
+        <article class="panel" data-panel="resume">
+          <header class="panel-head">
+            <span class="panel-tag">05</span>
+            <h2>Resume</h2>
+          </header>
+          <div class="resume-actions">
+            <a class="btn primary" href="Resume_Latex.pdf" download>&#11015; Download PDF</a>
+            <a class="btn" href="Resume_Latex.pdf" target="_blank" rel="noopener">Open in new tab &#8599;</a>
+          </div>
+          <div class="resume-frame">
+            <iframe src="Resume_Latex.pdf#view=FitH" title="Caellum Yip Hoi-Lee resume"></iframe>
+          </div>
+        </article>
 
-            <!-- Skills as marquee -->
-            <div class="skills-marquee">
-                <div class="marquee-content">
-                    <span>Python</span><span>·</span>
-                    <span>Java</span><span>·</span>
-                    <span>C#</span><span>·</span>
-                    <span>C++</span><span>·</span>
-                    <span>Lua</span><span>·</span>
-                    <span>React</span><span>·</span>
-                    <span>Django</span><span>·</span>
-                    <span>TensorFlow</span><span>·</span>
-                    <span>Unity</span><span>·</span>
-                    <span>Git</span><span>·</span>
-                    <span>Firebase</span><span>·</span>
-                    <span>Python</span><span>·</span>
-                    <span>Java</span><span>·</span>
-                    <span>C#</span><span>·</span>
-                    <span>C++</span><span>·</span>
-                    <span>Lua</span><span>·</span>
-                    <span>React</span><span>·</span>
-                    <span>Django</span><span>·</span>
-                    <span>TensorFlow</span><span>·</span>
-                    <span>Unity</span><span>·</span>
-                    <span>Git</span><span>·</span>
-                    <span>Firebase</span><span>·</span>
-                </div>
-            </div>
-        </section>
+        <!-- CONTACT -->
+        <article class="panel" data-panel="contact">
+          <header class="panel-head">
+            <span class="panel-tag">06</span>
+            <h2>Contact</h2>
+          </header>
+          <p class="contact-lead">Building something, hiring, or just want to talk shop? Pick a button.</p>
+          <div class="contact-grid">
+            <a class="contact-card" href="mailto:cyiphoilee@mail.utoronto.ca">
+              <span class="cc-ico">&#9993;</span>
+              <span class="cc-k">EMAIL</span>
+              <span class="cc-v">cyiphoilee@mail.utoronto.ca</span>
+            </a>
+            <a class="contact-card" href="https://github.com/CaellumYHL" target="_blank" rel="noopener">
+              <span class="cc-ico">&#9670;</span>
+              <span class="cc-k">GITHUB</span>
+              <span class="cc-v">@CaellumYHL</span>
+            </a>
+            <a class="contact-card" href="tel:+16475349789">
+              <span class="cc-ico">&#9742;</span>
+              <span class="cc-k">PHONE</span>
+              <span class="cc-v">(647) 534-9789</span>
+            </a>
+            <span class="contact-card static">
+              <span class="cc-ico">&#9678;</span>
+              <span class="cc-k">LOCATION</span>
+              <span class="cc-v">Toronto, Canada</span>
+            </span>
+          </div>
+        </article>
 
-        <!-- Contact Section -->
-        <section class="contact-section" id="contact">
-            <div class="contact-content">
-                <span class="section-label">04</span>
-                <h2 class="contact-title">
-                    Let's<br />
-                    <span class="outline">Connect</span>
-                </h2>
-                <div class="contact-links">
-                    <a href="resume.html" class="contact-link">
-                        <span class="link-label">Resume</span>
-                        <span class="link-value">View & Download PDF</span>
-                        <span class="link-arrow">↗</span>
-                    </a>
-                    <a href="mailto:cyiphoilee@mail.utoronto.ca" class="contact-link">
-                        <span class="link-label">Email</span>
-                        <span class="link-value">cyiphoilee@mail.utoronto.ca</span>
-                        <span class="link-arrow">↗</span>
-                    </a>
-                    <a href="https://github.com/CaellumYHL/" target="_blank" class="contact-link">
-                        <span class="link-label">GitHub</span>
-                        <span class="link-value">CaellumYHL</span>
-                        <span class="link-arrow">↗</span>
-                    </a>
-                    <a href="tel:+16475349789" class="contact-link">
-                        <span class="link-label">Phone</span>
-                        <span class="link-value">(647) 534-9789</span>
-                        <span class="link-arrow">↗</span>
-                    </a>
-                </div>
-            </div>
-            <div class="contact-footer">
-                <span>Toronto, Canada</span>
-                <span>© 2026</span>
-            </div>
-        </section>
-    </main>
-
-    <!-- Settings Toggle -->
-    <button class="settings-btn" id="settingsBtn">
-        <span>⚙</span>
-    </button>
-    <div class="settings-panel" id="settingsPanel">
-        <div class="setting-row">
-            <span>Float</span>
-            <input type="range" id="floatIntensity" min="0" max="100" value="50">
-        </div>
-        <div class="setting-row">
-            <span>Rotate</span>
-            <input type="range" id="rotationSpeed" min="0" max="100" value="30">
-        </div>
-        <div class="setting-row">
-            <span>Wave</span>
-            <input type="range" id="waveMotion" min="0" max="100" value="60">
-        </div>
-        <div class="setting-row">
-            <span>Objects</span>
-            <input type="range" id="objectCount" min="3" max="15" value="6">
-        </div>
-        <div class="setting-row">
-            <span>Shine</span>
-            <input type="range" id="materialShine" min="0" max="100" value="70">
-        </div>
-        <div class="fps-counter"><span id="fpsCounter">60</span> FPS</div>
+      </section>
     </div>
 
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-        }
-    }
-    </script>
-    <script type="module" src="main.js"></script>
-    <script src="scroll.js"></script>
-</body>
+    <footer class="appfoot">
+      <span>&copy; 2026 Caellum Yip Hoi-Lee</span>
+      <a class="foot-link" href="https://github.com/CaellumYHL" target="_blank" rel="noopener">github.com/CaellumYHL</a>
+    </footer>
+  </main>
 
+  <script src="flame.js"></script>
+  <script src="app.js"></script>
+</body>
 </html>
