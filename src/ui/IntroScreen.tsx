@@ -23,24 +23,19 @@ export function IntroScreen({ onEnter, onOpenNotes }: IntroScreenProps) {
       </header>
 
       <div className="intro-screen__content">
-        <p className="overline">A PLAYABLE PORTFOLIO · PROJECTS, WORK, AND SKILLS</p>
-        <h1 id="intro-title">
-          A body of work,
-          <br />
-          <em>made explorable.</em>
-        </h1>
+        <p className="overline">PERSONAL PORTFOLIO</p>
+        <h1 id="intro-title">Welcome to my portfolio.</h1>
         <p className="intro-screen__lede">
-          The main gallery holds four projects: Paper Cuts, Ensemble, Auctopus,
-          and Twin Universe. The next room contains work experience and technical skills.
+          Explore my projects, work experience, and technical skills.
         </p>
 
         <div className="intro-screen__actions">
           <button className="action-button action-button--primary" onClick={onEnter} autoFocus>
-            <span>Enter the project gallery</span>
+            <span>Explore projects</span>
             <kbd>↵</kbd>
           </button>
           <button className="action-button action-button--quiet" onClick={onOpenNotes}>
-            Read the résumé
+            View résumé
           </button>
         </div>
 
