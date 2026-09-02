@@ -1312,35 +1312,44 @@
         [px(0.6), py(0.43)], [px(0.67), py(0.45)], [px(0.71), py(0.54)], [px(0.67), py(0.62)], [px(0.61), py(0.6)], [px(0.585), py(0.51)],
       ], '#8e5236', seed + wave + 66, { passes: 4, jitter: unit * 0.004, alpha: 0.16 })
 
-      /* God's legs, stretched to the right edge of the cloak */
-      limb(context, [[px(0.79), py(0.47)], [px(0.86), py(0.55)], [px(0.915), py(0.615)]], unit * 0.032, unit * 0.016, TUNIC_SH, seed + wave + 70, { jitter: unit * 0.003 })
-      limb(context, [[px(0.915), py(0.615)], [px(0.952), py(0.645)]], unit * 0.014, unit * 0.009, FLESH, seed + wave + 71, { jitter: unit * 0.002 })
-      limb(context, [[px(0.8), py(0.4)], [px(0.868), py(0.462)]], unit * 0.046, unit * 0.038, TUNIC, seed + wave + 72, { jitter: unit * 0.003 })
-      limb(context, [[px(0.868), py(0.462)], [px(0.93), py(0.517)], [px(0.972), py(0.542)]], unit * 0.032, unit * 0.014, FLESH, seed + wave + 73, { jitter: unit * 0.0028 })
-      limb(context, [[px(0.972), py(0.542)], [px(0.996), py(0.55)]], unit * 0.013, unit * 0.008, FLESH, seed + 74, { jitter: unit * 0.002 })
+      /* God's bare legs, trailing behind to the right */
+      limb(context, [[px(0.825), py(0.475)], [px(0.878), py(0.545)], [px(0.928), py(0.6)]], unit * 0.03, unit * 0.015, FLESH, seed + wave + 70, { jitter: unit * 0.0028 })
+      limb(context, [[px(0.928), py(0.6)], [px(0.962), py(0.628)]], unit * 0.013, unit * 0.008, FLESH, seed + wave + 71, { jitter: unit * 0.002 })
+      limb(context, [[px(0.838), py(0.42)], [px(0.9), py(0.47)], [px(0.958), py(0.512)]], unit * 0.034, unit * 0.016, FLESH, seed + wave + 73, { jitter: unit * 0.0028 })
+      limb(context, [[px(0.958), py(0.512)], [px(0.99), py(0.526)]], unit * 0.014, unit * 0.008, FLESH, seed + 74, { jitter: unit * 0.002 })
 
-      /* the pale tunic driving forward */
+      /* THE white robe: one bright body flying forward, shoulders to thigh */
+      var robe = [
+        [px(0.638), py(0.2)], [px(0.672), py(0.165)], [px(0.716), py(0.165)], [px(0.757), py(0.2)],
+        [px(0.788), py(0.25)], [px(0.818), py(0.32)], [px(0.845), py(0.39)], [px(0.848), py(0.45)],
+        [px(0.812), py(0.475)], [px(0.77), py(0.44)], [px(0.727), py(0.39)], [px(0.683), py(0.33)],
+        [px(0.648), py(0.275)], [px(0.628), py(0.235)],
+      ]
+      context.save()
+      context.globalAlpha = 0.85
+      context.fillStyle = TUNIC
+      smoothPath(context, robe)
+      context.fill()
+      context.restore()
+      soften(context, robe, TUNIC, seed + wave + 75, { passes: 3, jitter: unit * 0.0035, alpha: 0.12 })
+      /* the underside of the robe in shadow, and the folds of flight */
       soften(context, [
-        [px(0.652), py(0.155)], [px(0.7), py(0.15)], [px(0.755), py(0.2)], [px(0.8), py(0.28)],
-        [px(0.835), py(0.38)], [px(0.83), py(0.47)], [px(0.77), py(0.475)], [px(0.715), py(0.415)],
-        [px(0.66), py(0.33)], [px(0.628), py(0.245)], [px(0.632), py(0.185)],
-      ], TUNIC, seed + wave + 75, { passes: 6, jitter: unit * 0.0035 })
-      soften(context, [
-        [px(0.69), py(0.32)], [px(0.75), py(0.38)], [px(0.79), py(0.45)], [px(0.73), py(0.44)], [px(0.675), py(0.36)],
-      ], TUNIC_SH, seed + 76, { passes: 3, jitter: unit * 0.003, alpha: 0.14, dust: false })
-      /* fold lines in the tunic */
-      ink(context, [[px(0.66), py(0.2)], [px(0.72), py(0.26)], [px(0.775), py(0.35)]], seed + 77, 1)
-      ink(context, [[px(0.648), py(0.25)], [px(0.7), py(0.32)], [px(0.75), py(0.42)]], seed + 78, 0.9)
+        [px(0.66), py(0.3)], [px(0.71), py(0.375)], [px(0.765), py(0.435)], [px(0.808), py(0.462)],
+        [px(0.77), py(0.455)], [px(0.71), py(0.4)], [px(0.658), py(0.325)],
+      ], TUNIC_SH, seed + 76, { passes: 3, jitter: unit * 0.0025, alpha: 0.2, dust: false })
+      ink(context, [[px(0.668), py(0.21)], [px(0.72), py(0.25)], [px(0.775), py(0.32)], [px(0.815), py(0.4)]], seed + 77, 1)
+      ink(context, [[px(0.655), py(0.26)], [px(0.705), py(0.315)], [px(0.757), py(0.385)], [px(0.795), py(0.44)]], seed + 78, 0.9)
+      ink(context, robe.slice(0, 8), seed + 81, 1, 'rgba(60, 46, 38, 0.5)')
 
-      /* his left arm reaching back over the one who waits */
-      limb(context, [[px(0.7), py(0.2)], [px(0.73), py(0.245)], [px(0.75), py(0.285)]], unit * 0.016, unit * 0.009, FLESH, seed + wave + 79, { jitter: unit * 0.002 })
-      tinyFace(context, px(0.737), py(0.3), unit * 0.017, HAIR_BROWN, -0.6, seed + 80)
+      /* the one who waits, tucked at his side under his arm */
+      tinyFace(context, px(0.716), py(0.276), unit * 0.016, HAIR_BROWN, -0.6, seed + 80)
+      limb(context, [[px(0.69), py(0.2)], [px(0.712), py(0.238)], [px(0.729), py(0.262)]], unit * 0.015, unit * 0.009, FLESH, seed + wave + 79, { jitter: unit * 0.002 })
 
       /* faces of the company, each one legible */
       tinyFace(context, px(0.73), py(0.115), unit * 0.015, HAIR_AUBURN, -0.4, seed + 82)
       tinyFace(context, px(0.782), py(0.1), unit * 0.014, HAIR_GOLD, -0.3, seed + 83)
-      tinyFace(context, px(0.834), py(0.26), unit * 0.02, HAIR_GOLD, -0.7, seed + 84)
-      tinyFace(context, px(0.877), py(0.35), unit * 0.015, HAIR_AUBURN, -0.5, seed + 85)
+      tinyFace(context, px(0.862), py(0.225), unit * 0.019, HAIR_GOLD, -0.7, seed + 84)
+      tinyFace(context, px(0.9), py(0.33), unit * 0.015, HAIR_AUBURN, -0.5, seed + 85)
       tinyFace(context, px(0.915), py(0.28), unit * 0.014, HAIR_BROWN, -0.4, seed + 86)
       tinyFace(context, px(0.928), py(0.42), unit * 0.013, HAIR_BROWN, -0.5, seed + 87)
       tinyFace(context, px(0.617), py(0.43), unit * 0.015, HAIR_BROWN, -0.2, seed + 88)
