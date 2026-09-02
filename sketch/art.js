@@ -42,6 +42,36 @@
     context.globalAlpha = 1
   }
 
+  /* A soft granular bloom of colour: pigment settling into the paper,
+     like the blots in the WORKING PLAN reference. */
+  function softBloom(context, centerX, centerY, radiusX, radiusY, color, seed) {
+    var random = SKETCH.rng(seed)
+    context.save()
+    context.fillStyle = color
+    for (var layer = 0; layer < 22; layer += 1) {
+      context.globalAlpha = 0.05 + random() * 0.06
+      context.beginPath()
+      context.ellipse(
+        centerX + (random() + random() - 1) * radiusX * 0.5,
+        centerY + (random() + random() - 1) * radiusY * 0.5,
+        radiusX * (0.3 + random() * 0.4), radiusY * (0.3 + random() * 0.4),
+        random() * 3, 0, Math.PI * 2,
+      )
+      context.fill()
+    }
+    for (var speck = 0; speck < radiusX * 1.4; speck += 1) {
+      var angle = random() * Math.PI * 2
+      var reach = 0.6 + Math.pow(random(), 0.6) * 0.6
+      context.globalAlpha = 0.08 + random() * 0.2
+      context.fillRect(
+        centerX + Math.cos(angle) * radiusX * reach,
+        centerY + Math.sin(angle) * radiusY * reach,
+        0.8 + random() * 1.6, 0.8 + random() * 1.4,
+      )
+    }
+    context.restore()
+  }
+
   /* ---------------------------------------------------------------- room */
   /* A pale, empty room with trees and grass growing out of the carpet —
      painted in the same pencil-and-wash hand as the grove outside. */
@@ -181,6 +211,44 @@
       SKETCH.stain(context, 0, height, Math.min(width, height) * 0.4, seed + 45)
       SKETCH.stain(context, width, height, Math.min(width, height) * 0.36, seed + 46)
       SKETCH.stain(context, width * 0.5, 0, Math.min(width, height) * 0.3, seed + 47)
+
+      /* the room darkens toward its edges, in soft gradients */
+      var gloomLeft = context.createLinearGradient(0, 0, width * 0.22, 0)
+      gloomLeft.addColorStop(0, 'rgba(96, 84, 60, 0.18)')
+      gloomLeft.addColorStop(1, 'rgba(96, 84, 60, 0)')
+      context.fillStyle = gloomLeft
+      context.fillRect(0, 0, width * 0.22, height)
+      var gloomRight = context.createLinearGradient(width, 0, width * 0.78, 0)
+      gloomRight.addColorStop(0, 'rgba(96, 84, 60, 0.18)')
+      gloomRight.addColorStop(1, 'rgba(96, 84, 60, 0)')
+      context.fillStyle = gloomRight
+      context.fillRect(width * 0.78, 0, width * 0.22, height)
+      var gloomDown = context.createLinearGradient(0, height, 0, height * 0.78)
+      gloomDown.addColorStop(0, 'rgba(80, 70, 48, 0.2)')
+      gloomDown.addColorStop(1, 'rgba(80, 70, 48, 0)')
+      context.fillStyle = gloomDown
+      context.fillRect(0, height * 0.78, width, height * 0.22)
+
+      /* pigment weather: violet blooms settling on the wall and carpet */
+      softBloom(context, back.left + (back.right - back.left) * 0.32, back.top + (back.bottom - back.top) * 0.42, 56, 42, '#8a7590', seed + 48)
+      softBloom(context, width * 0.63, height * 0.87, 76, 30, '#8a7590', seed + 49)
+      var ringPoints = []
+      for (var gouacheStep = 0; gouacheStep <= 26; gouacheStep += 1) {
+        var gouacheAngle = (gouacheStep / 26) * Math.PI * 1.7 + 0.4
+        ringPoints.push([width * 0.63 + Math.cos(gouacheAngle) * 62, height * 0.87 + Math.sin(gouacheAngle) * 26])
+      }
+      SKETCH.gouache(context, ringPoints, { seed: seed + 50, width: 7 })
+
+      /* pools of light on the carpet under the panels */
+      for (var pool = 0; pool < 3; pool += 1) {
+        var poolX = width / 2 + (pool - 1) * width * 0.17
+        var poolY = back.bottom + (height - back.bottom) * (0.3 + pool * 0.09)
+        var poolGlow = context.createRadialGradient(poolX, poolY, 4, poolX, poolY, width * 0.09)
+        poolGlow.addColorStop(0, 'rgba(250, 246, 226, 0.2)')
+        poolGlow.addColorStop(1, 'rgba(250, 246, 226, 0)')
+        context.fillStyle = poolGlow
+        context.fillRect(poolX - width * 0.1, poolY - width * 0.06, width * 0.2, width * 0.12)
+      }
 
       /* ivy creeping along the skirting and up the far corner */
       for (var creep = 0; creep < 26; creep += 1) {
@@ -926,6 +994,338 @@
         write(context, data.date, 26 + measure(data.title, 12, 0.4) + 20, 30, { size: 8.5, media: 'pencil', seed: 1204 })
         write(context, 'CLICK TO REPAINT', width - 26, 30, { size: 7, color: SKETCH.GREEN_PEN, seed: 1206, align: 'right' })
         SKETCH.artifacts(context, width, height, 1208 + state.seed)
+      },
+      onPointer: function (type, x, y, api) {
+        if (type === 'move') { api.canvas.style.cursor = 'pointer'; return }
+        if (type !== 'down') return
+        state.seed = Math.floor(Math.random() * 999983)
+        api.redraw()
+      },
+    }
+  }
+
+  /* ---------------------------------------------------------------- adam */
+  /* The Creation of Adam, as smeared pigment: the figures are blotches
+     dragged across the plaster, found again with searching pencil lines —
+     and the two smears still do not quite touch. */
+
+  ART.adam = function (data) {
+    var state = { seed: 1526 }
+
+    var INK = 'rgba(58, 44, 36, 0.8)'
+
+    /* A smeared blotch: a soft blob dragged along a path, dusty at the
+       edges, with drag streaks pulled through it. */
+    function smear(context, path, radius, color, seed, options) {
+      options = options || {}
+      var random = SKETCH.rng(seed)
+      var alpha = options.alpha === undefined ? 0.085 : options.alpha
+      var taper = options.taper === undefined ? 0.55 : options.taper
+
+      /* flatten the path into steps */
+      var steps = []
+      for (var segment = 1; segment < path.length; segment += 1) {
+        var ax = path[segment - 1][0]
+        var ay = path[segment - 1][1]
+        var bx = path[segment][0]
+        var by = path[segment][1]
+        var length = Math.hypot(bx - ax, by - ay)
+        var pieces = Math.max(1, Math.round(length / (radius * 0.36)))
+        for (var piece = 0; piece < pieces; piece += 1) {
+          var t = piece / pieces
+          steps.push([ax + (bx - ax) * t, ay + (by - ay) * t])
+        }
+      }
+      steps.push(path[path.length - 1])
+
+      context.save()
+      context.fillStyle = color
+      steps.forEach(function (step, index) {
+        var along = index / (steps.length - 1)
+        var stepRadius = radius * (1 - (1 - taper) * along)
+        for (var layer = 0; layer < 3; layer += 1) {
+          context.globalAlpha = alpha * (0.7 + random() * 0.6)
+          context.beginPath()
+          context.ellipse(
+            step[0] + (random() - 0.5) * stepRadius * 0.5,
+            step[1] + (random() - 0.5) * stepRadius * 0.5,
+            stepRadius * (0.6 + random() * 0.5),
+            stepRadius * (0.5 + random() * 0.45),
+            random() * 3, 0, Math.PI * 2,
+          )
+          context.fill()
+        }
+      })
+
+      /* pigment dust along the whole smear */
+      steps.forEach(function (step, index) {
+        var along = index / (steps.length - 1)
+        var stepRadius = radius * (1 - (1 - taper) * along)
+        if (random() > 0.5) return
+        for (var dust = 0; dust < 3; dust += 1) {
+          var angle = random() * Math.PI * 2
+          context.globalAlpha = 0.1 + random() * 0.22
+          context.fillRect(
+            step[0] + Math.cos(angle) * stepRadius * (0.8 + random() * 0.6),
+            step[1] + Math.sin(angle) * stepRadius * (0.8 + random() * 0.6),
+            0.8 + random() * 1.6, 0.8 + random() * 1.4,
+          )
+        }
+      })
+
+      /* drag streaks pulled along the direction of the smear */
+      if (options.streaks !== false) {
+        var first = steps[0]
+        var last = steps[steps.length - 1]
+        context.strokeStyle = options.streakColor || color
+        context.lineCap = 'round'
+        for (var streak = 0; streak < 4; streak += 1) {
+          var offset = (random() - 0.5) * radius * 1.1
+          var dirX = last[0] - first[0]
+          var dirY = last[1] - first[1]
+          var dirLength = Math.hypot(dirX, dirY) || 1
+          var normalX = -dirY / dirLength
+          var normalY = dirX / dirLength
+          context.globalAlpha = 0.12 + random() * 0.18
+          context.lineWidth = 0.9 + random() * 1.4
+          context.beginPath()
+          context.moveTo(first[0] + normalX * offset + dirX * random() * 0.2, first[1] + normalY * offset + dirY * random() * 0.2)
+          context.lineTo(last[0] + normalX * offset * 0.7 + dirX * random() * 0.1, last[1] + normalY * offset * 0.7 + dirY * random() * 0.1)
+          context.stroke()
+        }
+      }
+      context.restore()
+    }
+
+    /* Searching pencil gesture lines: the same stroke found two or three
+       times, each pass slightly elsewhere. */
+    function gesture(context, points, seed, options) {
+      options = options || {}
+      var passes = options.passes || 2
+      for (var pass = 0; pass < passes; pass += 1) {
+        var random = SKETCH.rng(seed + pass * 37)
+        var shiftX = (random() - 0.5) * 5
+        var shiftY = (random() - 0.5) * 5
+        SKETCH.pencil(context, points.map(function (point) {
+          return [point[0] + shiftX, point[1] + shiftY]
+        }), {
+          seed: seed + pass * 41,
+          color: options.color || 'rgba(70, 56, 44, 0.85)',
+          width: options.width || 1.3,
+          amp: 1.6,
+        })
+      }
+    }
+
+    function drawAdamPanel(context, width, height, seed) {
+      var random = SKETCH.rng(seed)
+      var paperTone = '#efece1'
+      SKETCH.plainPaper(context, width, height, { seed: 1503, tone: paperTone })
+
+      var frameX = width * 0.055
+      var frameY = height * 0.095
+      var frameWidth = width * 0.89
+      var frameHeight = height * 0.84
+      var fx = function (t) { return frameX + frameWidth * t }
+      var unit = frameWidth
+
+      context.save()
+      context.beginPath()
+      context.rect(frameX, frameY, frameWidth, frameHeight)
+      context.clip()
+
+      /* plaster */
+      var plaster = context.createLinearGradient(frameX, frameY, frameX + frameWidth, frameY + frameHeight)
+      plaster.addColorStop(0, '#e9e3cf')
+      plaster.addColorStop(0.5, '#efe8d2')
+      plaster.addColorStop(1, '#e2dbc4')
+      context.fillStyle = plaster
+      context.fillRect(frameX, frameY, frameWidth, frameHeight)
+      softBloom(context, fx(0.24), frameY + frameHeight * 0.3, unit * 0.14, unit * 0.08, '#cfc4a6', seed + 2)
+      softBloom(context, fx(0.85), frameY + frameHeight * 0.68, unit * 0.12, unit * 0.07, '#cfc4a6', seed + 3)
+
+      /* the cropped fresco above and below: dark strips with smeared company */
+      var stripHeight = frameHeight * 0.115
+      context.fillStyle = '#5d5c50'
+      context.fillRect(frameX, frameY, frameWidth, stripHeight)
+      context.fillRect(frameX, frameY + frameHeight - stripHeight, frameWidth, stripHeight)
+      smear(context, [[fx(0.1), frameY + stripHeight * 0.6], [fx(0.17), frameY + stripHeight * 0.4]], stripHeight * 0.32, '#cfa27f', seed + 4, { alpha: 0.12 })
+      smear(context, [[fx(0.26), frameY + stripHeight * 0.4], [fx(0.31), frameY + stripHeight * 0.6]], stripHeight * 0.26, '#c9a13c', seed + 5, { alpha: 0.12 })
+      smear(context, [[fx(0.8), frameY + stripHeight * 0.5], [fx(0.87), frameY + stripHeight * 0.45]], stripHeight * 0.3, '#cfa27f', seed + 6, { alpha: 0.12 })
+      smear(context, [[fx(0.3), frameY + frameHeight - stripHeight * 0.5], [fx(0.37), frameY + frameHeight - stripHeight * 0.55]], stripHeight * 0.3, '#cfa27f', seed + 7, { alpha: 0.12 })
+      smear(context, [[fx(0.83), frameY + frameHeight - stripHeight * 0.45], [fx(0.89), frameY + frameHeight - stripHeight * 0.55]], stripHeight * 0.28, '#b46a38', seed + 8, { alpha: 0.12 })
+      SKETCH.stroke(context, [[frameX, frameY + stripHeight], [frameX + frameWidth, frameY + stripHeight + 2]], { seed: seed + 10, color: 'rgba(48, 46, 40, 0.7)', width: 1.6, amp: 1, step: 12 })
+      SKETCH.stroke(context, [[frameX, frameY + frameHeight - stripHeight], [frameX + frameWidth, frameY + frameHeight - stripHeight - 2]], { seed: seed + 11, color: 'rgba(48, 46, 40, 0.7)', width: 1.6, amp: 1, step: 12 })
+
+      var panelTop = frameY + stripHeight
+      var panelHeight = frameHeight - stripHeight * 2
+      var py = function (t) { return panelTop + panelHeight * t }
+
+      /* ---------------------------------------------------- the earth */
+      /* the bank Adam lies on: broad dragged smears of grey-green and umber */
+      smear(context, [[fx(-0.02), py(0.62)], [fx(0.16), py(0.52)], [fx(0.34), py(0.5)], [fx(0.46), py(0.58)]], unit * 0.075, '#8b8874', seed + 20, { alpha: 0.1, taper: 0.9 })
+      smear(context, [[fx(-0.02), py(0.78)], [fx(0.2), py(0.72)], [fx(0.4), py(0.72)], [fx(0.47), py(0.8)]], unit * 0.085, '#6f6250', seed + 21, { alpha: 0.11, taper: 0.95 })
+      smear(context, [[fx(-0.02), py(0.94)], [fx(0.24), py(0.9)], [fx(0.46), py(0.93)]], unit * 0.07, '#5a5342', seed + 22, { alpha: 0.1, taper: 1 })
+      /* the bank found again in pencil */
+      gesture(context, [[fx(0.0), py(0.56)], [fx(0.18), py(0.485)], [fx(0.36), py(0.475)], [fx(0.465), py(0.55)]], seed + 23, { passes: 2, width: 1.2 })
+
+      /* -------------------------------------------------------- adam */
+      /* the body: one long flesh smear reclining up the bank */
+      smear(context, [[fx(0.155), py(0.66)], [fx(0.21), py(0.575)], [fx(0.265), py(0.49)], [fx(0.3), py(0.44)]], unit * 0.042, '#cfa27f', seed + 30, { alpha: 0.12, taper: 0.75 })
+      /* legs, dragged out along the ground */
+      smear(context, [[fx(0.195), py(0.65)], [fx(0.115), py(0.69)], [fx(0.04), py(0.68)]], unit * 0.022, '#c99a76', seed + 31, { alpha: 0.11, taper: 0.5 })
+      smear(context, [[fx(0.23), py(0.62)], [fx(0.3), py(0.525)], [fx(0.335), py(0.62)], [fx(0.345), py(0.7)]], unit * 0.02, '#c99a76', seed + 32, { alpha: 0.11, taper: 0.6 })
+      /* the head: a small round blot, hair dabbed dark */
+      smear(context, [[fx(0.302), py(0.43)], [fx(0.312), py(0.422)]], unit * 0.021, '#cfa27f', seed + 33, { alpha: 0.15, taper: 0.9, streaks: false })
+      smear(context, [[fx(0.296), py(0.405)], [fx(0.312), py(0.398)]], unit * 0.013, '#6b5136', seed + 34, { alpha: 0.18, taper: 0.9, streaks: false })
+      /* the reaching arm: a thin smear pulled toward the gap */
+      smear(context, [[fx(0.3), py(0.465)], [fx(0.36), py(0.5)], [fx(0.42), py(0.487)], [fx(0.458), py(0.472)]], unit * 0.013, '#d8b491', seed + 35, { alpha: 0.13, taper: 0.4 })
+
+      /* Adam found again: back, seat, legs, and the one certain arm line */
+      gesture(context, [[fx(0.165), py(0.675)], [fx(0.225), py(0.55)], [fx(0.285), py(0.455)], [fx(0.307), py(0.415)]], seed + 36, { passes: 3 })
+      gesture(context, [[fx(0.2), py(0.655)], [fx(0.11), py(0.695)], [fx(0.038), py(0.683)]], seed + 37, { passes: 2, width: 1.1 })
+      gesture(context, [[fx(0.235), py(0.625)], [fx(0.302), py(0.525)], [fx(0.34), py(0.63)], [fx(0.347), py(0.705)]], seed + 38, { passes: 2, width: 1.1 })
+      gesture(context, [[fx(0.302), py(0.468)], [fx(0.362), py(0.503)], [fx(0.425), py(0.488)], [fx(0.465), py(0.47)]], seed + 39, { passes: 3, width: 1.2 })
+      /* a face worth two marks, and the limp fingers in ink */
+      SKETCH.stroke(context, [[fx(0.316), py(0.428)], [fx(0.323), py(0.433)]], { seed: seed + 40, color: INK, width: 1.1, amp: 0.3 })
+      SKETCH.stroke(context, [[fx(0.462), py(0.468)], [fx(0.474), py(0.474)]], { seed: seed + 41, color: INK, width: 1.4, amp: 0.3 })
+      SKETCH.stroke(context, [[fx(0.46), py(0.475)], [fx(0.4715), py(0.483)]], { seed: seed + 42, color: INK, width: 1.1, amp: 0.3 })
+      SKETCH.stroke(context, [[fx(0.457), py(0.481)], [fx(0.466), py(0.49)]], { seed: seed + 43, color: INK, width: 1, amp: 0.3 })
+
+      /* ---------------------------------------------------- the host */
+      /* the mantle: wine-dark smears swirled into a cloud, open toward Adam */
+      smear(context, [
+        [fx(0.63), py(0.5)], [fx(0.6), py(0.38)], [fx(0.66), py(0.26)],
+        [fx(0.78), py(0.22)], [fx(0.89), py(0.28)], [fx(0.93), py(0.42)],
+        [fx(0.88), py(0.56)], [fx(0.76), py(0.61)], [fx(0.67), py(0.57)],
+      ], unit * 0.055, '#7c3e49', seed + 60, { alpha: 0.12, taper: 1 })
+      smear(context, [
+        [fx(0.66), py(0.46)], [fx(0.66), py(0.34)], [fx(0.75), py(0.28)],
+        [fx(0.85), py(0.33)], [fx(0.87), py(0.45)], [fx(0.79), py(0.54)], [fx(0.7), py(0.52)],
+      ], unit * 0.045, '#93454f', seed + 61, { alpha: 0.12, taper: 1 })
+      /* ribbons of cloth flying off behind */
+      smear(context, [[fx(0.9), py(0.33)], [fx(0.96), py(0.27)], [fx(0.995), py(0.24)]], unit * 0.018, '#8a4753', seed + 62, { alpha: 0.12, taper: 0.35 })
+      smear(context, [[fx(0.9), py(0.5)], [fx(0.96), py(0.55)], [fx(0.995), py(0.6)]], unit * 0.016, '#8a4753', seed + 63, { alpha: 0.12, taper: 0.35 })
+
+      /* the company: small dark-rose blots crowded into the cloth */
+      var cherubs = [
+        [0.7, 0.52, 0.02], [0.76, 0.55, 0.018], [0.83, 0.52, 0.017], [0.87, 0.42, 0.016], [0.8, 0.28, 0.016],
+      ]
+      cherubs.forEach(function (cherub, index) {
+        smear(context, [
+          [fx(cherub[0]), py(cherub[1])], [fx(cherub[0] + 0.012), py(cherub[1] - 0.014)],
+        ], unit * cherub[2], index % 2 ? '#b0707a' : '#c98a92', seed + 70 + index, { alpha: 0.14, taper: 0.8, streaks: false })
+      })
+      /* one face surfaces from the crowd */
+      SKETCH.dot(context, fx(0.757), py(0.532), 1, INK, seed + 80)
+      SKETCH.dot(context, fx(0.766), py(0.531), 1, INK, seed + 81)
+      SKETCH.stroke(context, [[fx(0.758), py(0.541)], [fx(0.765), py(0.541)]], { seed: seed + 82, color: INK, width: 0.9, amp: 0.2 })
+
+      /* God: a pale smear carried forward through the cloud */
+      smear(context, [[fx(0.63), py(0.44)], [fx(0.7), py(0.4)], [fx(0.78), py(0.39)], [fx(0.83), py(0.41)]], unit * 0.032, '#dcc3b6', seed + 90, { alpha: 0.14, taper: 0.8 })
+      /* his head, and the beard streaming in the wind of arrival */
+      smear(context, [[fx(0.638), py(0.41)], [fx(0.646), py(0.404)]], unit * 0.018, '#cfa27f', seed + 91, { alpha: 0.16, taper: 0.9, streaks: false })
+      context.save()
+      context.lineCap = 'round'
+      for (var beard = 0; beard < 12; beard += 1) {
+        var beardY = py(0.408) + (random() - 0.5) * unit * 0.02
+        context.strokeStyle = random() > 0.3 ? 'rgba(240, 236, 224, 0.85)' : 'rgba(168, 162, 148, 0.8)'
+        context.lineWidth = 0.9 + random() * 1.1
+        context.beginPath()
+        context.moveTo(fx(0.636), beardY)
+        context.quadraticCurveTo(
+          fx(0.616) + (random() - 0.5) * 6, beardY + unit * 0.006,
+          fx(0.6 + random() * 0.012), beardY + unit * (0.004 + random() * 0.01),
+        )
+        context.stroke()
+      }
+      context.restore()
+      SKETCH.dot(context, fx(0.641), py(0.406), 1, INK, seed + 92)
+
+      /* his arm: the one straight, certain smear in the picture */
+      smear(context, [[fx(0.655), py(0.43)], [fx(0.59), py(0.448)], [fx(0.53), py(0.458)], [fx(0.492), py(0.462)]], unit * 0.012, '#d8b491', seed + 93, { alpha: 0.14, taper: 0.4 })
+      gesture(context, [[fx(0.657), py(0.428)], [fx(0.59), py(0.447)], [fx(0.525), py(0.458)], [fx(0.488), py(0.4635)]], seed + 94, { passes: 3, width: 1.3 })
+      SKETCH.stroke(context, [[fx(0.494), py(0.461)], [fx(0.4805), py(0.4655)]], { seed: seed + 95, color: INK, width: 1.5, amp: 0.3 })
+      SKETCH.stroke(context, [[fx(0.496), py(0.467)], [fx(0.4855), py(0.4715)]], { seed: seed + 96, color: INK, width: 1, amp: 0.3 })
+
+      /* the mantle found again: a loose contour and two fold lines */
+      gesture(context, [
+        [fx(0.635), py(0.51)], [fx(0.605), py(0.38)], [fx(0.665), py(0.255)],
+        [fx(0.79), py(0.215)], [fx(0.9), py(0.28)], [fx(0.935), py(0.43)],
+        [fx(0.87), py(0.58)], [fx(0.74), py(0.625)],
+      ], seed + 97, { passes: 2, width: 1.3 })
+      gesture(context, [[fx(0.67), py(0.34)], [fx(0.75), py(0.31)], [fx(0.83), py(0.35)]], seed + 98, { passes: 1, width: 1.1 })
+      gesture(context, [[fx(0.68), py(0.5)], [fx(0.77), py(0.49)]], seed + 99, { passes: 1, width: 1 })
+
+      /* the green sash, dragged down and away */
+      smear(context, [[fx(0.68), py(0.58)], [fx(0.65), py(0.68)], [fx(0.61), py(0.77)], [fx(0.59), py(0.84)]], unit * 0.02, '#6f8f6a', seed + 100, { alpha: 0.13, taper: 0.4 })
+      SKETCH.gouache(context, [[fx(0.672), py(0.6)], [fx(0.643), py(0.69)], [fx(0.607), py(0.78)]], { seed: seed + 101, width: 4 })
+
+      /* the gap: nothing but plaster, and one hot fleck of pigment */
+      context.save()
+      context.globalAlpha = 0.85
+      context.fillStyle = '#d4457c'
+      context.fillRect(fx(0.4775), py(0.442), 2.4, 2)
+      context.restore()
+
+      /* cracks through the plaster */
+      SKETCH.pencil(context, [
+        [fx(0.505), panelTop], [fx(0.5), py(0.2)], [fx(0.52), py(0.38)], [fx(0.505), py(0.45)],
+      ], { seed: seed + 150, color: 'rgba(96, 88, 72, 0.5)', width: 1, amp: 1.8 })
+      SKETCH.pencil(context, [
+        [fx(0.36), py(1)], [fx(0.375), py(0.84)], [fx(0.36), py(0.74)],
+      ], { seed: seed + 151, color: 'rgba(96, 88, 72, 0.4)', width: 1, amp: 1.6 })
+      SKETCH.pencil(context, [
+        [fx(0.88), panelTop], [fx(0.895), py(0.14)],
+      ], { seed: seed + 152, color: 'rgba(96, 88, 72, 0.4)', width: 0.9, amp: 1.2 })
+
+      /* warm light from the upper right */
+      var warmth = context.createLinearGradient(frameX + frameWidth, frameY, frameX, frameY + frameHeight)
+      warmth.addColorStop(0, 'rgba(244, 226, 186, 0.14)')
+      warmth.addColorStop(0.55, 'rgba(244, 226, 186, 0)')
+      context.fillStyle = warmth
+      context.fillRect(frameX, frameY, frameWidth, frameHeight)
+
+      context.restore()
+
+      /* the paper takes the edges back */
+      raggedPlateEdge(context, frameX, frameY, frameWidth, frameHeight, paperTone, seed + 160)
+      SKETCH.texture(context, width, height, seed)
+    }
+
+    function raggedPlateEdge(context, frameX, frameY, frameWidth, frameHeight, paperTone, seed) {
+      var random = SKETCH.rng(seed)
+      context.save()
+      context.fillStyle = paperTone
+      var perimeter = (frameWidth + frameHeight) * 2
+      for (var bite = 0; bite < perimeter / 3; bite += 1) {
+        var along = random() * perimeter
+        var x
+        var y
+        if (along < frameWidth) { x = frameX + along; y = frameY }
+        else if (along < frameWidth + frameHeight) { x = frameX + frameWidth; y = frameY + (along - frameWidth) }
+        else if (along < frameWidth * 2 + frameHeight) { x = frameX + (frameWidth * 2 + frameHeight - along); y = frameY + frameHeight }
+        else { x = frameX; y = frameY + (perimeter - along) }
+        context.globalAlpha = 0.5 + random() * 0.5
+        context.beginPath()
+        context.ellipse(x, y, 2 + random() * 6, 1.5 + random() * 4, random() * 3, 0, Math.PI * 2)
+        context.fill()
+      }
+      context.restore()
+    }
+
+    return {
+      state: state,
+      aria: 'An artwork: a smeared-pigment rendition of Michelangelo’s Creation of Adam — the figures are dragged blotches found again in pencil, and the two hands still do not quite touch. Repainted on every click.',
+      height: function (width) { return width * 1.05 },
+      draw: function (context, width, height) {
+        drawAdamPanel(context, width, height, state.seed)
+        write(context, data.title, 26, 30, { size: 12, media: 'pencil', seed: 1601, tracking: 0.4, width: 2 })
+        SKETCH.rule(context, 24, 40, 26 + measure(data.title, 12, 0.4) + 8, { seed: 1602, color: SKETCH.PENCIL, width: 1.1 })
+        write(context, data.note, 26 + measure(data.title, 12, 0.4) + 20, 30, { size: 8, color: SKETCH.GREEN_PEN, seed: 1603 })
+        write(context, data.date, width - 26, 30, { size: 8.5, media: 'pencil', seed: 1604, align: 'right' })
+        write(context, 'CLICK TO REPAINT', width - 26, 46, { size: 7, color: SKETCH.GREEN_PEN, seed: 1605, align: 'right' })
+        SKETCH.artifacts(context, width, height, 1606 + state.seed)
       },
       onPointer: function (type, x, y, api) {
         if (type === 'move') { api.canvas.style.cursor = 'pointer'; return }

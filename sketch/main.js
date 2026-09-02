@@ -13,7 +13,7 @@
   var DATA = {
     cover: {
       date: slashDate,
-      subtitle: 'CS AT THE UNIVERSITY OF TORONTO · FOUNDING ENGINEER AT CHATFORCE',
+      subtitle: 'CS AT THE UNIVERSITY OF TORONTO · SOFTWARE ENGINEER AT CHATFORCE',
       stationery: 'YIP HOI-LEE & SON · TORONTO',
       links: [
         { label: 'GITHUB ↗', href: 'https://github.com/CaellumYHL', title: 'GitHub — CaellumYHL' },
@@ -25,9 +25,19 @@
 
     faces: { date: shortDate },
 
-    room: { title: 'TREES IN THE BACK ROOM', date: shortDate },
+    room: { title: 'DREAM DUMP NO. 1', date: shortDate },
 
-    court: { title: 'THE SUNKEN COURT', date: shortDate },
+    court: { title: 'DREAM DUMP NO. 2', date: shortDate },
+
+    adam: { title: 'THE CREATION OF ADAM RENDITION', note: '(MY FAVOURITE ART)', date: shortDate },
+
+    resume: {
+      date: shortDate,
+      href: 'Resume_Latex.pdf',
+      openLabel: 'OPEN THE PDF ↗',
+      openTitle: 'Open the résumé PDF',
+      note: 'THE REAL ONE, TYPESET IN LATEX',
+    },
 
     work: {
       date: shortDate,
@@ -108,27 +118,45 @@
       rows: [
         {
           org: 'CHATFORCE',
-          role: 'FOUNDING ENGINEER',
+          role: 'SOFTWARE ENGINEER',
           period: 'FEB 2026 — TODAY',
-          facts: 'AGENTIC GAME HARNESS · RUST PIXEL UPSCALER · MULTIPLAYER FOR 5,000+ USERS · TORONTO',
+          bullets: [
+            'OVERHAULED A THREE.JS AGENTIC HARNESS — ARCHITECTURE, MCP, AND TOOL CALLS FOR A VISION-DRIVEN MULTI-AGENT SYSTEM — LIFTING GAME PUBLICATION RATE 20%',
+            'DEVELOPED FASTAPI/REDIS RATE-LIMITING AND SERVER-AUTHORITATIVE MULTIPLAYER SUPPORTING 5,000+ USERS · HELPED DRIVE USER COUNT UP OVER 900%',
+            'BUILT A RUST PIXEL-ART UPSCALER WITH FUSED-ARGMAX VOTERS, SCORING 77% ON PIXEL-BENCH',
+          ],
         },
         {
           org: 'U OF T BLUEPRINT',
           role: 'SOFTWARE ENGINEER & PROJECT LEAD',
           period: 'SEP 2025 — MAY 2026',
-          facts: 'LED 10 DEVELOPERS · BUILT SOFTWARE FOR TWO NONPROFITS · TORONTO',
+          bullets: [
+            'LEADING A TEAM OF 10 DEVELOPERS BUILDING SOFTWARE FOR TWO NONPROFIT ORGANIZATIONS',
+            'BUILT JWT AUTHENTICATION, AN ADMIN DASHBOARD, AND CSV DATA MANAGEMENT WITH DJANGO REST AND REACT FOR THE MUSEUM OF ART AND DIGITAL ENTERTAINMENT',
+          ],
         },
         {
           org: 'BRONZE BAT STUDIO',
           role: 'OWNER & SOFTWARE LEAD',
           period: 'AUG 2023 — TODAY',
-          facts: 'SEVEN TITLES ON STEAM & ROBLOX · 3M+ PLAYS · RICHMOND HILL',
+          bullets: [
+            'PUBLISHED 7 TITLES ACROSS STEAM AND ROBLOX — OVER 3 MILLION PLAYS AND $2,000 IN REVENUE',
+            'DIRECT AN INDIE GAME STUDIO — MECHANICS, PHYSICS ALGORITHMS, AND NETWORKING IN LUA AND C#',
+          ],
+        },
+        {
+          org: 'UNIVERSITY OF TORONTO',
+          role: 'HONOURS BSC, COMPUTER SCIENCE',
+          period: 'FEB 2025 — APR 2029',
+          bullets: [
+            'CUMULATIVE GPA 3.94 / 4.0',
+          ],
         },
       ],
     },
 
     washes: {
-      title: 'TWENTY-FIVE WASHES',
+      title: 'SKILLS',
       date: shortDate,
       margin: '2 CYCLES X 70 DIVISIONS · MADE IN CANADA',
       groups: [
@@ -141,9 +169,6 @@
 
     ledger: {
       date: shortDate,
-      colophon: [
-        'EVERY MARK IN THIS BOOK IS DRAWN BY JAVASCRIPT WHEN IT LOADS — THE PAPER, THE LETTERING, THE WASHES, THE FACES',
-      ],
       sourceLabel: 'SOURCE ON GITHUB ↗',
       sourceHref: 'https://github.com/CaellumYHL/caellumyhl.github.io',
       sourceTitle: 'Source of this site on GitHub',
@@ -158,8 +183,10 @@
     var context = canvas.getContext('2d')
     SKETCH.plainPaper(context, 64, 64, { seed: 991, stains: 0 })
     SKETCH.faces.drawFace(context, 32, 34, 52, 412)
-    var link = document.querySelector('link[rel="icon"]') || document.createElement('link')
+    document.querySelectorAll('link[rel="icon"]').forEach(function (old) { old.remove() })
+    var link = document.createElement('link')
     link.rel = 'icon'
+    link.type = 'image/png'
     link.href = canvas.toDataURL('image/png')
     document.head.appendChild(link)
   }
@@ -183,6 +210,8 @@
       { id: 'paint', tab: 'PAINT', spec: SKETCH.watercolor.spec() },
       { id: 'room', tab: 'ART', spec: SKETCH.art.room(DATA.room) },
       { id: 'court', tab: 'ART', spec: SKETCH.art.court(DATA.court) },
+      { id: 'adam', tab: 'ART', spec: SKETCH.art.adam(DATA.adam) },
+      { id: 'resume', tab: 'RESUME', spec: SKETCH.plates.resume(DATA.resume) },
       { id: 'ledger', tab: 'END', spec: SKETCH.ledger.spec(DATA.ledger) },
     ])
   }

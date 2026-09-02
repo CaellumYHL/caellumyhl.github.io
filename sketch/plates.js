@@ -286,21 +286,29 @@
 
         var compact = width < 430
         var s = typeScale(width)
-        var factSize = (compact ? 8 : 9.5) * s
-        var rowH = Math.max(112, (height - 160) / data.rows.length)
+        var factSize = (compact ? 7.5 : 8.5) * s
+        var rowH = Math.max(104, (height - 140) / data.rows.length)
         data.rows.forEach(function (row, index) {
-          var y = 86 + index * rowH
+          var y = 78 + index * rowH
           var textX = width * 0.21
-          SKETCH.thumbprint(context, width * 0.1, y + 40, Math.min(38, width * 0.038), Math.min(48, width * 0.048), null, 1220 + index * 13)
-          var orgSize = (compact ? 11.5 : 14) * s
+          var floor = y + rowH - 8
+          SKETCH.thumbprint(context, width * 0.1, y + 38, Math.min(34, width * 0.034), Math.min(42, width * 0.044), null, 1220 + index * 13)
+          var orgSize = (compact ? 11 : 13) * s
           write(context, row.org, textX, y + 12, { size: orgSize, seed: 1100 + index, width: orgSize * 0.115, tracking: 0.36 })
-          if (!compact) write(context, row.period, width - 28, y + 12, { size: 9 * s, media: 'pencil', seed: 1110 + index, align: 'right' })
-          write(context, row.role, textX, y + 14 + 26 * s, { size: (compact ? 9 : 10.5) * s, seed: 1105 + index, tracking: 0.36 })
-          var lineY = y + 18 + 50 * s
-          var facts = compact ? row.period + ' · ' + row.facts : row.facts
-          wrapLines(facts, factSize, width - textX - 34).forEach(function (line) {
-            write(context, line, textX, lineY, { size: factSize, color: SKETCH.INK_SOFT, seed: 1120 + index + lineY })
-            lineY += factSize * 1.8
+          if (!compact) write(context, row.period, width - 28, y + 12, { size: 8.5 * s, media: 'pencil', seed: 1110 + index, align: 'right' })
+          write(context, row.role, textX, y + 12 + 23 * s, { size: (compact ? 8.5 : 9.5) * s, color: SKETCH.RED, seed: 1105 + index, tracking: 0.36 })
+          var lineY = y + 16 + 44 * s
+          var maxWidth = width - textX - 34
+          ;(row.bullets || []).forEach(function (bullet, bulletIndex) {
+            var pieces = wrapLines(bullet, factSize, maxWidth - 16 * s)
+            if (compact && bulletIndex > 0) return
+            if (lineY + pieces.length * factSize * 1.7 > floor) return
+            write(context, '—', textX, lineY, { size: factSize, color: SKETCH.PENCIL, seed: 1130 + index })
+            pieces.forEach(function (piece) {
+              write(context, piece, textX + 16 * s, lineY, { size: factSize, color: SKETCH.INK_SOFT, seed: 1140 + index * 7 + lineY })
+              lineY += factSize * 1.7
+            })
+            lineY += 3 * s
           })
         })
 
@@ -409,6 +417,86 @@
         SKETCH.scribble(context, width * 0.14, height * 0.9, 30, 14, 409)
 
         SKETCH.artifacts(context, width, height, 406)
+      },
+    }
+  }
+
+  /* -------------------------------------------------------- resume sheet */
+
+  PLATES.resume = function (data) {
+    return {
+      aria: 'Résumé: a drawn miniature of the typeset résumé. Click it to open the real PDF.',
+      height: function (width) { return width * 1.05 },
+      draw: function (context, width, height, api) {
+        SKETCH.ledgerPaper(context, width, height, { seed: 1801, ruleGap: 27, headY: 36, columns: [0.06, 0.94] })
+        sheetTitle(context, 'RESUME', data.date, 26, 26, width)
+
+        /* a miniature of the typeset page, taped to the sheet */
+        var sheetHeight = height * 0.66
+        var sheetWidth = sheetHeight * 0.773
+        var sheetX = width / 2 - sheetWidth / 2
+        var sheetY = height * 0.12
+        var random = SKETCH.rng(1808)
+
+        context.save()
+        context.translate(width / 2, sheetY + sheetHeight / 2)
+        context.rotate(-0.012)
+        context.translate(-width / 2, -(sheetY + sheetHeight / 2))
+        /* shadow, then the white sheet */
+        context.fillStyle = 'rgba(60, 50, 34, 0.22)'
+        context.fillRect(sheetX + 5, sheetY + 7, sheetWidth, sheetHeight)
+        context.fillStyle = '#fbfaf4'
+        context.fillRect(sheetX, sheetY, sheetWidth, sheetHeight)
+        SKETCH.pencil(context, [
+          [sheetX, sheetY], [sheetX + sheetWidth, sheetY], [sheetX + sheetWidth, sheetY + sheetHeight],
+          [sheetX, sheetY + sheetHeight], [sheetX, sheetY],
+        ], { seed: 1809, color: 'rgba(90, 84, 70, 0.5)', width: 1, amp: 0.8 })
+
+        /* the resume in miniature: real headings, pencil filler */
+        var inner = sheetWidth * 0.08
+        var penY = sheetY + sheetHeight * 0.06
+        write(context, 'CAELLUM YIP HOI-LEE', sheetX + sheetWidth / 2, penY, { size: Math.max(8, sheetWidth * 0.038), seed: 1810, align: 'center', tracking: 0.38 })
+        penY += sheetHeight * 0.045
+        SKETCH.rule(context, sheetX + inner * 2, penY, sheetX + sheetWidth - inner * 2, { seed: 1811, color: 'rgba(110, 104, 90, 0.4)', width: 0.8, amp: 0.4 })
+        penY += sheetHeight * 0.045
+
+        var sections = [
+          { label: 'EDUCATION', lines: 2 },
+          { label: 'EXPERIENCE', lines: 6 },
+          { label: 'PROJECTS', lines: 6 },
+          { label: 'SKILLS', lines: 3 },
+        ]
+        sections.forEach(function (section, sectionIndex) {
+          write(context, section.label, sheetX + inner, penY, { size: Math.max(5.5, sheetWidth * 0.023), seed: 1820 + sectionIndex, tracking: 0.5, color: 'rgba(52, 48, 42, 0.9)' })
+          SKETCH.rule(context, sheetX + inner, penY + sheetHeight * 0.014, sheetX + sheetWidth - inner, { seed: 1830 + sectionIndex, color: 'rgba(110, 104, 90, 0.45)', width: 0.7, amp: 0.3 })
+          penY += sheetHeight * 0.04
+          for (var filler = 0; filler < section.lines; filler += 1) {
+            var lineEnd = sheetX + inner + (sheetWidth - inner * 2) * (0.55 + random() * 0.42)
+            SKETCH.pencil(context, [
+              [sheetX + inner + (filler % 2) * sheetWidth * 0.02, penY],
+              [lineEnd, penY],
+            ], { seed: 1840 + sectionIndex * 9 + filler, color: 'rgba(120, 114, 100, 0.5)', width: 1, amp: 0.3 })
+            penY += sheetHeight * 0.032
+          }
+          penY += sheetHeight * 0.022
+        })
+
+        SKETCH.tape(context, sheetX + sheetWidth * 0.08, sheetY - 2, 44, -0.26, 1850)
+        SKETCH.tape(context, sheetX + sheetWidth * 0.94, sheetY + 4, 44, 0.32, 1851)
+        context.restore()
+
+        api.link(sheetX - 6, sheetY - 8, sheetWidth + 14, sheetHeight + 14, data.href, data.openTitle)
+
+        /* the open link, big and unmissable */
+        var linkSize = 12 * typeScale(width)
+        var linkWidth = measure(data.openLabel, linkSize)
+        var linkY = sheetY + sheetHeight + height * 0.07
+        write(context, data.openLabel, width / 2, linkY, { size: linkSize, seed: 1860, align: 'center', width: linkSize * 0.12 })
+        SKETCH.rule(context, width / 2 - linkWidth / 2 - 4, linkY + linkSize * 0.8, width / 2 + linkWidth / 2 + 6, { seed: 1861, color: SKETCH.RED, width: 2.2, amp: 0.8 })
+        api.link(width / 2 - linkWidth / 2 - 10, linkY - linkSize * 1.5, linkWidth + 20, linkSize * 3, data.href, data.openTitle)
+        write(context, data.note, width / 2, linkY + linkSize * 2, { size: 7.5, color: SKETCH.GREEN_PEN, seed: 1862, align: 'center' })
+
+        SKETCH.artifacts(context, width, height, 1863)
       },
     }
   }

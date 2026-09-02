@@ -181,11 +181,59 @@
 
   /* ------------------------------------------------- the page environment */
 
+  /* a soft granular field of colour, pigment settling into the paper */
+  function softField(context, centerX, centerY, radiusX, radiusY, color, seed) {
+    var random = SKETCH.rng(seed)
+    context.save()
+    context.fillStyle = color
+    for (var layer = 0; layer < 20; layer += 1) {
+      context.globalAlpha = 0.035 + random() * 0.05
+      context.beginPath()
+      context.ellipse(
+        centerX + (random() + random() - 1) * radiusX * 0.5,
+        centerY + (random() + random() - 1) * radiusY * 0.5,
+        radiusX * (0.32 + random() * 0.4), radiusY * (0.32 + random() * 0.4),
+        random() * 3, 0, Math.PI * 2,
+      )
+      context.fill()
+    }
+    for (var speck = 0; speck < 160; speck += 1) {
+      var angle = random() * Math.PI * 2
+      var reach = 0.55 + Math.pow(random(), 0.6) * 0.65
+      context.globalAlpha = 0.06 + random() * 0.14
+      context.fillRect(
+        centerX + Math.cos(angle) * radiusX * reach,
+        centerY + Math.sin(angle) * radiusY * reach,
+        1 + random() * 2, 1 + random() * 1.6,
+      )
+    }
+    context.restore()
+  }
+
   function drawEnvironment(context, width, height, seed) {
     var random = SKETCH.rng(seed)
-    context.fillStyle = '#eee9dd'
+    var sky = context.createLinearGradient(0, 0, 0, height)
+    sky.addColorStop(0, '#f1ede1')
+    sky.addColorStop(0.65, '#ebe6d7')
+    sky.addColorStop(1, '#e0dac6')
+    context.fillStyle = sky
     context.fillRect(0, 0, width, height)
     SKETCH.texture(context, width, height, seed)
+
+    /* weather: broad settled fields of ochre, grey, and mauve */
+    softField(context, width * 0.08, height * 0.5, width * 0.16, height * 0.3, '#d9c39a', seed + 1)
+    softField(context, width * 0.93, height * 0.42, width * 0.15, height * 0.34, '#a8a494', seed + 2)
+    softField(context, width * 0.85, height * 0.12, width * 0.13, height * 0.14, '#a5939c', seed + 3)
+    softField(context, width * 0.14, height * 0.14, width * 0.11, height * 0.12, '#b8bd9c', seed + 4)
+    softField(context, width * 0.5, height * 0.97, width * 0.3, height * 0.08, '#c4b892', seed + 5)
+
+    /* two pale gouache passes low across the sheet */
+    SKETCH.gouache(context, [
+      [width * 0.04, height * 0.9], [width * 0.3, height * 0.905], [width * 0.5, height * 0.895],
+    ], { seed: seed + 6, width: 9 })
+    SKETCH.gouache(context, [
+      [width * 0.55, height * 0.94], [width * 0.8, height * 0.935], [width * 0.97, height * 0.945],
+    ], { seed: seed + 7, width: 7 })
 
     /* faint ground strokes */
     for (var ground = 0; ground < 8; ground += 1) {

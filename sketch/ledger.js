@@ -111,18 +111,7 @@
             : 'COUNT UNAVAILABLE TODAY'
         write(context, statusLine, centerX, height * 0.33 + 42 * s, { size: 8 * Math.min(s, 1.2), color: SKETCH.GREEN_PEN, seed: 705, align: 'center', tracking: 0.6 })
 
-        /* colophon */
-        var noteSize = 8.5 * Math.min(s, 1.2)
         var y = height * 0.58
-        data.colophon.forEach(function (line) {
-          SKETCH.letter.wrap(line, noteSize, Math.min(700, width - 56), 0.35).forEach(function (piece) {
-            write(context, piece, centerX, y, { size: noteSize, color: SKETCH.INK_SOFT, seed: 720 + y, align: 'center', tracking: 0.35 })
-            y += noteSize * 2.1
-          })
-          y += 8
-        })
-        y += 10
-
         var sourceSize = 9.5 * Math.min(s, 1.25)
         var sourceWidth = SKETCH.letter.measure(data.sourceLabel, sourceSize)
         write(context, data.sourceLabel, centerX, y, { size: sourceSize, seed: 730, align: 'center' })
