@@ -95,9 +95,8 @@
           linkY += 30 * s
         })
 
-        /* a small grove growing out of the page corner */
-        SKETCH.grove.cluster(context, width * 0.72, height * 0.93, Math.min(height * 0.3, width * 0.2), 7411, 3)
-        SKETCH.splatter(context, width * 0.6, height * 0.82, 30, 'rgba(84, 66, 48, 0.6)', 123, 6)
+        /* a garden growing out of the page corner, the rose at its heart */
+        SKETCH.garden.bed(context, width * 0.7, height * 0.9, Math.min(height * 0.32, width * 0.22), 7411)
 
         SKETCH.print(context, data.stationery, width / 2, height - 30, { align: 'center', seed: 150 })
         SKETCH.artifacts(context, width, height, 152)
