@@ -494,7 +494,6 @@
         write(context, data.openLabel, width / 2, linkY, { size: linkSize, seed: 1860, align: 'center', width: linkSize * 0.12 })
         SKETCH.rule(context, width / 2 - linkWidth / 2 - 4, linkY + linkSize * 0.8, width / 2 + linkWidth / 2 + 6, { seed: 1861, color: SKETCH.RED, width: 2.2, amp: 0.8 })
         api.link(width / 2 - linkWidth / 2 - 10, linkY - linkSize * 1.5, linkWidth + 20, linkSize * 3, data.href, data.openTitle)
-        write(context, data.note, width / 2, linkY + linkSize * 2, { size: 7.5, color: SKETCH.GREEN_PEN, seed: 1862, align: 'center' })
 
         SKETCH.artifacts(context, width, height, 1863)
       },
