@@ -214,164 +214,382 @@
   }
 
   /* ----------------------------------------------------- garden flowers */
+  /* Flowers built the way the trees are built: muted washes with scribble
+     hatching inside, dark specks along every boundary, pale pencil-edged
+     stems, and the rare fleck of warm colour. */
 
   var GARDEN = SKETCH.garden = {}
 
-  function stem(context, x, baseY, topX, topY, seed, thickness) {
-    SKETCH.stroke(context, [
-      [x, baseY], [x + (topX - x) * 0.4, baseY + (topY - baseY) * 0.55], [topX, topY],
-    ], { seed: seed, color: '#4a5c33', width: thickness || 2, amp: 1.4, step: 8 })
+  var LEAF_TONE = { fill: '#7d8468', hatch: 'rgba(70, 76, 58, 1)', accent: '#a8b06a' }
+
+  function smoothClosed(context, points) {
+    context.beginPath()
+    context.moveTo(points[0][0], points[0][1])
+    for (var index = 1; index < points.length - 1; index += 1) {
+      var midX = (points[index][0] + points[index + 1][0]) / 2
+      var midY = (points[index][1] + points[index + 1][1]) / 2
+      context.quadraticCurveTo(points[index][0], points[index][1], midX, midY)
+    }
+    context.closePath()
   }
 
+  /* Paint a shape the crown way: wash, hatch, grain, boundary specks. */
+  function paintShape(context, points, tone, seed, options) {
+    options = options || {}
+    var random = SKETCH.rng(seed)
+    var minX = Infinity
+    var minY = Infinity
+    var maxX = -Infinity
+    var maxY = -Infinity
+    points.forEach(function (point) {
+      minX = Math.min(minX, point[0]); maxX = Math.max(maxX, point[0])
+      minY = Math.min(minY, point[1]); maxY = Math.max(maxY, point[1])
+    })
+    var spanX = maxX - minX
+    var spanY = maxY - minY
+
+    context.save()
+    smoothClosed(context, points)
+    context.clip()
+    context.globalAlpha = options.alpha === undefined ? 0.5 : options.alpha
+    context.fillStyle = tone.fill
+    context.fillRect(minX - 2, minY - 2, spanX + 4, spanY + 4)
+    /* a lighter breath where the light lands */
+    if (options.light !== false) {
+      context.globalAlpha = 0.16
+      context.fillStyle = '#e8e2d0'
+      context.beginPath()
+      context.ellipse(minX + spanX * 0.4, minY + spanY * 0.3, spanX * 0.34, spanY * 0.26, 0, 0, Math.PI * 2)
+      context.fill()
+    }
+    /* scribble hatch, like the crowns */
+    var strokes = Math.round((spanX * spanY) / (options.hatchGap || 30))
+    context.strokeStyle = tone.hatch
+    context.lineCap = 'round'
+    for (var hatch = 0; hatch < strokes; hatch += 1) {
+      var x = minX + random() * spanX
+      var y = minY + random() * spanY
+      var direction = options.hatchAngle === undefined ? random() * Math.PI : options.hatchAngle + (random() - 0.5) * 0.7
+      var length = 2.5 + random() * Math.min(8, spanX * 0.3)
+      context.globalAlpha = 0.12 + random() * 0.24
+      context.lineWidth = 0.6 + random() * 0.8
+      context.beginPath()
+      context.moveTo(x, y)
+      context.quadraticCurveTo(
+        x + Math.cos(direction) * length * 0.5 + (random() - 0.5) * 3,
+        y + Math.sin(direction) * length * 0.5 - (random() - 0.5) * 3,
+        x + Math.cos(direction) * length,
+        y + Math.sin(direction) * length,
+      )
+      context.stroke()
+    }
+    /* grain */
+    context.fillStyle = tone.hatch
+    for (var grain = 0; grain < strokes / 2; grain += 1) {
+      context.globalAlpha = 0.08 + random() * 0.16
+      context.fillRect(minX + random() * spanX, minY + random() * spanY, 1 + random() * 1.2, 1 + random())
+    }
+    context.restore()
+
+    /* dark specks along the boundary, the signature of everything here */
+    context.save()
+    context.fillStyle = 'rgba(38, 34, 30, 1)'
+    var edgeSpecks = Math.round((spanX + spanY) / 3.4)
+    for (var speck = 0; speck < edgeSpecks; speck += 1) {
+      var at = Math.floor(random() * (points.length - 1))
+      var t = random()
+      context.globalAlpha = 0.16 + random() * 0.34
+      context.fillRect(
+        points[at][0] + (points[at + 1][0] - points[at][0]) * t + (random() - 0.5) * 3,
+        points[at][1] + (points[at + 1][1] - points[at][1]) * t + (random() - 0.5) * 3,
+        0.7 + random() * 1.4, 0.7 + random() * 1.2,
+      )
+    }
+    /* the rare warm fleck */
+    if (tone.accent && random() > 0.4) {
+      context.fillStyle = tone.accent
+      context.globalAlpha = 0.55 + random() * 0.3
+      var accentAt = Math.floor(random() * (points.length - 1))
+      context.fillRect(points[accentAt][0], points[accentAt][1], 1.2 + random() * 1.6, 1 + random())
+    }
+    context.restore()
+  }
+
+  /* A petal: a fan from its base to a rounded tip. */
+  function petalPoints(baseX, baseY, angle, length, width, random) {
+    var tipX = baseX + Math.cos(angle) * length
+    var tipY = baseY + Math.sin(angle) * length
+    var perpX = -Math.sin(angle)
+    var perpY = Math.cos(angle)
+    var jitter = function () { return (random() - 0.5) * length * 0.12 }
+    return [
+      [baseX, baseY],
+      [baseX + Math.cos(angle) * length * 0.38 + perpX * width * 0.5 + jitter(), baseY + Math.sin(angle) * length * 0.38 + perpY * width * 0.5 + jitter()],
+      [tipX + perpX * width * 0.34 + jitter(), tipY + perpY * width * 0.34 + jitter()],
+      [tipX + jitter() * 0.5, tipY + jitter() * 0.5],
+      [tipX - perpX * width * 0.34 + jitter(), tipY - perpY * width * 0.34 + jitter()],
+      [baseX + Math.cos(angle) * length * 0.38 - perpX * width * 0.5 + jitter(), baseY + Math.sin(angle) * length * 0.38 - perpY * width * 0.5 + jitter()],
+    ]
+  }
+
+  /* the stems are cousins of the trunks: pale gouache, pencilled edge */
+  function stem(context, x, baseY, topX, topY, seed, thickness) {
+    var midX = x + (topX - x) * 0.4
+    var midY = baseY + (topY - baseY) * 0.55
+    SKETCH.stroke(context, [[x, baseY], [midX, midY], [topX, topY]], { seed: seed, color: 'rgba(224, 217, 201, 0.92)', width: thickness || 2.4, amp: 1.2, step: 8 })
+    SKETCH.pencil(context, [
+      [x - (thickness || 2.4) * 0.35, baseY], [midX - (thickness || 2.4) * 0.3, midY], [topX - (thickness || 2.4) * 0.2, topY],
+    ], { seed: seed + 1, color: 'rgba(60, 54, 46, 0.85)', width: 1, amp: 0.7 })
+  }
+
+  /* A proper leaf: almond blade, centre vein, side veins, ticked edge. */
   function leaf(context, x, y, length, angle, seed) {
     var random = SKETCH.rng(seed)
     var tipX = x + Math.cos(angle) * length
     var tipY = y + Math.sin(angle) * length
-    SKETCH.wash(context, Math.min(x, tipX) - length * 0.16, Math.min(y, tipY) - length * 0.16,
-      Math.abs(tipX - x) + length * 0.32, Math.abs(tipY - y) + length * 0.32,
-      random() > 0.5 ? '#5d7440' : '#6b8248', { seed: seed + 1, alpha: 0.5, layers: 3 })
-    SKETCH.stroke(context, [[x, y], [tipX, tipY]], { seed: seed + 2, color: 'rgba(52, 66, 36, 0.7)', width: 1, amp: 0.8 })
+    var perpX = -Math.sin(angle)
+    var perpY = Math.cos(angle)
+    var width = length * (0.34 + random() * 0.1)
+    var blade = [
+      [x, y],
+      [x + Math.cos(angle) * length * 0.35 + perpX * width * 0.5, y + Math.sin(angle) * length * 0.35 + perpY * width * 0.5],
+      [x + Math.cos(angle) * length * 0.75 + perpX * width * 0.36, y + Math.sin(angle) * length * 0.75 + perpY * width * 0.36],
+      [tipX, tipY],
+      [x + Math.cos(angle) * length * 0.75 - perpX * width * 0.36, y + Math.sin(angle) * length * 0.75 - perpY * width * 0.36],
+      [x + Math.cos(angle) * length * 0.35 - perpX * width * 0.5, y + Math.sin(angle) * length * 0.35 - perpY * width * 0.5],
+    ]
+    paintShape(context, blade, LEAF_TONE, seed + 1, { hatchAngle: angle + 0.6, hatchGap: 22 })
+    SKETCH.pencil(context, [[x, y], [tipX, tipY]], { seed: seed + 2, color: 'rgba(52, 58, 40, 0.7)', width: 1, amp: 0.8 })
+    for (var vein = 1; vein < 4; vein += 1) {
+      var along = vein / 4
+      SKETCH.pencil(context, [
+        [x + Math.cos(angle) * length * along, y + Math.sin(angle) * length * along],
+        [x + Math.cos(angle) * length * (along + 0.14) + perpX * width * 0.3, y + Math.sin(angle) * length * (along + 0.14) + perpY * width * 0.3],
+      ], { seed: seed + 3 + vein, color: 'rgba(52, 58, 40, 0.45)', width: 0.8, amp: 0.5 })
+    }
   }
 
-  /* A rose: layered wash petals around a wound spiral heart. */
+  /* ------------------------------------------------------------ the rose */
   GARDEN.rose = function (context, x, baseY, size, seed) {
     var random = SKETCH.rng(seed)
     var lean = (random() - 0.5) * size * 0.3
     var bloomX = x + lean
-    var bloomY = baseY - size * 1.6
+    var bloomY = baseY - size * 2
 
-    stem(context, x, baseY, bloomX, bloomY + size * 0.4, seed + 1, Math.max(2, size * 0.05))
-    /* thorns */
+    stem(context, x, baseY, bloomX, bloomY + size * 0.55, seed + 1, Math.max(2.2, size * 0.055))
     for (var thorn = 0; thorn < 3; thorn += 1) {
-      var thornY = baseY - size * (0.3 + thorn * 0.35)
-      var thornX = x + lean * ((baseY - thornY) / (size * 1.6)) * 0.8
-      SKETCH.stroke(context, [[thornX, thornY], [thornX + (thorn % 2 ? 5 : -5), thornY - 3]], { seed: seed + 4 + thorn, color: 'rgba(58, 70, 40, 0.8)', width: 1.4, amp: 0.3 })
+      var thornY = baseY - size * (0.4 + thorn * 0.42)
+      var thornX = x + lean * ((baseY - thornY) / (size * 2)) * 0.8
+      SKETCH.stroke(context, [[thornX, thornY], [thornX + (thorn % 2 ? size * 0.09 : -size * 0.09), thornY - size * 0.06]], { seed: seed + 4 + thorn, color: 'rgba(58, 52, 44, 0.85)', width: 1.6, amp: 0.3 })
     }
-    leaf(context, x + lean * 0.3, baseY - size * 0.6, size * 0.42, Math.PI * 0.85, seed + 8)
-    leaf(context, x + lean * 0.5, baseY - size * 0.95, size * 0.38, Math.PI * 0.15, seed + 12)
+    leaf(context, x + lean * 0.3, baseY - size * 0.7, size * 0.52, Math.PI * 0.82, seed + 8)
+    leaf(context, x + lean * 0.55, baseY - size * 1.15, size * 0.46, Math.PI * 0.16, seed + 14)
 
-    /* outer petals: a ring of washes */
-    for (var petal = 0; petal < 7; petal += 1) {
-      var petalAngle = (petal / 7) * Math.PI * 2 + random() * 0.4
-      var petalX = bloomX + Math.cos(petalAngle) * size * 0.42
-      var petalY = bloomY + Math.sin(petalAngle) * size * 0.36
-      SKETCH.wash(context, petalX - size * 0.34, petalY - size * 0.28, size * 0.68, size * 0.56,
-        petal % 2 ? '#b5495b' : '#a93e50', { seed: seed + 20 + petal, alpha: 0.5, layers: 3 })
+    /* the bloom settles into its own shadow */
+    softShadowBlob(context, bloomX + size * 0.1, bloomY + size * 0.14, size * 0.62, size * 0.5, seed + 19)
+
+    /* sepals reaching up under the petals */
+    for (var sepal = 0; sepal < 3; sepal += 1) {
+      var sepalAngle = Math.PI * (0.32 + sepal * 0.18)
+      paintShape(context, petalPoints(bloomX, bloomY + size * 0.42, -sepalAngle, size * 0.42, size * 0.14, random), LEAF_TONE, seed + 22 + sepal, { hatchGap: 20 })
     }
-    /* mid petals, deeper */
+
+    /* outer petals: a ring of true petal shapes, tipped outward */
+    var outerTones = [
+      { fill: '#9c6169', hatch: 'rgba(96, 52, 60, 1)', accent: '#d9a441' },
+      { fill: '#8d565f', hatch: 'rgba(86, 46, 54, 1)', accent: '#d9a441' },
+      { fill: '#b07f85', hatch: 'rgba(110, 64, 72, 1)', accent: null },
+    ]
+    for (var outer = 0; outer < 7; outer += 1) {
+      var outerAngle = (outer / 7) * Math.PI * 2 + 0.3 + (random() - 0.5) * 0.3
+      paintShape(
+        context,
+        petalPoints(bloomX, bloomY, outerAngle, size * (0.62 + random() * 0.14), size * (0.4 + random() * 0.1), random),
+        outerTones[outer % 3], seed + 30 + outer * 3,
+        { hatchAngle: outerAngle, hatchGap: 20, alpha: 0.52 },
+      )
+    }
+    /* mid petals, cupped and deeper */
     for (var mid = 0; mid < 5; mid += 1) {
-      var midAngle = (mid / 5) * Math.PI * 2 + 0.7
-      SKETCH.wash(context,
-        bloomX + Math.cos(midAngle) * size * 0.2 - size * 0.24,
-        bloomY + Math.sin(midAngle) * size * 0.18 - size * 0.2,
-        size * 0.48, size * 0.4, '#963848', { seed: seed + 40 + mid, alpha: 0.45, layers: 2 })
+      var midAngle = (mid / 5) * Math.PI * 2 + 1.1 + (random() - 0.5) * 0.3
+      paintShape(
+        context,
+        petalPoints(bloomX, bloomY, midAngle, size * (0.36 + random() * 0.08), size * 0.3, random),
+        { fill: '#7d4550', hatch: 'rgba(70, 34, 42, 1)', accent: null }, seed + 60 + mid * 3,
+        { hatchAngle: midAngle, hatchGap: 18, alpha: 0.5, light: false },
+      )
     }
-    /* light on the upper petals */
-    SKETCH.wash(context, bloomX - size * 0.36, bloomY - size * 0.5, size * 0.5, size * 0.3, '#d98f98', { seed: seed + 50, alpha: 0.3, layers: 2, grain: false })
-    /* the wound heart: three broken spiral turns */
-    for (var turn = 0; turn < 3; turn += 1) {
-      var turnRadius = size * (0.12 + turn * 0.11)
+    /* light along two upper petal rims */
+    SKETCH.stroke(context, [
+      [bloomX - size * 0.5, bloomY - size * 0.34], [bloomX - size * 0.16, bloomY - size * 0.56], [bloomX + size * 0.2, bloomY - size * 0.5],
+    ], { seed: seed + 76, color: 'rgba(232, 222, 204, 0.6)', width: 1.6, amp: 1.4, step: 6 })
+    /* the wound heart: broken dark turns, tighter and tighter */
+    for (var turn = 0; turn < 4; turn += 1) {
+      var turnRadius = size * (0.08 + turn * 0.085)
       var arc = []
-      var startAngle = turn * 1.8 + random()
-      for (var step = 0; step <= 7; step += 1) {
-        var arcAngle = startAngle + (step / 7) * Math.PI * (1.3 + turn * 0.2)
+      var startAngle = turn * 2.1 + random() * 0.8
+      for (var step = 0; step <= 6; step += 1) {
+        var arcAngle = startAngle + (step / 6) * Math.PI * (1.2 + turn * 0.15)
         arc.push([
-          bloomX + Math.cos(arcAngle) * turnRadius * (1 + step * 0.03),
-          bloomY + Math.sin(arcAngle) * turnRadius * (0.85 + step * 0.03),
+          bloomX + Math.cos(arcAngle) * turnRadius * (1 + step * 0.04),
+          bloomY + Math.sin(arcAngle) * turnRadius * (0.82 + step * 0.04),
         ])
       }
-      SKETCH.stroke(context, arc, { seed: seed + 60 + turn, color: 'rgba(110, 37, 52, 0.85)', width: Math.max(1.2, size * 0.05), amp: size * 0.015, step: 5 })
+      SKETCH.stroke(context, arc, { seed: seed + 80 + turn, color: 'rgba(64, 30, 38, 0.85)', width: Math.max(1.1, size * 0.045 - turn * 0.01 * size), amp: size * 0.012, step: 4 })
+    }
+    /* petal separations, found in pencil */
+    for (var sep = 0; sep < 4; sep += 1) {
+      var sepAngle = (sep / 4) * Math.PI * 2 + 0.9
+      SKETCH.pencil(context, [
+        [bloomX + Math.cos(sepAngle) * size * 0.3, bloomY + Math.sin(sepAngle) * size * 0.26],
+        [bloomX + Math.cos(sepAngle) * size * 0.58, bloomY + Math.sin(sepAngle) * size * 0.5],
+      ], { seed: seed + 90 + sep, color: 'rgba(70, 40, 46, 0.5)', width: 0.9, amp: 1 })
     }
   }
 
-  /* A tulip: a soft cup of three petals on a tall stem. */
+  function softShadowBlob(context, centerX, centerY, radiusX, radiusY, seed) {
+    var random = SKETCH.rng(seed)
+    context.save()
+    context.fillStyle = '#4c3a40'
+    for (var layer = 0; layer < 10; layer += 1) {
+      context.globalAlpha = 0.02 + random() * 0.02
+      context.beginPath()
+      context.ellipse(
+        centerX + (random() - 0.5) * radiusX * 0.5, centerY + (random() - 0.5) * radiusY * 0.5,
+        radiusX * (0.5 + random() * 0.4), radiusY * (0.5 + random() * 0.4), 0, 0, Math.PI * 2,
+      )
+      context.fill()
+    }
+    context.restore()
+  }
+
+  /* --------------------------------------------------------- the others */
+  GARDEN.poppy = function (context, x, baseY, size, seed) {
+    var random = SKETCH.rng(seed)
+    var lean = (random() - 0.5) * size * 0.5
+    var headX = x + lean
+    var headY = baseY - size * 1.8
+    stem(context, x, baseY, headX, headY + size * 0.3, seed + 1, Math.max(1.6, size * 0.04))
+    /* the drooping bud on its bent second stem */
+    var budX = x - size * 0.5
+    stem(context, x - size * 0.1, baseY, budX, baseY - size * 1.1, seed + 3, Math.max(1.3, size * 0.032))
+    paintShape(context, petalPoints(budX, baseY - size * 1.1, -Math.PI * 0.65, size * 0.34, size * 0.24, random), LEAF_TONE, seed + 5, { hatchGap: 18 })
+
+    var poppyTone = { fill: '#9c5f45', hatch: 'rgba(96, 54, 38, 1)', accent: '#d9a441' }
+    for (var petal = 0; petal < 4; petal += 1) {
+      var petalAngle = -Math.PI / 2 + (petal - 1.5) * 0.9 + (random() - 0.5) * 0.2
+      paintShape(
+        context,
+        petalPoints(headX, headY + size * 0.16, petalAngle, size * (0.5 + random() * 0.1), size * 0.44, random),
+        poppyTone, seed + 10 + petal * 3,
+        { hatchAngle: petalAngle, hatchGap: 16, alpha: 0.5 },
+      )
+    }
+    /* creases in the paper petals */
+    for (var crease = 0; crease < 3; crease += 1) {
+      var creaseAngle = -Math.PI / 2 + (crease - 1) * 0.7
+      SKETCH.pencil(context, [
+        [headX, headY + size * 0.1],
+        [headX + Math.cos(creaseAngle) * size * 0.42, headY + size * 0.1 + Math.sin(creaseAngle) * size * 0.4],
+      ], { seed: seed + 30 + crease, color: 'rgba(76, 42, 30, 0.5)', width: 0.9, amp: 1 })
+    }
+    /* the dark eye and its crown of stamens */
+    SKETCH.dot(context, headX, headY, size * 0.1, 'rgba(40, 32, 28, 0.9)', seed + 40)
+    for (var stamen = 0; stamen < 8; stamen += 1) {
+      var stamenAngle = (stamen / 8) * Math.PI * 2
+      SKETCH.dot(context, headX + Math.cos(stamenAngle) * size * 0.17, headY + Math.sin(stamenAngle) * size * 0.15, size * 0.022, 'rgba(40, 32, 28, 0.7)', seed + 42 + stamen)
+    }
+    SKETCH.stroke(context, [[headX - size * 0.05, headY], [headX + size * 0.05, headY]], { seed: seed + 52, color: 'rgba(40, 32, 28, 0.8)', width: 1, amp: 0.2 })
+    SKETCH.stroke(context, [[headX, headY - size * 0.05], [headX, headY + size * 0.05]], { seed: seed + 53, color: 'rgba(40, 32, 28, 0.8)', width: 1, amp: 0.2 })
+  }
+
   GARDEN.tulip = function (context, x, baseY, size, seed) {
     var random = SKETCH.rng(seed)
     var lean = (random() - 0.5) * size * 0.4
     var headX = x + lean
-    var headY = baseY - size * 2
-    stem(context, x, baseY, headX, headY + size * 0.5, seed + 1, Math.max(1.6, size * 0.045))
-    leaf(context, x + lean * 0.2, baseY - size * 0.5, size * 0.7, Math.PI * 0.9, seed + 3)
-    var tone = random() > 0.5 ? '#c9a13c' : '#8a6b8f'
-    SKETCH.wash(context, headX - size * 0.34, headY - size * 0.4, size * 0.4, size * 0.72, tone, { seed: seed + 6, alpha: 0.55, layers: 3 })
-    SKETCH.wash(context, headX - size * 0.06, headY - size * 0.42, size * 0.4, size * 0.74, tone, { seed: seed + 7, alpha: 0.55, layers: 3 })
-    SKETCH.wash(context, headX - size * 0.2, headY - size * 0.52, size * 0.4, size * 0.6, tone, { seed: seed + 8, alpha: 0.45, layers: 2 })
-    SKETCH.stroke(context, [
-      [headX - size * 0.3, headY - size * 0.05], [headX - size * 0.12, headY + size * 0.12],
-      [headX + size * 0.06, headY - size * 0.02], [headX + size * 0.22, headY + size * 0.1],
-    ], { seed: seed + 9, color: 'rgba(90, 70, 40, 0.4)', width: 1, amp: 0.8 })
+    var headY = baseY - size * 2.1
+    stem(context, x, baseY, headX, headY + size * 0.45, seed + 1, Math.max(1.8, size * 0.045))
+    /* the long folded strap leaf */
+    leaf(context, x - size * 0.06, baseY - size * 0.3, size * 0.95, Math.PI * 0.93, seed + 3)
+
+    var tulipTone = { fill: '#8a7590', hatch: 'rgba(84, 68, 92, 1)', accent: '#c9b471' }
+    /* back petal peeking, then the two front petals of the cup */
+    paintShape(context, petalPoints(headX, headY + size * 0.3, -Math.PI / 2 + 0.06, size * 0.72, size * 0.34, random), { fill: '#75617c', hatch: 'rgba(74, 58, 82, 1)', accent: null }, seed + 6, { hatchAngle: -Math.PI / 2, hatchGap: 18, light: false })
+    paintShape(context, petalPoints(headX + size * 0.02, headY + size * 0.34, -Math.PI / 2 - 0.34, size * 0.68, size * 0.4, random), tulipTone, seed + 9, { hatchAngle: -Math.PI / 2, hatchGap: 16 })
+    paintShape(context, petalPoints(headX - size * 0.02, headY + size * 0.34, -Math.PI / 2 + 0.34, size * 0.68, size * 0.4, random), tulipTone, seed + 12, { hatchAngle: -Math.PI / 2, hatchGap: 16 })
+    /* the cleft where they part */
+    SKETCH.pencil(context, [
+      [headX, headY - size * 0.32], [headX + size * 0.03, headY + size * 0.05], [headX - size * 0.02, headY + size * 0.3],
+    ], { seed: seed + 15, color: 'rgba(66, 52, 74, 0.55)', width: 1, amp: 0.8 })
   }
 
-  /* A daisy: rays of cream around a golden middle. */
   GARDEN.daisy = function (context, x, baseY, size, seed) {
     var random = SKETCH.rng(seed)
     var lean = (random() - 0.5) * size * 0.4
     var headX = x + lean
-    var headY = baseY - size * 1.7
-    stem(context, x, baseY, headX, headY + size * 0.2, seed + 1, Math.max(1.4, size * 0.04))
-    leaf(context, x + lean * 0.3, baseY - size * 0.45, size * 0.4, Math.PI * 0.88, seed + 3)
-    for (var ray = 0; ray < 11; ray += 1) {
-      var rayAngle = (ray / 11) * Math.PI * 2 + random() * 0.2
-      SKETCH.stroke(context, [
-        [headX + Math.cos(rayAngle) * size * 0.14, headY + Math.sin(rayAngle) * size * 0.12],
-        [headX + Math.cos(rayAngle) * size * 0.5, headY + Math.sin(rayAngle) * size * 0.44],
-      ], { seed: seed + 10 + ray, color: 'rgba(239, 233, 216, 0.95)', width: Math.max(2.4, size * 0.1), amp: 0.6 })
+    var headY = baseY - size * 1.9
+    stem(context, x, baseY, headX, headY + size * 0.15, seed + 1, Math.max(1.4, size * 0.036))
+    leaf(context, x + lean * 0.2, baseY - size * 0.5, size * 0.42, Math.PI * 0.87, seed + 3)
+
+    /* rays: true little petals of bone, irregular, some folded short */
+    var rayTone = { fill: '#d3cab2', hatch: 'rgba(140, 132, 112, 1)', accent: null }
+    for (var ray = 0; ray < 12; ray += 1) {
+      var rayAngle = (ray / 12) * Math.PI * 2 + random() * 0.18
+      var rayLength = size * (0.42 + random() * 0.16) * (random() > 0.85 ? 0.6 : 1)
+      paintShape(
+        context,
+        petalPoints(headX + Math.cos(rayAngle) * size * 0.12, headY + Math.sin(rayAngle) * size * 0.1, rayAngle, rayLength, size * 0.14, random),
+        rayTone, seed + 10 + ray * 2,
+        { hatchAngle: rayAngle, hatchGap: 26, alpha: 0.55 },
+      )
     }
-    SKETCH.wash(context, headX - size * 0.15, headY - size * 0.13, size * 0.3, size * 0.26, '#c8963c', { seed: seed + 30, alpha: 0.8, layers: 3 })
+    /* the umber dome, dark under its brim */
+    paintShape(context, [
+      [headX - size * 0.16, headY], [headX - size * 0.1, headY - size * 0.13], [headX + size * 0.05, headY - size * 0.15],
+      [headX + size * 0.16, headY - size * 0.04], [headX + size * 0.12, headY + size * 0.11], [headX - size * 0.08, headY + size * 0.12],
+    ], { fill: '#a8813f', hatch: 'rgba(110, 82, 38, 1)', accent: '#d9a441' }, seed + 40, { hatchGap: 10, alpha: 0.7 })
   }
 
-  /* A sprig of lavender: little purple dabs up a wand. */
   GARDEN.lavender = function (context, x, baseY, size, seed) {
     var random = SKETCH.rng(seed)
-    var lean = (random() - 0.5) * size * 0.5
+    var lean = (random() - 0.5) * size * 0.55
     var topX = x + lean
-    var topY = baseY - size * 2.1
-    stem(context, x, baseY, topX, topY, seed + 1, Math.max(1.2, size * 0.035))
-    for (var dab = 0; dab < 9; dab += 1) {
-      var along = dab / 9
-      var dabX = x + lean * (0.4 + along * 0.6) + (dab % 2 ? 4 : -4) * (1 - along * 0.5)
-      var dabY = baseY - size * (0.9 + along * 1.2)
-      SKETCH.wash(context, dabX - size * 0.08, dabY - size * 0.06, size * 0.16, size * 0.12, '#7c6a9c', { seed: seed + 10 + dab, alpha: 0.6, layers: 2, grain: false })
+    var topY = baseY - size * 2.3
+    stem(context, x, baseY, topX, topY + size * 0.2, seed + 1, Math.max(1.2, size * 0.03))
+    var lavenderTone = { fill: '#7f7391', hatch: 'rgba(72, 62, 88, 1)', accent: '#c9b471' }
+    for (var bud = 0; bud < 8; bud += 1) {
+      var along = bud / 8
+      var budX = x + lean * (0.35 + along * 0.65) + (bud % 2 ? size * 0.1 : -size * 0.1) * (1 - along * 0.6)
+      var budY = baseY - size * (1.0 + along * 1.25)
+      paintShape(context, [
+        [budX - size * 0.09, budY + size * 0.05], [budX - size * 0.05, budY - size * 0.07],
+        [budX + size * 0.03, budY - size * 0.09], [budX + size * 0.09, budY - size * 0.01],
+        [budX + size * 0.05, budY + size * 0.08], [budX - size * 0.04, budY + size * 0.09],
+      ], lavenderTone, seed + 10 + bud * 2, { hatchGap: 9, alpha: 0.55, light: false })
     }
-    leaf(context, x + lean * 0.15, baseY - size * 0.35, size * 0.3, Math.PI * 0.92, seed + 30)
+    leaf(context, x + lean * 0.12, baseY - size * 0.4, size * 0.32, Math.PI * 0.9, seed + 40)
   }
 
-  /* A poppy: a loose hot cup with a dark middle. */
-  GARDEN.poppy = function (context, x, baseY, size, seed) {
-    var random = SKETCH.rng(seed)
-    var lean = (random() - 0.5) * size * 0.6
-    var headX = x + lean
-    var headY = baseY - size * 1.5
-    stem(context, x, baseY, headX, headY + size * 0.3, seed + 1, Math.max(1.4, size * 0.04))
-    SKETCH.wash(context, headX - size * 0.42, headY - size * 0.3, size * 0.5, size * 0.52, '#bf5a3a', { seed: seed + 5, alpha: 0.55, layers: 3 })
-    SKETCH.wash(context, headX - size * 0.08, headY - size * 0.34, size * 0.5, size * 0.55, '#b34e30', { seed: seed + 6, alpha: 0.55, layers: 3 })
-    SKETCH.wash(context, headX - size * 0.26, headY - size * 0.14, size * 0.52, size * 0.4, '#c96a45', { seed: seed + 7, alpha: 0.4, layers: 2 })
-    SKETCH.dot(context, headX, headY + size * 0.03, size * 0.09, 'rgba(46, 36, 34, 0.9)', seed + 8)
-    for (var stamen = 0; stamen < 6; stamen += 1) {
-      var stamenAngle = (stamen / 6) * Math.PI * 2
-      SKETCH.dot(context, headX + Math.cos(stamenAngle) * size * 0.16, headY + Math.sin(stamenAngle) * size * 0.14, size * 0.025, 'rgba(46, 36, 34, 0.7)', seed + 10 + stamen)
-    }
-  }
-
-  /* A bed of them: the rose in the middle of good company. */
+  /* A bed of them: the rose at the heart of good company. */
   GARDEN.bed = function (context, x, baseY, spread, seed) {
     var random = SKETCH.rng(seed)
-    /* a breath of ground */
-    SKETCH.wash(context, x - spread * 0.7, baseY - spread * 0.1, spread * 1.4, spread * 0.2, '#8a9573', { seed: seed + 1, alpha: 0.25, layers: 2, edge: false })
-    GARDEN.daisy(context, x - spread * 0.52, baseY - 2, spread * 0.2, seed + 10)
-    GARDEN.poppy(context, x - spread * 0.28, baseY + 2, spread * 0.26, seed + 20)
-    GARDEN.rose(context, x + spread * 0.02, baseY, spread * 0.3, seed + 30)
-    GARDEN.tulip(context, x + spread * 0.3, baseY + 1, spread * 0.22, seed + 40)
-    GARDEN.lavender(context, x + spread * 0.52, baseY - 2, spread * 0.2, seed + 50)
-    /* grass at their feet, and a few fallen petals */
-    for (var blade = 0; blade < 16; blade += 1) {
-      var bladeX = x + (random() - 0.5) * spread * 1.2
+    /* a settled breath of ground, in the grove's grey-green */
+    softShadowBlob(context, x, baseY + 2, spread * 0.8, spread * 0.1, seed + 1)
+    GARDEN.daisy(context, x - spread * 0.52, baseY - 2, spread * 0.17, seed + 10)
+    GARDEN.poppy(context, x - spread * 0.26, baseY + 2, spread * 0.23, seed + 20)
+    GARDEN.tulip(context, x + spread * 0.3, baseY + 1, spread * 0.2, seed + 40)
+    GARDEN.lavender(context, x + spread * 0.52, baseY - 2, spread * 0.18, seed + 50)
+    GARDEN.rose(context, x + spread * 0.02, baseY, spread * 0.27, seed + 30)
+    /* grass at their feet in the grove's greens */
+    for (var blade = 0; blade < 18; blade += 1) {
+      var bladeX = x + (random() - 0.5) * spread * 1.3
       SKETCH.stroke(context, [
-        [bladeX, baseY + 3], [bladeX + (random() - 0.5) * 8, baseY - 6 - random() * 8],
-      ], { seed: seed + 60 + blade, color: random() > 0.5 ? 'rgba(123, 139, 78, 0.7)' : 'rgba(95, 110, 66, 0.7)', width: 1, amp: 0.5 })
+        [bladeX, baseY + 3], [bladeX + (random() - 0.5) * 9, baseY - 7 - random() * 9],
+      ], { seed: seed + 60 + blade, color: random() > 0.5 ? 'rgba(112, 120, 92, 0.7)' : 'rgba(90, 98, 74, 0.7)', width: 1, amp: 0.5 })
     }
+    /* fallen petals, gone dusty */
     for (var petal = 0; petal < 4; petal += 1) {
-      SKETCH.wash(context, x + (random() - 0.5) * spread, baseY + 2 + random() * 6, 7, 5, '#b5495b', { seed: seed + 80 + petal, alpha: 0.35, layers: 2, grain: false })
+      SKETCH.wash(context, x + (random() - 0.5) * spread, baseY + 2 + random() * 6, 7, 5, '#8d565f', { seed: seed + 80 + petal, alpha: 0.28, layers: 2, grain: false })
     }
   }
 
