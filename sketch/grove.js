@@ -575,11 +575,14 @@
     var random = SKETCH.rng(seed)
     /* a settled breath of ground, in the grove's grey-green */
     softShadowBlob(context, x, baseY + 2, spread * 0.8, spread * 0.1, seed + 1)
-    GARDEN.daisy(context, x - spread * 0.52, baseY - 2, spread * 0.17, seed + 10)
-    GARDEN.poppy(context, x - spread * 0.26, baseY + 2, spread * 0.23, seed + 20)
-    GARDEN.tulip(context, x + spread * 0.3, baseY + 1, spread * 0.2, seed + 40)
-    GARDEN.lavender(context, x + spread * 0.52, baseY - 2, spread * 0.18, seed + 50)
-    GARDEN.rose(context, x + spread * 0.02, baseY, spread * 0.27, seed + 30)
+    /* back row first, leaning away; the rose forward of them; the small
+       ones tucked in front, everything a little staggered */
+    GARDEN.tulip(context, x + spread * 0.2, baseY - 4, spread * 0.21, seed + 40)
+    GARDEN.lavender(context, x + spread * 0.44, baseY - 6, spread * 0.19, seed + 50)
+    GARDEN.lavender(context, x + spread * 0.56, baseY + 4, spread * 0.13, seed + 55)
+    GARDEN.poppy(context, x - spread * 0.3, baseY - 4, spread * 0.22, seed + 20)
+    GARDEN.rose(context, x - spread * 0.02, baseY + 2, spread * 0.28, seed + 30)
+    GARDEN.daisy(context, x - spread * 0.44, baseY + 8, spread * 0.15, seed + 10)
     /* grass at their feet in the grove's greens */
     for (var blade = 0; blade < 18; blade += 1) {
       var bladeX = x + (random() - 0.5) * spread * 1.3

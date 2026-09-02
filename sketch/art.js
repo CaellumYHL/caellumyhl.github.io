@@ -1215,12 +1215,12 @@
         SKETCH.stroke(context, jagged.concat([jagged[0]]), { seed: seed, color: edge, width: 1.7, amp: 1.8, step: 5 })
       }
 
-      paintWing(fore, '#b39a5e', '#8a744a', 'rgba(122, 102, 66, 0.55)', 5440)
-      paintWing(hind, '#8a7d92', '#655a72', 'rgba(88, 78, 100, 0.55)', 5441)
+      paintWing(fore, '#ddd6c4', '#a8a294', 'rgba(118, 112, 98, 0.55)', 5440)
+      paintWing(hind, '#b3afa4', '#807b70', 'rgba(96, 90, 78, 0.55)', 5441)
 
-      /* pale spots lifted out while wet */
-      SKETCH.wash(context, wingWidth * 0.56, wingHeight * 0.12, wingWidth * 0.18, wingHeight * 0.12, '#ecdfc0', { seed: 5442, alpha: 0.6, layers: 3, grain: false })
-      SKETCH.wash(context, wingWidth * 0.3, wingHeight * 0.64, wingWidth * 0.13, wingHeight * 0.1, '#ddd2b8', { seed: 5443, alpha: 0.5, layers: 2, grain: false })
+      /* grey marks, like a cabbage white's */
+      SKETCH.wash(context, wingWidth * 0.56, wingHeight * 0.14, wingWidth * 0.14, wingHeight * 0.1, '#8a857a', { seed: 5442, alpha: 0.5, layers: 2, grain: false })
+      SKETCH.wash(context, wingWidth * 0.32, wingHeight * 0.66, wingWidth * 0.1, wingHeight * 0.08, '#918c80', { seed: 5443, alpha: 0.4, layers: 2, grain: false })
 
       var body = document.createElement('canvas')
       var bodyWidth = Math.round(span * 0.1)
@@ -1290,30 +1290,45 @@
         state.butterfly = buildCourtButterfly(span)
       }
       var parts = state.butterfly
-      var dt = Math.min(0.06, (now - (state.butterflyLast || now)) / 1000)
+      var dt = Math.min(0.06, (now - (state.butterflyLast || now)) / 1000) || 0.016
       state.butterflyLast = now
 
-      /* it beats in bursts and glides between them */
-      var flutter = Math.pow(Math.max(0, Math.sin(t * 0.55 + Math.sin(t * 0.21) * 1.4)), 2)
-      state.butterflyPhase = (state.butterflyPhase || 0) + dt * (2 + 15 * flutter)
+      /* it beats often and quickly, resting only briefly between bursts */
+      var flutter = 0.12 + 0.88 * Math.pow(Math.max(0, Math.sin(t * 0.9 + Math.sin(t * 0.33) * 1.6)), 1.5)
+      state.butterflyPhase = (state.butterflyPhase || 0) + dt * (6 + 26 * flutter)
       /* the wings snap shut quickly and open slowly */
-      var beat = state.butterflyPhase
-      var warped = beat + 0.7 * Math.sin(beat)
-      var flapDepth = 0.12 + 0.72 * flutter
+      var warped = state.butterflyPhase + 0.7 * Math.sin(state.butterflyPhase)
+      var flapDepth = 0.15 + 0.7 * flutter
       var spread = 1 - flapDepth * (0.5 + 0.5 * Math.sin(warped))
       var fold = Math.sin(warped)
 
-      /* the bursts lift it; the glides let it settle */
-      state.butterflyLift = (state.butterflyLift || 0) + (flutter - 0.42) * dt * frame.height * 0.05
-      state.butterflyLift = SKETCH.clamp(state.butterflyLift, -frame.height * 0.03, frame.height * 0.035)
+      /* it only travels on its wingbeats: the bursts push and lift it,
+         and when the wings rest it slows to a hover and settles */
+      if (!state.butterflyPos) {
+        state.butterflyPos = { x: 0.47, y: 0.58 }
+        state.butterflyVel = { x: 0, y: 0 }
+      }
+      var pos = state.butterflyPos
+      var vel = state.butterflyVel
+      var targetX = 0.47 + Math.sin(t * 0.13) * 0.05
+      var targetY = 0.58 + Math.sin(t * 0.19 + 1) * 0.035
+      var beating = flutter > 0.4
+      if (beating) {
+        vel.x += (targetX - pos.x) * 1.6 * dt
+        vel.y += ((targetY - pos.y) * 1.2 - 0.045 * flutter) * dt
+      } else {
+        vel.y += 0.014 * dt
+      }
+      var damp = beating ? 0.9 : 2.8
+      vel.x *= Math.max(0, 1 - damp * dt)
+      vel.y *= Math.max(0, 1 - damp * dt)
+      pos.x = SKETCH.clamp(pos.x + vel.x * dt, 0.38, 0.56)
+      pos.y = SKETCH.clamp(pos.y + vel.y * dt, 0.48, 0.68)
 
-      var driftX = Math.sin(t * 0.16) * 0.045 + Math.sin(t * 0.051 + 2) * 0.02
-      var butterflyX = frame.x + frame.width * (0.47 + driftX)
-      var butterflyY = frame.y + frame.height * (0.6 + Math.sin(t * 0.21 + 1) * 0.025)
-        - state.butterflyLift + fold * 2 * flutter
-      /* it leans the way it drifts, and rocks with each beat */
-      var heading = Math.cos(t * 0.16) * 0.045 + Math.cos(t * 0.051 + 2) * 0.02
-      var tilt = SKETCH.clamp(heading * 4, -0.22, 0.22) + fold * 0.05 * flutter
+      var butterflyX = frame.x + frame.width * pos.x
+      var butterflyY = frame.y + frame.height * pos.y + fold * 2 * flutter
+      /* it leans into its own motion, and rocks with each beat */
+      var tilt = SKETCH.clamp(vel.x * 30, -0.24, 0.24) + fold * 0.05 * flutter
 
       /* a soft shadow on the grass beneath it */
       context.save()
