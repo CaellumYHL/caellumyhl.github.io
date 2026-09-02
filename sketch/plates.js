@@ -50,7 +50,7 @@
     var KINDS = ['rose', 'poppy', 'tulip', 'daisy', 'lavender']
 
     function gardenBox(width, height) {
-      return { y: Math.round(height * 0.52), bottom: Math.round(height - 96), pivot: height * 0.93 }
+      return { y: Math.round(height * 0.42), bottom: Math.round(height - 96), pivot: height * 0.93 }
     }
 
     function drawGarden(context, width, height) {
@@ -145,9 +145,6 @@
           api.link(pad - 6, linkY - linkSize * 1.4, wordWidth + 16, linkSize * 2.6, link.href, link.title)
           linkY += 30 * s
         })
-
-        /* the author, drawn in the house style */
-        SKETCH.faces.portrait(context, width * 0.175, height * 0.53, height * 0.16, 77)
 
         SKETCH.print(context, data.stationery, width / 2, height - 30, { align: 'center', seed: 150 })
         SKETCH.artifacts(context, width, height, 152)
