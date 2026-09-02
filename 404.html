@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Torn out — Caellum Yip Hoi-Lee</title>
+    <style>
+      * { margin: 0; box-sizing: border-box; }
+      body { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #eee9dd; padding: 16px; }
+      .sheet { position: relative; line-height: 0; width: min(94vw, 560px); filter: drop-shadow(0 6px 22px rgba(52,42,26,.24)); }
+      .sheet canvas { display: block; width: 100%; }
+      .sheet a { position: absolute; display: block; }
+      .fallback { font-family: Georgia, serif; color: #2f2b26; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <div class="sheet" id="sheet">
+      <noscript><p class="fallback">This page is not in the book. <a href="/">Back to the book</a>.</p></noscript>
+    </div>
+    <script src="sketch/tools.js"></script>
+    <script src="sketch/lettering.js"></script>
+    <script src="sketch/faces.js"></script>
+    <script>
+      SKETCH.mount(document.getElementById('sheet'), {
+        aria: 'This sheet was torn out of the book. A link leads back to the cover.',
+        height: function (width) { return width * 0.86 },
+        draw: function (context, width, height, api) {
+          SKETCH.plainPaper(context, width, height, { seed: 404, tone: '#f0ebdc' })
+
+          /* the torn top edge */
+          var random = SKETCH.rng(404)
+          context.fillStyle = '#eee9dd'
+          for (var bite = 0; bite < width / 3; bite += 1) {
+            context.globalAlpha = 0.6 + random() * 0.4
+            context.beginPath()
+            context.ellipse(random() * width, random() * 7, 3 + random() * 8, 2 + random() * 6, random() * 3, 0, Math.PI * 2)
+            context.fill()
+          }
+          context.globalAlpha = 1
+          SKETCH.pencil(context, [[4, 10], [width * 0.3, 6], [width * 0.6, 12], [width - 4, 7]], { seed: 405, color: 'rgba(110, 102, 86, 0.5)', width: 1.2, amp: 2 })
+
+          var s = SKETCH.clamp(width / 520, 0.8, 1.2)
+          SKETCH.letter.write(context, '404', width / 2, height * 0.24, { size: 44 * s, media: 'pencil', seed: 406, align: 'center', tracking: 0.8, width: 6 * s })
+          SKETCH.letter.write(context, 'THIS SHEET WAS TORN OUT', width / 2, height * 0.42, { size: 13 * s, seed: 407, align: 'center', tracking: 0.42 })
+          SKETCH.rule(context, width * 0.2, height * 0.46, width * 0.8, { seed: 408, color: SKETCH.PENCIL })
+
+          /* somebody looking apologetic about it */
+          SKETCH.faces.drawFace(context, width / 2, height * 0.62, 90 * s, 8404)
+
+          var label = 'BACK TO THE BOOK'
+          var labelSize = 12 * s
+          var labelWidth = SKETCH.letter.measure(label, labelSize)
+          SKETCH.letter.write(context, label, width / 2, height * 0.85, { size: labelSize, seed: 409, align: 'center' })
+          SKETCH.rule(context, width / 2 - labelWidth / 2 - 3, height * 0.85 + labelSize * 0.8, width / 2 + labelWidth / 2 + 5, { seed: 410, color: SKETCH.RED, width: 2 })
+          api.link(width / 2 - labelWidth / 2 - 10, height * 0.85 - labelSize * 1.4, labelWidth + 20, labelSize * 2.8, '/', 'Back to the book')
+
+          SKETCH.artifacts(context, width, height, 411)
+        },
+      })
+    </script>
+  </body>
+</html>

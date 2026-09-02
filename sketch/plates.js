@@ -46,7 +46,58 @@
   /* ---------------------------------------------------------------- cover */
 
   PLATES.cover = function (data) {
+    var state = { planted: [], raf: 0 }
+    var KINDS = ['rose', 'poppy', 'tulip', 'daisy', 'lavender']
+
+    function gardenBox(width, height) {
+      return { y: Math.round(height * 0.52), bottom: Math.round(height - 96), pivot: height * 0.93 }
+    }
+
+    function drawGarden(context, width, height) {
+      SKETCH.garden.bed(context, width * 0.7, height * 0.9, Math.min(height * 0.32, width * 0.22), 7411)
+      state.planted.slice().sort(function (a, b) { return a.fy - b.fy }).forEach(function (plant) {
+        SKETCH.garden[plant.kind](context, plant.fx * width, plant.fy * height, plant.size * height, plant.seed)
+      })
+    }
+
+    function startSway(api) {
+      if (!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        if (state.raf) return
+        var tick = function (now) {
+          state.raf = 0
+          if (state.hidden || !state.base) return
+          var liveApi = state.swayApi
+          var bounds = liveApi.canvas.getBoundingClientRect()
+          var ratio = bounds.width ? liveApi.canvas.width / bounds.width : 1
+          var box = gardenBox(liveApi.width, liveApi.height)
+          var context = liveApi.canvas.getContext('2d')
+          context.save()
+          context.setTransform(1, 0, 0, 1, 0, 0)
+          context.drawImage(
+            state.base,
+            0, box.y * ratio, liveApi.width * ratio, (box.bottom - box.y) * ratio,
+            0, box.y * ratio, liveApi.width * ratio, (box.bottom - box.y) * ratio,
+          )
+          context.setTransform(ratio, 0, 0, ratio, 0, 0)
+          context.beginPath()
+          context.rect(0, box.y, liveApi.width, box.bottom - box.y)
+          context.clip()
+          /* the flowers hold stiffer than the trees, but the same wind */
+          var lean = (SKETCH.windAt ? SKETCH.windAt(now * 0.001) : 0) * 0.35
+          var shear = Math.tan(lean * Math.PI / 180)
+          context.translate(0, box.pivot)
+          context.transform(1, 0, shear, 1, 0, 0)
+          context.translate(0, -box.pivot)
+          context.drawImage(state.sprite, 0, box.y, liveApi.width, box.bottom - box.y)
+          context.restore()
+          state.raf = requestAnimationFrame(tick)
+        }
+        state.raf = requestAnimationFrame(tick)
+      }
+    }
+
     return {
+      state: state,
       aria: 'Cover: Caellum Yip Hoi-Lee. ' + data.subtitle,
       height: function (width) { return width * 1.02 },
       draw: function (context, width, height, api) {
@@ -95,11 +146,52 @@
           linkY += 30 * s
         })
 
-        /* a garden growing out of the page corner, the rose at its heart */
-        SKETCH.garden.bed(context, width * 0.7, height * 0.9, Math.min(height * 0.32, width * 0.22), 7411)
+        /* the author, drawn in the house style */
+        SKETCH.faces.portrait(context, width * 0.175, height * 0.53, height * 0.16, 77)
 
         SKETCH.print(context, data.stationery, width / 2, height - 30, { align: 'center', seed: 150 })
         SKETCH.artifacts(context, width, height, 152)
+
+        /* the page without its garden, remembered; the garden on its own
+           sheet, so the wind can lean it */
+        var base = document.createElement('canvas')
+        base.width = api.canvas.width
+        base.height = api.canvas.height
+        base.getContext('2d').drawImage(api.canvas, 0, 0)
+        state.base = base
+        state.swayApi = api
+
+        var bounds = api.canvas.getBoundingClientRect()
+        var ratio = bounds.width ? api.canvas.width / bounds.width : 1
+        var box = gardenBox(width, height)
+        var sprite = document.createElement('canvas')
+        sprite.width = Math.round(width * ratio)
+        sprite.height = Math.round((box.bottom - box.y) * ratio)
+        var spriteContext = sprite.getContext('2d')
+        spriteContext.setTransform(ratio, 0, 0, ratio, 0, 0)
+        spriteContext.translate(0, -box.y)
+        drawGarden(spriteContext, width, height)
+        state.sprite = sprite
+
+        context.drawImage(sprite, 0, box.y, width, box.bottom - box.y)
+        startSway(api)
+      },
+      onPointer: function (type, x, y, api) {
+        var plantable = y > api.height * 0.62 && y < api.height - 110 && x > 130 && x < api.width - 130
+        if (type === 'move') {
+          api.canvas.style.cursor = plantable ? 'pointer' : 'default'
+          return
+        }
+        if (type !== 'down' || !plantable) return
+        if (state.planted.length >= 20) state.planted.shift()
+        state.planted.push({
+          fx: x / api.width,
+          fy: y / api.height,
+          kind: KINDS[Math.floor(Math.random() * KINDS.length)],
+          size: 0.04 + Math.random() * 0.028,
+          seed: Math.floor(Math.random() * 999983),
+        })
+        api.redraw()
       },
     }
   }

@@ -19,6 +19,7 @@ body {
 
 /* the drawn grove behind the book, and its weather */
 #grove,
+#grove-trees,
 #precip {
   position: fixed;
   inset: 0;
@@ -28,6 +29,11 @@ body {
   pointer-events: none;
 }
 
+
+#grove-trees {
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
 
 #weather-toggle {
   position: fixed;

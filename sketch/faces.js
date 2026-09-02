@@ -210,6 +210,203 @@
     context.restore()
   }
 
+  /* A portrait of the author: curly dark fringe, rectangular glasses,
+     strong brows, a fuller mouth held level, a cord at the neck, and a
+     grey tank — drawn with the same marks as everyone else. */
+  FACES.portrait = function (context, centerX, centerY, size, seed) {
+    var random = SKETCH.rng(seed)
+    var headW = size * 0.37
+    var headH = size * 0.5
+    var ink = 'rgba(40, 36, 32, 0.85)'
+
+    /* shoulders and the grey tank */
+    context.save()
+    context.globalAlpha = 0.5
+    context.fillStyle = '#a8a49c'
+    context.beginPath()
+    context.moveTo(centerX - size * 0.52, centerY + size * 0.78)
+    context.quadraticCurveTo(centerX - size * 0.42, centerY + size * 0.52, centerX - size * 0.2, centerY + size * 0.47)
+    context.lineTo(centerX + size * 0.2, centerY + size * 0.47)
+    context.quadraticCurveTo(centerX + size * 0.42, centerY + size * 0.52, centerX + size * 0.52, centerY + size * 0.78)
+    context.closePath()
+    context.fill()
+    context.restore()
+    SKETCH.stroke(context, [
+      [centerX - size * 0.5, centerY + size * 0.76], [centerX - size * 0.38, centerY + size * 0.52],
+      [centerX - size * 0.2, centerY + size * 0.47],
+    ], { seed: seed + 1, color: ink, width: 1.4, amp: 1 })
+    SKETCH.stroke(context, [
+      [centerX + size * 0.5, centerY + size * 0.76], [centerX + size * 0.38, centerY + size * 0.52],
+      [centerX + size * 0.2, centerY + size * 0.47],
+    ], { seed: seed + 2, color: ink, width: 1.4, amp: 1 })
+
+    /* neck */
+    context.save()
+    context.globalAlpha = 0.55
+    context.fillStyle = '#d3a983'
+    context.fillRect(centerX - size * 0.11, centerY + size * 0.34, size * 0.22, size * 0.18)
+    context.restore()
+
+    /* the face: broad at the brow, tapering to the chin */
+    var face = [
+      [centerX - headW * 0.92, centerY - headH * 0.5],
+      [centerX - headW, centerY - headH * 0.05],
+      [centerX - headW * 0.82, centerY + headH * 0.42],
+      [centerX - headW * 0.45, centerY + headH * 0.86],
+      [centerX, centerY + headH],
+      [centerX + headW * 0.45, centerY + headH * 0.86],
+      [centerX + headW * 0.82, centerY + headH * 0.42],
+      [centerX + headW, centerY - headH * 0.05],
+      [centerX + headW * 0.92, centerY - headH * 0.5],
+      [centerX + headW * 0.5, centerY - headH * 0.86],
+      [centerX, centerY - headH * 0.95],
+      [centerX - headW * 0.5, centerY - headH * 0.86],
+    ]
+    context.save()
+    context.globalAlpha = 0.6
+    context.fillStyle = '#dcb28c'
+    context.beginPath()
+    face.forEach(function (point, index) {
+      if (index === 0) context.moveTo(point[0], point[1])
+      else context.lineTo(point[0], point[1])
+    })
+    context.closePath()
+    context.fill()
+    /* the light leaves the sides of the face */
+    context.globalAlpha = 0.16
+    context.fillStyle = '#a97e58'
+    context.beginPath()
+    context.ellipse(centerX - headW * 0.66, centerY + headH * 0.3, headW * 0.26, headH * 0.34, 0.3, 0, Math.PI * 2)
+    context.ellipse(centerX + headW * 0.66, centerY + headH * 0.3, headW * 0.26, headH * 0.34, -0.3, 0, Math.PI * 2)
+    context.fill()
+    context.restore()
+    SKETCH.stroke(context, face.concat([face[0]]), { seed: seed + 3, color: ink, width: 1.5, amp: size * 0.008, step: size * 0.06 })
+
+    /* ears */
+    SKETCH.stroke(context, [
+      [centerX - headW * 0.98, centerY - headH * 0.02], [centerX - headW * 1.1, centerY + headH * 0.08], [centerX - headW * 0.95, centerY + headH * 0.22],
+    ], { seed: seed + 4, color: ink, width: 1.3, amp: 0.8 })
+    SKETCH.stroke(context, [
+      [centerX + headW * 0.98, centerY - headH * 0.02], [centerX + headW * 1.1, centerY + headH * 0.08], [centerX + headW * 0.95, centerY + headH * 0.22],
+    ], { seed: seed + 5, color: ink, width: 1.3, amp: 0.8 })
+
+    /* the curly dark hair, a mass of scribbles with a falling fringe */
+    context.save()
+    context.globalAlpha = 0.75
+    context.fillStyle = '#453627'
+    context.beginPath()
+    context.moveTo(centerX - headW * 1.04, centerY - headH * 0.28)
+    context.quadraticCurveTo(centerX - headW * 1.12, centerY - headH * 1.05, centerX - headW * 0.35, centerY - headH * 1.28)
+    context.quadraticCurveTo(centerX + headW * 0.4, centerY - headH * 1.42, centerX + headW * 1.02, centerY - headH * 0.92)
+    context.quadraticCurveTo(centerX + headW * 1.12, centerY - headH * 0.5, centerX + headW * 1.0, centerY - headH * 0.26)
+    context.quadraticCurveTo(centerX + headW * 0.6, centerY - headH * 0.62, centerX, centerY - headH * 0.66)
+    context.quadraticCurveTo(centerX - headW * 0.6, centerY - headH * 0.64, centerX - headW * 1.04, centerY - headH * 0.28)
+    context.closePath()
+    context.fill()
+    context.restore()
+    /* curls throughout the mass */
+    for (var curl = 0; curl < 40; curl += 1) {
+      var curlX = centerX + (random() - 0.5) * headW * 1.85
+      var curlY = centerY - headH * (0.7 + random() * 0.48)
+      SKETCH.stroke(context, [
+        [curlX - size * 0.02, curlY + size * 0.008],
+        [curlX, curlY - size * 0.02],
+        [curlX + size * 0.022, curlY + size * 0.006],
+        [curlX + size * 0.008, curlY + size * 0.02],
+      ], { seed: seed + 20 + curl, color: 'rgba(50, 38, 27, 0.85)', width: 1.4, amp: size * 0.006 })
+    }
+    /* the fringe: a few curls falling over the forehead */
+    for (var strand = 0; strand < 3; strand += 1) {
+      var strandX = centerX - headW * 0.42 + strand * headW * 0.4
+      SKETCH.stroke(context, [
+        [strandX, centerY - headH * 0.66],
+        [strandX + (random() - 0.5) * size * 0.03, centerY - headH * (0.5 - (strand % 2) * 0.06)],
+        [strandX + size * 0.02, centerY - headH * (0.42 - (strand % 2) * 0.05)],
+        [strandX - size * 0.005, centerY - headH * (0.38 - (strand % 2) * 0.05)],
+      ], { seed: seed + 60 + strand, color: 'rgba(50, 38, 27, 0.9)', width: size * 0.02, amp: size * 0.008 })
+    }
+
+    /* strong brows, nearly level */
+    SKETCH.stroke(context, [
+      [centerX - headW * 0.62, centerY - headH * 0.24], [centerX - headW * 0.16, centerY - headH * 0.28],
+    ], { seed: seed + 70, color: 'rgba(44, 34, 26, 0.9)', width: size * 0.018, amp: size * 0.004 })
+    SKETCH.stroke(context, [
+      [centerX + headW * 0.16, centerY - headH * 0.28], [centerX + headW * 0.62, centerY - headH * 0.24],
+    ], { seed: seed + 71, color: 'rgba(44, 34, 26, 0.9)', width: size * 0.018, amp: size * 0.004 })
+
+    /* the rectangular glasses: dark along the top, fine below */
+    var lensW = headW * 0.62
+    var lensH = headH * 0.3
+    var lensY = centerY - headH * 0.12
+    ;[-1, 1].forEach(function (side, sideIndex) {
+      var lensX = centerX + side * headW * 0.42
+      SKETCH.stroke(context, [
+        [lensX - lensW / 2, lensY - lensH / 2], [lensX + lensW / 2, lensY - lensH / 2],
+      ], { seed: seed + 80 + sideIndex, color: 'rgba(36, 32, 28, 0.95)', width: size * 0.016, amp: 0.4 })
+      SKETCH.stroke(context, [
+        [lensX + lensW / 2, lensY - lensH / 2], [lensX + lensW / 2, lensY + lensH / 2],
+        [lensX - lensW / 2, lensY + lensH / 2], [lensX - lensW / 2, lensY - lensH / 2],
+      ], { seed: seed + 84 + sideIndex, color: 'rgba(56, 50, 44, 0.75)', width: size * 0.008, amp: 0.5 })
+    })
+    SKETCH.stroke(context, [
+      [centerX - headW * 0.11, lensY - lensH / 2], [centerX + headW * 0.11, lensY - lensH / 2],
+    ], { seed: seed + 88, color: 'rgba(36, 32, 28, 0.9)', width: size * 0.012, amp: 0.3 })
+    SKETCH.stroke(context, [
+      [centerX - headW * 0.73, lensY - lensH / 2], [centerX - headW * 0.97, lensY - lensH * 0.2],
+    ], { seed: seed + 89, color: 'rgba(36, 32, 28, 0.8)', width: size * 0.01, amp: 0.3 })
+    SKETCH.stroke(context, [
+      [centerX + headW * 0.73, lensY - lensH / 2], [centerX + headW * 0.97, lensY - lensH * 0.2],
+    ], { seed: seed + 90, color: 'rgba(36, 32, 28, 0.8)', width: size * 0.01, amp: 0.3 })
+
+    /* calm eyes behind the lenses */
+    ;[-1, 1].forEach(function (side, sideIndex) {
+      var eyeX = centerX + side * headW * 0.4
+      SKETCH.stroke(context, [
+        [eyeX - headW * 0.16, lensY], [eyeX + headW * 0.16, lensY - headH * 0.015],
+      ], { seed: seed + 94 + sideIndex, color: ink, width: size * 0.011, amp: 0.5 })
+      SKETCH.dot(context, eyeX + side * headW * 0.02, lensY + headH * 0.028, size * 0.018, '#33291f', seed + 98 + sideIndex)
+    })
+
+    /* the nose, defined */
+    SKETCH.stroke(context, [
+      [centerX - headW * 0.05, centerY - headH * 0.06],
+      [centerX - headW * 0.09, centerY + headH * 0.2],
+      [centerX - headW * 0.02, centerY + headH * 0.3],
+      [centerX + headW * 0.1, centerY + headH * 0.28],
+    ], { seed: seed + 102, color: ink, width: size * 0.011, amp: size * 0.004 })
+    SKETCH.stroke(context, [
+      [centerX - headW * 0.16, centerY + headH * 0.3], [centerX - headW * 0.1, centerY + headH * 0.33],
+    ], { seed: seed + 103, color: 'rgba(40, 36, 32, 0.6)', width: size * 0.009, amp: 0.3 })
+
+    /* the mouth: fuller lips, held level */
+    SKETCH.stroke(context, [
+      [centerX - headW * 0.3, centerY + headH * 0.52],
+      [centerX - headW * 0.1, centerY + headH * 0.5],
+      [centerX, centerY + headH * 0.53],
+      [centerX + headW * 0.1, centerY + headH * 0.5],
+      [centerX + headW * 0.3, centerY + headH * 0.52],
+    ], { seed: seed + 106, color: 'rgba(40, 34, 30, 0.9)', width: size * 0.012, amp: size * 0.003 })
+    context.save()
+    context.globalAlpha = 0.4
+    context.fillStyle = '#b97a68'
+    context.beginPath()
+    context.ellipse(centerX, centerY + headH * 0.6, headW * 0.26, headH * 0.06, 0, 0, Math.PI)
+    context.fill()
+    context.restore()
+    SKETCH.stroke(context, [
+      [centerX - headW * 0.2, centerY + headH * 0.67], [centerX + headW * 0.2, centerY + headH * 0.67],
+    ], { seed: seed + 108, color: 'rgba(40, 36, 32, 0.5)', width: size * 0.008, amp: 0.4 })
+
+    /* the cord at the neck, and its small knot */
+    SKETCH.stroke(context, [
+      [centerX - size * 0.16, centerY + size * 0.5], [centerX - size * 0.05, centerY + size * 0.62], [centerX + size * 0.01, centerY + size * 0.65],
+    ], { seed: seed + 112, color: 'rgba(34, 30, 26, 0.85)', width: 1.3, amp: 0.6 })
+    SKETCH.stroke(context, [
+      [centerX + size * 0.16, centerY + size * 0.5], [centerX + size * 0.06, centerY + size * 0.62], [centerX + size * 0.01, centerY + size * 0.65],
+    ], { seed: seed + 113, color: 'rgba(34, 30, 26, 0.85)', width: 1.3, amp: 0.6 })
+    SKETCH.dot(context, centerX + size * 0.01, centerY + size * 0.66, size * 0.014, 'rgba(34, 30, 26, 0.9)', seed + 114)
+  }
+
   FACES.columnsFor = function (width) {
     if (width > 690) return 6
     if (width > 460) return 4

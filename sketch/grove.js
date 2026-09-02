@@ -195,6 +195,15 @@
       SKETCH.pencil(context, [
         [x + trunkWidth * 0.3, baseY], [x + lean * 0.5 + trunkWidth * 0.2, baseY - height * 0.3],
       ], { seed: seed + 61, color: 'rgba(50, 56, 60, 0.5)', width: 1, amp: 0.6 })
+    } else if (weather === 'night') {
+      /* dusk settles over the whole tree */
+      context.save()
+      context.globalAlpha = 0.3
+      context.fillStyle = '#1c2334'
+      context.beginPath()
+      context.ellipse(x + lean, crownY, mainRx * 1.25, mainRy * 1.3, 0, 0, Math.PI * 2)
+      context.fill()
+      context.restore()
     }
   }
 
@@ -631,11 +640,13 @@
     sun: ['#f1ede1', '#ebe6d7', '#e0dac6'],
     rain: ['#e3e2d8', '#d5d7ce', '#c2c7bd'],
     snow: ['#f4f3ed', '#edece5', '#dfddd3'],
+    night: ['#4d5364', '#434959', '#343a49'],
   }
   var FIELD_SETS = {
     sun: ['#d9c39a', '#a8a494', '#a5939c', '#b8bd9c', '#c4b892'],
     rain: ['#b0ab96', '#8f9490', '#8b8792', '#98a294', '#a5a292'],
     snow: ['#d8dce1', '#c6ccd4', '#cdc6cf', '#ced6d4', '#d2d4d8'],
+    night: ['#565e73', '#49506b', '#5c5270', '#4b5c74', '#414a5e'],
   }
 
   function drawEnvironment(context, width, height, seed, weather) {
@@ -656,6 +667,41 @@
     softField(context, width * 0.85, height * 0.12, width * 0.13, height * 0.14, fields[2], seed + 3)
     softField(context, width * 0.14, height * 0.14, width * 0.11, height * 0.12, fields[3], seed + 4)
     softField(context, width * 0.5, height * 0.97, width * 0.3, height * 0.08, fields[4], seed + 5)
+
+    if (weather === 'night') {
+      /* the moon, gouache-pale, with a breath of halo */
+      var moonX = Math.min(width * 0.05, 74)
+      var moonY = height * 0.13
+      var halo = context.createRadialGradient(moonX, moonY, 8, moonX, moonY, 90)
+      halo.addColorStop(0, 'rgba(232, 230, 210, 0.22)')
+      halo.addColorStop(1, 'rgba(232, 230, 210, 0)')
+      context.fillStyle = halo
+      context.fillRect(moonX - 100, moonY - 100, 200, 200)
+      context.save()
+      context.fillStyle = '#e2ddc6'
+      for (var moonLayer = 0; moonLayer < 6; moonLayer += 1) {
+        context.globalAlpha = 0.3 + random() * 0.25
+        context.beginPath()
+        context.arc(moonX + (random() - 0.5) * 3, moonY + (random() - 0.5) * 3, 26 * (0.86 + random() * 0.22), 0, Math.PI * 2)
+        context.fill()
+      }
+      /* its craters, barely */
+      context.fillStyle = 'rgba(150, 146, 126, 0.4)'
+      context.globalAlpha = 1
+      context.beginPath()
+      context.arc(moonX - 8, moonY - 4, 4, 0, Math.PI * 2)
+      context.arc(moonX + 7, moonY + 8, 3, 0, Math.PI * 2)
+      context.fill()
+      context.restore()
+      /* a scatter of stars */
+      context.save()
+      for (var star = 0; star < 22; star += 1) {
+        context.globalAlpha = 0.25 + random() * 0.5
+        context.fillStyle = 'rgba(235, 233, 218, 1)'
+        context.fillRect(random() * width, random() * height * 0.45, 1 + random() * 1.4, 1 + random() * 1.4)
+      }
+      context.restore()
+    }
 
     if (weather === 'snow') {
       /* drifts along the bottom of the window */
@@ -698,7 +744,11 @@
       SKETCH.stain(context, random() * width, random() * height, 40 + random() * 120, seed + 40 + stain)
     }
 
-    /* groves hugging the edges, crowns bleeding off-screen */
+  }
+
+  /* the trees live on their own sheet, so the wind can lean them */
+  function drawTreeLayer(context, width, height, seed, weather) {
+    var random = SKETCH.rng(seed + 99)
     var scale = Math.max(height, 560)
     GROVE.tree(context, width * 0.04, height + 14, scale * (0.66 + random() * 0.2), seed + 100, weather)
     GROVE.tree(context, width * 0.115, height + 30, scale * (0.44 + random() * 0.16), seed + 130, weather)
@@ -716,9 +766,25 @@
     context.restore()
   }
 
+  /* how hard the wind blows in each weather, and how fast it turns */
+  var WINDS = {
+    sun: { amp: 0.45, speed: 0.5 },
+    rain: { amp: 1.5, speed: 1.35 },
+    snow: { amp: 0.85, speed: 0.65 },
+    night: { amp: 0.3, speed: 0.32 },
+  }
+
+  /* the wind at a moment, in degrees of lean — shared with the pages */
+  SKETCH.windAt = function (t) {
+    var wind = WINDS[SKETCH.weatherNow] || WINDS.sun
+    var gust = 0.68 + 0.32 * Math.sin(t * 0.13 * wind.speed + 1)
+    return wind.amp * gust * (Math.sin(t * 0.6 * wind.speed) * 0.62 + Math.sin(t * 1.7 * wind.speed + 1.7) * 0.38)
+  }
+  SKETCH.weatherNow = 'sun'
+
   /* Mount the environment behind everything, redrawn when the window
      changes shape. */
-  var WEATHERS = ['sun', 'rain', 'snow']
+  var WEATHERS = ['sun', 'rain', 'snow', 'night']
 
   function loadWeather() {
     try {
@@ -740,11 +806,17 @@
     canvas.setAttribute('aria-hidden', 'true')
     document.body.insertBefore(canvas, document.body.firstChild)
 
+    /* the trees on their own sheet, leaning with the wind */
+    var trees = document.createElement('canvas')
+    trees.id = 'grove-trees'
+    trees.setAttribute('aria-hidden', 'true')
+    document.body.insertBefore(trees, canvas.nextSibling)
+
     /* the precipitation lives on its own sheet over the grove */
     var precip = document.createElement('canvas')
     precip.id = 'precip'
     precip.setAttribute('aria-hidden', 'true')
-    document.body.insertBefore(precip, canvas.nextSibling)
+    document.body.insertBefore(precip, trees.nextSibling)
 
     var seed = 7300 + Math.floor(Math.random() * 400)
     function draw() {
@@ -756,8 +828,14 @@
       var context = canvas.getContext('2d')
       context.setTransform(ratio, 0, 0, ratio, 0, 0)
       drawEnvironment(context, width, height, seed, weather)
+      trees.width = Math.round(width * ratio)
+      trees.height = Math.round(height * ratio)
+      var treeContext = trees.getContext('2d')
+      treeContext.setTransform(ratio, 0, 0, ratio, 0, 0)
+      drawTreeLayer(treeContext, width, height, seed, weather)
       precip.width = Math.round(width * ratio)
       precip.height = Math.round(height * ratio)
+      SKETCH.weatherNow = weather
     }
 
     /* ------------------------------------------------- falling weather */
@@ -767,11 +845,13 @@
     function seedDrops() {
       drops = []
       var random = SKETCH.rng(seed + 9)
-      var count = weather === 'rain' ? 110 : weather === 'snow' ? 80 : 0
+      var count = weather === 'rain' ? 110 : weather === 'snow' ? 80 : weather === 'night' ? 24 : 0
       for (var index = 0; index < count; index += 1) {
         drops.push({
           x: random(), y: random(),
-          speed: weather === 'rain' ? 0.55 + random() * 0.35 : 0.05 + random() * 0.05,
+          speed: weather === 'rain' ? 0.55 + random() * 0.35
+            : weather === 'night' ? 0.004 + random() * 0.006
+              : 0.05 + random() * 0.05,
           length: 7 + random() * 9,
           drift: weather === 'rain' ? 0.06 + random() * 0.04 : 0,
           radius: 1 + random() * 1.6,
@@ -783,7 +863,12 @@
     var lastTick = 0
     function tick(now) {
       raf = 0
-      if (!drops.length) return
+      /* the trees lean with the weather's wind */
+      trees.style.transform = 'skewX(' + SKETCH.windAt(now * 0.001).toFixed(3) + 'deg)'
+      if (!drops.length) {
+        raf = requestAnimationFrame(tick)
+        return
+      }
       var dt = Math.min(0.06, (now - lastTick) / 1000) || 0.016
       lastTick = now
       var width = window.innerWidth
@@ -807,6 +892,22 @@
           context.moveTo(dropX, dropY)
           context.lineTo(dropX - drop.length * 0.22, dropY - drop.length)
           context.stroke()
+        } else if (weather === 'night') {
+          /* a firefly: a slow wanderer with a breathing lamp */
+          var wanderX = dropX + Math.sin(now * 0.00042 + drop.phase * 3) * 46
+          var wanderY = (drop.y * 0.7 + 0.28) * height + Math.sin(now * 0.00031 + drop.phase * 5) * 30
+          var lamp = Math.max(0, Math.sin(now * 0.0016 + drop.phase * 7))
+          if (lamp > 0.05) {
+            var glowLamp = context.createRadialGradient(wanderX, wanderY, 0, wanderX, wanderY, 7 + lamp * 7)
+            glowLamp.addColorStop(0, 'rgba(226, 232, 150, ' + (0.5 * lamp) + ')')
+            glowLamp.addColorStop(1, 'rgba(226, 232, 150, 0)')
+            context.fillStyle = glowLamp
+            context.fillRect(wanderX - 16, wanderY - 16, 32, 32)
+            context.globalAlpha = Math.min(1, 0.4 + lamp * 0.6)
+            context.fillStyle = 'rgba(240, 244, 190, 1)'
+            context.fillRect(wanderX - 0.8, wanderY - 0.8, 1.8, 1.8)
+            context.globalAlpha = 1
+          }
         } else {
           var sway = Math.sin(drop.y * 9 + drop.phase) * 6
           context.globalAlpha = 0.55 + Math.sin(drop.phase + drop.y * 5) * 0.2
@@ -825,7 +926,7 @@
       var context = precip.getContext('2d')
       context.setTransform(1, 0, 0, 1, 0, 0)
       context.clearRect(0, 0, precip.width, precip.height)
-      if (reducedMotion || !drops.length) return
+      if (reducedMotion) return
       if (!raf) raf = requestAnimationFrame(tick)
     }
 
@@ -866,6 +967,15 @@
             [glyphX - 4 + drop * 4, glyphY + 2], [glyphX - 6 + drop * 4, glyphY + 8],
           ], { seed: 25 + drop, color: 'rgba(96, 110, 122, 0.85)', width: 1.3, amp: 0.3 })
         }
+      } else if (weather === 'night') {
+        SKETCH.stroke(context, [
+          [glyphX + 3, glyphY - 7], [glyphX - 2, glyphY - 5], [glyphX - 5, glyphY], [glyphX - 2, glyphY + 5], [glyphX + 3, glyphY + 7],
+        ], { seed: 35, color: 'rgba(120, 116, 96, 0.9)', width: 1.4, amp: 0.4, step: 4 })
+        SKETCH.stroke(context, [
+          [glyphX + 3, glyphY - 7], [glyphX + 1, glyphY - 3], [glyphX + 0.5, glyphY + 2], [glyphX + 3, glyphY + 7],
+        ], { seed: 36, color: 'rgba(120, 116, 96, 0.9)', width: 1.2, amp: 0.3, step: 4 })
+        SKETCH.dot(context, glyphX + 8, glyphY - 5, 1, 'rgba(120, 116, 96, 0.9)', 37)
+        SKETCH.dot(context, glyphX + 6, glyphY + 4, 0.8, 'rgba(120, 116, 96, 0.8)', 38)
       } else {
         for (var flake = 0; flake < 3; flake += 1) {
           var flakeX = glyphX - 5 + flake * 5
