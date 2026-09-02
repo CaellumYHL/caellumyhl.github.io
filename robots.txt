@@ -1,0 +1,5 @@
+# https://caellumyhl.github.io/ — the sketchbook of Caellum Yip Hoi-Lee
+User-agent: *
+Allow: /
+
+Sitemap: https://caellumyhl.github.io/sitemap.xml

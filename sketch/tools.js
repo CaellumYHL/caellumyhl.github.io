@@ -592,6 +592,12 @@ SKETCH.mount = function (container, spec) {
       anchor.href = spot.href
       anchor.setAttribute('aria-label', spot.label)
       anchor.title = spot.label
+      /* the label again as clipped text, so crawlers see anchor text where
+         the drawing only has lettering painted onto a canvas */
+      var caption = document.createElement('span')
+      caption.className = 'visually-hidden'
+      caption.textContent = spot.label
+      anchor.appendChild(caption)
       if (/^https?:/.test(spot.href)) {
         anchor.target = '_blank'
         anchor.rel = 'noreferrer'
