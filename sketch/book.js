@@ -144,12 +144,13 @@
         }
         context.restore()
 
-        /* the label, written up the tab */
+        /* the label, written up the tab, shrunk to fit it */
+        var labelSize = Math.min(6.5 * ts, (10 * (tabH - 8)) / SKETCH.letter.measure(page.tab, 10, 0.5))
         context.save()
         context.translate(pageW + (active ? 15 : 11) * ts, tabY + tabH / 2)
         context.rotate(Math.PI / 2)
         SKETCH.letter.write(context, page.tab, 0, 2.5 * ts, {
-          size: 6.5 * ts,
+          size: labelSize,
           color: 'rgba(252, 248, 238, 0.95)',
           seed: 4100 + index,
           align: 'center',

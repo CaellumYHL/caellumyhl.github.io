@@ -28,6 +28,16 @@ body {
   pointer-events: none;
 }
 
+/* the one butterfly, above everything, touching nothing */
+#butterfly {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 3;
+  pointer-events: none;
+}
+
 #weather-toggle {
   position: fixed;
   top: 8px;
@@ -65,6 +75,18 @@ body {
   filter:
     drop-shadow(0 1px 3px rgba(52, 42, 26, 0.3))
     drop-shadow(0 8px 26px rgba(52, 42, 26, 0.24));
+  /* touch draws and flips; it never scrolls or zooms the page */
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+}
+
+#weather-toggle {
+  touch-action: manipulation;
 }
 
 .hotspots a {

@@ -234,9 +234,9 @@
           api.link(0, top, width, ENTRY, project.href, project.title + ' — ' + project.linkNote)
 
           if (compact) {
-            /* a tight two-line entry on small screens */
-            write(context, project.shortDate, textX, top + 52, { size: 8.5, media: 'pencil', seed: project.seed + 4 })
-            write(context, project.metric, width - 26, top + 52, { size: 8.5, color: SKETCH.RED, seed: project.seed + 3, align: 'right' })
+            /* a tight three-line entry on small screens */
+            write(context, project.shortDate, textX, top + 50, { size: 8.5, media: 'pencil', seed: project.seed + 4 })
+            write(context, project.metric, textX, top + 72, { size: 8.5, color: SKETCH.RED, seed: project.seed + 3 })
           } else {
             write(context, project.metric, width - 28, top + 24, { size: 9.5 * s, color: SKETCH.RED, seed: project.seed + 3, align: 'right' })
             write(context, project.date, textX, top + 34 + 22 * s, { size: 9 * s, media: 'pencil', seed: project.seed + 4 })
@@ -300,11 +300,12 @@
           var lineY = y + 16 + 44 * s
           var maxWidth = width - textX - 34
           ;(row.bullets || []).forEach(function (bullet, bulletIndex) {
-            var pieces = wrapLines(bullet, factSize, maxWidth - 16 * s)
             if (compact && bulletIndex > 0) return
-            if (lineY + pieces.length * factSize * 1.7 > floor) return
+            if (lineY + factSize * 1.7 > floor) return
+            var pieces = wrapLines(bullet, factSize, maxWidth - 16 * s)
             write(context, '—', textX, lineY, { size: factSize, color: SKETCH.PENCIL, seed: 1130 + index })
             pieces.forEach(function (piece) {
+              if (lineY + factSize * 0.7 > floor) return
               write(context, piece, textX + 16 * s, lineY, { size: factSize, color: SKETCH.INK_SOFT, seed: 1140 + index * 7 + lineY })
               lineY += factSize * 1.7
             })

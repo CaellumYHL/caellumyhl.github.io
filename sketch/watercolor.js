@@ -407,7 +407,9 @@
 
         SKETCH.letter.write(context, 'WET PAPER, NO. 2', PAD, 26, { size: 12, seed: 61, width: 1.5, tracking: 0.42 })
         SKETCH.rule(context, PAD - 2, 35, PAD + SKETCH.letter.measure('WET PAPER, NO. 2', 12, 0.42) + 8, { seed: 62, color: SKETCH.PENCIL, width: 1.1 })
-        SKETCH.letter.write(context, 'DRAG ON THE PAPER', width - PAD, 26, { size: 7, color: SKETCH.GREEN_PEN, seed: 63, align: 'right' })
+        if (width >= 460) {
+          SKETCH.letter.write(context, 'DRAG ON THE PAPER', width - PAD, 26, { size: 7, color: SKETCH.GREEN_PEN, seed: 63, align: 'right' })
+        }
 
         /* pencil frame around the paper */
         SKETCH.stroke(context, [

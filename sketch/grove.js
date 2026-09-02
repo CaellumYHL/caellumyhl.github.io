@@ -363,6 +363,12 @@
     precip.setAttribute('aria-hidden', 'true')
     document.body.insertBefore(precip, canvas.nextSibling)
 
+    /* and one great scrapbook butterfly on a sheet above everything */
+    var flight = document.createElement('canvas')
+    flight.id = 'butterfly'
+    flight.setAttribute('aria-hidden', 'true')
+    document.body.appendChild(flight)
+
     var seed = 7300 + Math.floor(Math.random() * 400)
     function draw() {
       var width = window.innerWidth
@@ -375,6 +381,9 @@
       drawEnvironment(context, width, height, seed, weather)
       precip.width = Math.round(width * ratio)
       precip.height = Math.round(height * ratio)
+      flight.width = Math.round(width * ratio)
+      flight.height = Math.round(height * ratio)
+      butterflyParts = null
     }
 
     /* ------------------------------------------------- falling weather */
@@ -397,10 +406,146 @@
       }
     }
 
+    /* ---------------------------------------------- the one butterfly */
+    var butterflyParts = null
+    var butterflyPhase = 0
+
+    function buildButterfly() {
+      var span = SKETCH.clamp(window.innerWidth * 0.13, 96, 220)
+      var wingWidth = Math.round(span * 0.55)
+      var wingHeight = Math.round(span * 0.8)
+      var wing = document.createElement('canvas')
+      wing.width = wingWidth * 2
+      wing.height = wingHeight * 2
+      var context = wing.getContext('2d')
+      context.setTransform(2, 0, 0, 2, 0, 0)
+
+      var fore = [
+        [3, wingHeight * 0.5], [wingWidth * 0.22, wingHeight * 0.14], [wingWidth * 0.68, wingHeight * 0.04],
+        [wingWidth * 0.95, wingHeight * 0.2], [wingWidth * 0.82, wingHeight * 0.44], [wingWidth * 0.36, wingHeight * 0.52],
+      ]
+      var hind = [
+        [3, wingHeight * 0.54], [wingWidth * 0.5, wingHeight * 0.5], [wingWidth * 0.72, wingHeight * 0.64],
+        [wingWidth * 0.6, wingHeight * 0.86], [wingWidth * 0.3, wingHeight * 0.96], [wingWidth * 0.07, wingHeight * 0.74],
+      ]
+
+      function fillShape(points, color, grow) {
+        var centerX = 0
+        var centerY = 0
+        points.forEach(function (point) { centerX += point[0] / points.length; centerY += point[1] / points.length })
+        context.beginPath()
+        points.forEach(function (point, index) {
+          var x = centerX + (point[0] - centerX) * grow
+          var y = centerY + (point[1] - centerY) * grow
+          if (index === 0) context.moveTo(x, y)
+          else context.lineTo(x, y)
+        })
+        context.closePath()
+        context.fillStyle = color
+        context.fill()
+      }
+
+      /* the paper it was cut from: a cream margin all round */
+      fillShape(fore, '#f3eeda', 1.14)
+      fillShape(hind, '#f3eeda', 1.16)
+      /* the painted wings */
+      fillShape(fore, '#d9a441', 1)
+      fillShape(hind, '#6d4a5e', 1)
+      /* granulation and scribble, like every wash on the site */
+      var random = SKETCH.rng(4177)
+      context.save()
+      context.beginPath()
+      fore.concat([fore[0]]).forEach(function (point, index) {
+        if (index === 0) context.moveTo(point[0], point[1])
+        else context.lineTo(point[0], point[1])
+      })
+      hind.concat([hind[0]]).forEach(function (point, index) {
+        if (index === 0) context.moveTo(point[0], point[1])
+        else context.lineTo(point[0], point[1])
+      })
+      context.clip()
+      for (var grain = 0; grain < 260; grain += 1) {
+        context.globalAlpha = 0.08 + random() * 0.16
+        context.fillStyle = random() > 0.5 ? 'rgba(84, 56, 30, 1)' : 'rgba(255, 248, 230, 1)'
+        context.fillRect(random() * wingWidth, random() * wingHeight, 1 + random() * 1.6, 1 + random() * 1.2)
+      }
+      context.globalAlpha = 1
+      context.restore()
+      /* cream spots */
+      SKETCH.dot(context, wingWidth * 0.62, wingHeight * 0.2, wingWidth * 0.05, 'rgba(246, 240, 222, 0.95)', 4180)
+      SKETCH.dot(context, wingWidth * 0.78, wingHeight * 0.3, wingWidth * 0.035, 'rgba(246, 240, 222, 0.9)', 4181)
+      SKETCH.dot(context, wingWidth * 0.42, wingHeight * 0.72, wingWidth * 0.04, 'rgba(232, 220, 200, 0.9)', 4182)
+      /* the ink that missed the paint */
+      SKETCH.stroke(context, fore.concat([fore[0]]).map(function (point) { return [point[0] + 1.5, point[1] - 1] }), { seed: 4183, color: 'rgba(48, 42, 36, 0.9)', width: 2, amp: 1.2, step: 6 })
+      SKETCH.stroke(context, hind.concat([hind[0]]).map(function (point) { return [point[0] + 1, point[1] + 1] }), { seed: 4184, color: 'rgba(48, 42, 36, 0.85)', width: 1.8, amp: 1.2, step: 6 })
+      /* veins from the shoulder */
+      SKETCH.stroke(context, [[4, wingHeight * 0.5], [wingWidth * 0.6, wingHeight * 0.16]], { seed: 4185, color: 'rgba(48, 42, 36, 0.5)', width: 1, amp: 0.8 })
+      SKETCH.stroke(context, [[4, wingHeight * 0.5], [wingWidth * 0.78, wingHeight * 0.3]], { seed: 4186, color: 'rgba(48, 42, 36, 0.5)', width: 1, amp: 0.8 })
+      SKETCH.stroke(context, [[4, wingHeight * 0.54], [wingWidth * 0.52, wingHeight * 0.78]], { seed: 4187, color: 'rgba(48, 42, 36, 0.5)', width: 1, amp: 0.8 })
+
+      /* the body on its own little sheet */
+      var body = document.createElement('canvas')
+      var bodyWidth = Math.round(span * 0.1)
+      var bodyHeight = Math.round(span * 0.52)
+      body.width = bodyWidth * 2
+      body.height = bodyHeight * 2
+      var bodyContext = body.getContext('2d')
+      bodyContext.setTransform(2, 0, 0, 2, 0, 0)
+      SKETCH.stroke(bodyContext, [
+        [bodyWidth * 0.5, bodyHeight * 0.22], [bodyWidth * 0.5, bodyHeight * 0.6], [bodyWidth * 0.5, bodyHeight * 0.92],
+      ], { seed: 4190, color: 'rgba(52, 44, 36, 0.95)', width: bodyWidth * 0.5, amp: 0.6 })
+      SKETCH.dot(bodyContext, bodyWidth * 0.5, bodyHeight * 0.18, bodyWidth * 0.26, 'rgba(52, 44, 36, 0.95)', 4191)
+      SKETCH.stroke(bodyContext, [[bodyWidth * 0.46, bodyHeight * 0.14], [bodyWidth * 0.2, bodyHeight * 0.02]], { seed: 4192, color: 'rgba(52, 44, 36, 0.85)', width: 1.1, amp: 0.8 })
+      SKETCH.stroke(bodyContext, [[bodyWidth * 0.54, bodyHeight * 0.14], [bodyWidth * 0.82, bodyHeight * 0.02]], { seed: 4193, color: 'rgba(52, 44, 36, 0.85)', width: 1.1, amp: 0.8 })
+
+      butterflyParts = { wing: wing, body: body, wingWidth: wingWidth, wingHeight: wingHeight, bodyWidth: bodyWidth, bodyHeight: bodyHeight }
+    }
+
+    function drawButterfly(now) {
+      if (!butterflyParts) buildButterfly()
+      var parts = butterflyParts
+      var width = window.innerWidth
+      var height = window.innerHeight
+      var ratio = Math.min(1.5, window.devicePixelRatio || 1)
+      var context = flight.getContext('2d')
+      context.setTransform(ratio, 0, 0, ratio, 0, 0)
+      context.clearRect(0, 0, width, height)
+
+      var t = now * 0.001
+      /* it flutters in bursts, then glides */
+      var effort = 0.5 + 0.5 * Math.sin(t * 0.9 + Math.sin(t * 0.31) * 1.7)
+      butterflyPhase += (0.016) * (4 + 11 * effort)
+      var fold = Math.sin(butterflyPhase)
+      var spread = 0.18 + 0.82 * Math.abs(fold)
+
+      var x = width * 0.5 + Math.sin(t * 0.19) * width * 0.15 + Math.sin(t * 0.047 + 2) * width * 0.06
+      var y = height * 0.42 + Math.sin(t * 0.23 + 1) * height * 0.11 + fold * 3 - effort * 8
+      var tilt = Math.cos(t * 0.19) * 0.16 + Math.sin(t * 0.09) * 0.08
+
+      context.save()
+      context.translate(x, y)
+      context.rotate(tilt)
+      context.globalAlpha = 0.96
+      context.save()
+      context.scale(-spread, 1)
+      context.drawImage(parts.wing, 0, -parts.wingHeight / 2, parts.wingWidth, parts.wingHeight)
+      context.restore()
+      context.save()
+      context.scale(spread, 1)
+      context.drawImage(parts.wing, 0, -parts.wingHeight / 2, parts.wingWidth, parts.wingHeight)
+      context.restore()
+      context.drawImage(parts.body, -parts.bodyWidth / 2, -parts.bodyHeight * 0.4, parts.bodyWidth, parts.bodyHeight)
+      context.restore()
+    }
+
     var lastTick = 0
     function tick(now) {
       raf = 0
-      if (!drops.length) return
+      drawButterfly(now)
+      if (!drops.length) {
+        raf = requestAnimationFrame(tick)
+        return
+      }
       var dt = Math.min(0.06, (now - lastTick) / 1000) || 0.016
       lastTick = now
       var width = window.innerWidth
@@ -442,7 +587,11 @@
       var context = precip.getContext('2d')
       context.setTransform(1, 0, 0, 1, 0, 0)
       context.clearRect(0, 0, precip.width, precip.height)
-      if (reducedMotion || !drops.length) return
+      if (reducedMotion) {
+        /* a still butterfly, wings open, for those who prefer stillness */
+        drawButterfly(1200)
+        return
+      }
       if (!raf) raf = requestAnimationFrame(tick)
     }
 

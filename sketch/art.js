@@ -72,6 +72,45 @@
     context.restore()
   }
 
+  var REDUCED_MOTION = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  /* Snapshot a freshly drawn page and keep a quiet overlay moving on it —
+     the base art stays still, only the air moves. */
+  function beginIdle(state, api, overlay) {
+    if (REDUCED_MOTION) return
+    var snap = document.createElement('canvas')
+    snap.width = api.canvas.width
+    snap.height = api.canvas.height
+    snap.getContext('2d').drawImage(api.canvas, 0, 0)
+    state.snap = snap
+    state.idleApi = api
+    if (state.raf) return
+    var tick = function (now) {
+      state.raf = 0
+      if (state.hidden || !state.snap) return
+      var liveApi = state.idleApi
+      var ratio = liveApi.canvas.width / liveApi.width
+      var region = { x: 0, y: 58, width: liveApi.width, height: liveApi.height - 58 - 96 }
+      var context = liveApi.canvas.getContext('2d')
+      context.save()
+      context.setTransform(1, 0, 0, 1, 0, 0)
+      context.drawImage(
+        state.snap,
+        region.x * ratio, region.y * ratio, region.width * ratio, region.height * ratio,
+        region.x * ratio, region.y * ratio, region.width * ratio, region.height * ratio,
+      )
+      context.setTransform(ratio, 0, 0, ratio, 0, 0)
+      context.beginPath()
+      context.rect(region.x, region.y, region.width, region.height)
+      context.clip()
+      overlay(context, now)
+      context.restore()
+      state.raf = requestAnimationFrame(tick)
+    }
+    state.raf = requestAnimationFrame(tick)
+  }
+
   /* ---------------------------------------------------------------- room */
   /* A pale, empty room with trees and grass growing out of the carpet —
      painted in the same pencil-and-wash hand as the grove outside. */
@@ -89,6 +128,7 @@
         top: height * (0.24 + random() * 0.04),
         bottom: height * (0.66 + random() * 0.03),
       }
+      state.room = { back: back, width: width, height: height }
 
       function fillPolygon(points, color) {
         context.save()
@@ -306,11 +346,34 @@
       context.restore()
     }
 
+    function roomOverlay(context, now) {
+      var room = state.room
+      if (!room) return
+      var t = now * 0.001
+      /* dust hanging in the still air */
+      context.fillStyle = 'rgba(120, 108, 86, 1)'
+      for (var mote = 0; mote < 22; mote += 1) {
+        var moteX = (((mote * 0.127 + t * 0.006 * (1 + (mote % 3))) % 1) + 1) % 1 * room.width
+        var moteY = ((((mote * 0.211) - t * 0.009) % 1) + 1) % 1 * room.height
+        context.globalAlpha = 0.08 + 0.12 * Math.abs(Math.sin(t * 0.7 + mote * 1.7))
+        context.fillRect(moteX, moteY, 1.3, 1.3)
+      }
+      context.globalAlpha = 1
+      /* the fluorescents stutter now and then */
+      var cycle = t % 6.4
+      if (cycle < 0.1 || (cycle > 0.18 && cycle < 0.26)) {
+        context.globalAlpha = 0.07
+        context.fillStyle = '#fdf9e8'
+        context.fillRect(0, 0, room.width, room.back.bottom)
+        context.globalAlpha = 1
+      }
+    }
+
     return {
       state: state,
       aria: 'An artwork: a pale, empty back room with drawn trees and grass growing out of the carpet, regrown on every click.',
       height: function (width) { return width * 1.05 },
-      draw: function (context, width, height) {
+      draw: function (context, width, height, api) {
         SKETCH.plainPaper(context, width, height, { seed: 903, tone: '#efece1' })
         drawRoom(context, width, height, state.seed)
         write(context, data.title, 26, 28, { size: 12, media: 'pencil', seed: 901, tracking: 0.4, width: 2 })
@@ -318,6 +381,7 @@
         write(context, data.date, 26 + measure(data.title, 12, 0.4) + 20, 28, { size: 8.5, media: 'pencil', seed: 904 })
         write(context, 'CLICK TO REGROW', 26, 48, { size: 7, color: SKETCH.GREEN_PEN, seed: 906 })
         SKETCH.artifacts(context, width, height, 908 + state.seed)
+        if (api) beginIdle(state, api, roomOverlay)
       },
       onPointer: function (type, x, y, api) {
         if (type === 'move') { api.canvas.style.cursor = 'pointer'; return }
@@ -887,6 +951,7 @@
       var frameY = height * 0.095
       var frameWidth = width * 0.89
       var frameHeight = height * 0.84
+      state.frame = { x: frameX, y: frameY, width: frameWidth, height: frameHeight }
 
       context.save()
       context.beginPath()
@@ -983,17 +1048,67 @@
       SKETCH.texture(context, width, height, seed)
     }
 
+    function courtOverlay(context, now) {
+      var frame = state.frame
+      if (!frame) return
+      var t = now * 0.001
+
+      /* the light through the canopy breathes */
+      var shimmer = 0.028 + 0.028 * Math.sin(t * 0.5)
+      var glow = context.createLinearGradient(0, frame.y, 0, frame.y + frame.height * 0.8)
+      glow.addColorStop(0, 'rgba(248, 246, 224, ' + shimmer + ')')
+      glow.addColorStop(1, 'rgba(248, 246, 224, 0)')
+      context.fillStyle = glow
+      context.fillRect(frame.x + frame.width * 0.3, frame.y, frame.width * 0.28, frame.height * 0.8)
+
+      /* dust rising through the shafts */
+      context.fillStyle = 'rgba(246, 243, 220, 1)'
+      for (var mote = 0; mote < 18; mote += 1) {
+        var rise = ((t * 0.03 * (1 + (mote % 3) * 0.4) + mote * 0.37) % 1)
+        var moteX = frame.x + frame.width * (0.33 + ((mote * 0.617) % 1) * 0.24)
+        var moteY = frame.y + frame.height * (0.75 - rise * 0.6)
+        context.globalAlpha = Math.sin(rise * Math.PI) * (0.18 + 0.14 * ((mote * 7) % 3) / 3)
+        context.fillRect(moteX + Math.sin(t + mote) * 3, moteY, 1.4, 1.4)
+      }
+      context.globalAlpha = 1
+
+      /* every little while, one leaf lets go */
+      var period = 8.5
+      var phase = (t % period) / period
+      if (phase < 0.62) {
+        var fall = phase / 0.62
+        var leafX = frame.x + frame.width * (0.45 + Math.sin(fall * 9 + Math.floor(t / period)) * 0.05)
+        var leafY = frame.y + frame.height * (0.16 + fall * 0.58)
+        context.save()
+        context.translate(leafX, leafY)
+        context.rotate(Math.sin(fall * 11) * 0.9)
+        context.globalAlpha = Math.min(1, Math.sin(fall * Math.PI) * 1.6) * 0.85
+        context.fillStyle = '#77855c'
+        context.beginPath()
+        context.ellipse(0, 0, 5.5, 3, 0, 0, Math.PI * 2)
+        context.fill()
+        context.strokeStyle = 'rgba(46, 54, 40, 0.7)'
+        context.lineWidth = 0.8
+        context.beginPath()
+        context.moveTo(-5, 0)
+        context.lineTo(5, 0)
+        context.stroke()
+        context.restore()
+      }
+    }
+
     return {
       state: state,
       aria: 'An artwork: a sunken court deep in a forest — mossy ruined columns among tall trees, light through the canopy, a ring of ivy, and a small striped dais at the centre. Repainted on every click.',
       height: function (width) { return width * 1.05 },
-      draw: function (context, width, height) {
+      draw: function (context, width, height, api) {
         drawCourt(context, width, height, state.seed)
         write(context, data.title, 26, 30, { size: 12, media: 'pencil', seed: 1201, tracking: 0.4, width: 2 })
         SKETCH.rule(context, 24, 40, 26 + measure(data.title, 12, 0.4) + 8, { seed: 1202, color: SKETCH.PENCIL, width: 1.1 })
         write(context, data.date, 26 + measure(data.title, 12, 0.4) + 20, 30, { size: 8.5, media: 'pencil', seed: 1204 })
         write(context, 'CLICK TO REPAINT', width - 26, 30, { size: 7, color: SKETCH.GREEN_PEN, seed: 1206, align: 'right' })
         SKETCH.artifacts(context, width, height, 1208 + state.seed)
+        if (api) beginIdle(state, api, courtOverlay)
       },
       onPointer: function (type, x, y, api) {
         if (type === 'move') { api.canvas.style.cursor = 'pointer'; return }
