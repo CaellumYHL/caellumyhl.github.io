@@ -117,10 +117,13 @@
       state.zones = []
       var ts = SKETCH.clamp(width / 900, 1, 1.4)
 
-      /* index tabs, sliding out from under the page edge */
-      var tabH = Math.min(46 * ts, (height - 120) / pages.length - 8)
+      /* index tabs, sliding out from under the page edge; on short
+         screens they tighten up and wear only their initials */
+      var slot = Math.min(46 * ts + 8, (height - 44) / pages.length)
+      var tabH = Math.max(10, slot - Math.min(8, slot * 0.2))
+      var tabsTop = Math.max(20, (height - slot * pages.length) / 2)
       pages.forEach(function (page, index) {
-        var tabY = 58 + index * (tabH + 8)
+        var tabY = tabsTop + index * slot
         var active = index === state.index
         var hovered = state.hover === 'tab' + index
         var color = TAB_COLORS[index % TAB_COLORS.length]
@@ -147,12 +150,17 @@
         }
         context.restore()
 
-        /* the label, written up the tab, shrunk to fit it */
-        var labelSize = Math.min(6.5 * ts, (10 * (tabH - 8)) / SKETCH.letter.measure(page.tab, 10, 0.5))
+        /* the label, written up the tab, shrunk to fit it — down to a
+           single initial when the tab is short */
+        var label = tabH >= 26 ? page.tab : page.tab.charAt(0)
+        var labelSize = Math.min(
+          (label.length > 1 ? 6.5 : 9) * ts,
+          (10 * (tabH - 6)) / SKETCH.letter.measure(label, 10, 0.5),
+        )
         context.save()
         context.translate(pageW + (active ? 15 : 11) * ts, tabY + tabH / 2)
         context.rotate(Math.PI / 2)
-        SKETCH.letter.write(context, page.tab, 0, 2.5 * ts, {
+        SKETCH.letter.write(context, label, 0, 2.5 * ts, {
           size: labelSize,
           color: 'rgba(252, 248, 238, 0.95)',
           seed: 4100 + index,

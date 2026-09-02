@@ -14,7 +14,7 @@
     cover: {
       date: slashDate,
       subtitle: 'CS AT THE UNIVERSITY OF TORONTO · SOFTWARE ENGINEER AT CHATFORCE',
-      stationery: 'YIP HOI-LEE & CRAWFORD · TORONTO',
+      stationery: 'YHL PAPER CO. · TORONTO',
       links: [
         { label: 'GITHUB ↗', href: 'https://github.com/CaellumYHL', title: 'GitHub — CaellumYHL' },
         { label: 'LINKEDIN ↗', href: 'https://www.linkedin.com/in/caellum-yip-hoi-lee-29242b30b', title: 'LinkedIn — Caellum Yip Hoi-Lee' },

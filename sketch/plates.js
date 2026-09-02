@@ -49,12 +49,17 @@
     var state = { planted: [], raf: 0 }
     var KINDS = ['rose', 'poppy', 'tulip', 'daisy', 'lavender']
 
+    function cornerInset(width) {
+      return Math.round(Math.min(120, Math.max(52, width * 0.08)))
+    }
+
     function gardenBox(width, height) {
       /* inset from the corners so the dog-ears stay untouched, and deep
          enough that no flower loses its feet */
+      var inset = cornerInset(width)
       return {
-        x: 120,
-        width: width - 240,
+        x: inset,
+        width: width - inset * 2,
         y: Math.round(height * 0.42),
         bottom: Math.round(Math.min(height - 26, height * 0.965)),
         pivot: height * 0.93,
@@ -62,7 +67,9 @@
     }
 
     function drawGarden(context, width, height) {
-      SKETCH.garden.bed(context, width * 0.7, height * 0.9, Math.min(height * 0.32, width * 0.22), 7411)
+      var spread = Math.min(height * 0.32, width * 0.22)
+      var bedX = Math.min(width * 0.7, width - cornerInset(width) - spread * 0.95)
+      SKETCH.garden.bed(context, bedX, height * 0.9, spread, 7411)
       state.planted.slice().sort(function (a, b) { return a.fy - b.fy }).forEach(function (plant) {
         SKETCH.garden[plant.kind](context, plant.fx * width, plant.fy * height, plant.size * height, plant.seed)
       })
@@ -154,7 +161,10 @@
           linkY += 30 * s
         })
 
-        SKETCH.print(context, data.stationery, width / 2, height - 30, { align: 'center', seed: 150 })
+        if (height > 480) {
+          var markSize = Math.min(7.5, (7.5 * (width - 60)) / measure(data.stationery, 7.5, 0.85))
+          SKETCH.print(context, data.stationery, width / 2, height - 30, { align: 'center', seed: 150, size: markSize })
+        }
         SKETCH.artifacts(context, width, height, 152)
 
         /* the page without its garden, remembered; the garden on its own
@@ -182,7 +192,8 @@
         startSway(api)
       },
       onPointer: function (type, x, y, api) {
-        var plantable = y > api.height * 0.62 && y < api.height - 110 && x > 130 && x < api.width - 130
+        var inset = cornerInset(api.width) + 10
+        var plantable = y > api.height * 0.62 && y < api.height - 110 && x > inset && x < api.width - inset
         if (type === 'move') {
           api.canvas.style.cursor = plantable ? 'pointer' : 'default'
           return
