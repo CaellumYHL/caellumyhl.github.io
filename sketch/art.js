@@ -1276,11 +1276,15 @@
       ], FLESH_SH, seed + 38, { passes: 3, jitter: unit * 0.0025, alpha: 0.15, dust: false })
       /* the reaching arm, carried high across the knee */
       modelLimb(context, [[px(0.125), py(0.385)], [px(0.2), py(0.345)], [px(0.27), py(0.34)], [px(0.333), py(0.36)]], unit * 0.028, unit * 0.012, seed + wave + 39, { jitter: unit * 0.0026 })
-      limb(context, [[px(0.333), py(0.36)], [px(0.353), py(0.372)]], unit * 0.011, unit * 0.007, FLESH, seed + wave + 40, { jitter: unit * 0.002 })
-      /* the limp fingers */
-      ink(context, [[px(0.354), py(0.37)], [px(0.371), py(0.389)]], seed + 41, 1.5, INK_DARK)
-      ink(context, [[px(0.352), py(0.377)], [px(0.368), py(0.398)]], seed + 42, 1.2, INK_DARK)
-      ink(context, [[px(0.349), py(0.383)], [px(0.362), py(0.405)]], seed + 43, 1, INK_DARK)
+      limb(context, [[px(0.333), py(0.36)], [px(0.349), py(0.369)]], unit * 0.012, unit * 0.009, FLESH, seed + wave + 40, { jitter: unit * 0.002 })
+      /* the limp hand: a palm, and fingers hanging from it */
+      soften(context, ringPoints(px(0.356), py(0.374), unit * 0.0105, 1.15), FLESH, seed + 240, { passes: 4, jitter: unit * 0.0015, dust: false })
+      limb(context, [[px(0.362), py(0.378)], [px(0.373), py(0.392)]], unit * 0.006, unit * 0.004, FLESH, seed + 241, { jitter: unit * 0.0012 })
+      limb(context, [[px(0.359), py(0.382)], [px(0.369), py(0.399)]], unit * 0.0055, unit * 0.0038, FLESH, seed + 242, { jitter: unit * 0.0012 })
+      limb(context, [[px(0.355), py(0.385)], [px(0.362), py(0.403)]], unit * 0.005, unit * 0.0035, FLESH, seed + 243, { jitter: unit * 0.0012 })
+      ink(context, [[px(0.361), py(0.377)], [px(0.3735), py(0.3925)]], seed + 41, 1.1, INK_DARK)
+      ink(context, [[px(0.358), py(0.381)], [px(0.3695), py(0.4)]], seed + 42, 1, INK_DARK)
+      ink(context, [[px(0.354), py(0.3845)], [px(0.3625), py(0.4045)]], seed + 43, 0.9, INK_DARK)
       /* head, tipped back to watch */
       soften(context, ringPoints(px(0.105), py(0.315), unit * 0.026, 1.12), FLESH, seed + wave + 44, { passes: 5, jitter: unit * 0.002 })
       soften(context, [
@@ -1327,10 +1331,10 @@
       ], '#8e5236', seed + wave + 66, { passes: 4, jitter: unit * 0.004, alpha: 0.16 })
 
       /* God's bare legs, trailing behind to the right */
-      modelLimb(context, [[px(0.818), py(0.47)], [px(0.868), py(0.55)], [px(0.916), py(0.617)]], unit * 0.03, unit * 0.014, seed + wave + 70, { jitter: unit * 0.0028 })
-      limb(context, [[px(0.916), py(0.617)], [px(0.945), py(0.638)], [px(0.955), py(0.652)]], unit * 0.012, unit * 0.006, FLESH, seed + wave + 71, { jitter: unit * 0.002 })
-      modelLimb(context, [[px(0.836), py(0.415)], [px(0.9), py(0.452)], [px(0.956), py(0.485)]], unit * 0.034, unit * 0.015, seed + wave + 73, { jitter: unit * 0.0028 })
-      limb(context, [[px(0.956), py(0.485)], [px(0.986), py(0.49)], [px(0.996), py(0.5)]], unit * 0.013, unit * 0.006, FLESH, seed + 74, { jitter: unit * 0.002 })
+      modelLimb(context, [[px(0.816), py(0.472)], [px(0.858), py(0.555)], [px(0.898), py(0.632)]], unit * 0.03, unit * 0.014, seed + wave + 70, { jitter: unit * 0.0028 })
+      limb(context, [[px(0.898), py(0.632)], [px(0.921), py(0.655)], [px(0.928), py(0.668)]], unit * 0.012, unit * 0.006, FLESH, seed + wave + 71, { jitter: unit * 0.002 })
+      modelLimb(context, [[px(0.84), py(0.412)], [px(0.902), py(0.44)], [px(0.955), py(0.458)]], unit * 0.034, unit * 0.015, seed + wave + 73, { jitter: unit * 0.0028 })
+      limb(context, [[px(0.955), py(0.458)], [px(0.983), py(0.458)], [px(0.993), py(0.468)]], unit * 0.013, unit * 0.006, FLESH, seed + 74, { jitter: unit * 0.002 })
 
       /* THE white robe: one bright body flying forward, shoulders to thigh */
       var robe = [
@@ -1358,6 +1362,14 @@
       /* folds turned away from the light */
       limb(context, [[px(0.676), py(0.215)], [px(0.724), py(0.262)], [px(0.772), py(0.334)]], unit * 0.009, unit * 0.007, TUNIC_SH, seed + 86, { passes: 3, jitter: unit * 0.002, alpha: 0.2, dust: false })
       limb(context, [[px(0.662), py(0.262)], [px(0.708), py(0.32)], [px(0.752), py(0.392)]], unit * 0.008, unit * 0.006, TUNIC_SH, seed + 87, { passes: 3, jitter: unit * 0.002, alpha: 0.18, dust: false })
+      /* the body inside the robe: a lit chest, a cinched waist, a hip */
+      soften(context, [
+        [px(0.652), py(0.215)], [px(0.676), py(0.19)], [px(0.706), py(0.196)], [px(0.716), py(0.23)],
+        [px(0.694), py(0.256)], [px(0.664), py(0.252)],
+      ], '#f4ece6', seed + 190, { passes: 3, jitter: unit * 0.002, alpha: 0.2, dust: false })
+      ink(context, [[px(0.706), py(0.238)], [px(0.72), py(0.28)], [px(0.727), py(0.325)]], seed + 191, 1.1)
+      ink(context, [[px(0.712), py(0.245)], [px(0.727), py(0.29)]], seed + 192, 0.9)
+      soften(context, ringPoints(px(0.792), py(0.385), unit * 0.026, 0.8), TUNIC_SH, seed + 193, { passes: 3, jitter: unit * 0.002, alpha: 0.14, dust: false })
       ink(context, [[px(0.668), py(0.21)], [px(0.72), py(0.25)], [px(0.775), py(0.32)], [px(0.815), py(0.4)]], seed + 77, 1)
       ink(context, [[px(0.655), py(0.26)], [px(0.705), py(0.315)], [px(0.757), py(0.385)], [px(0.795), py(0.44)]], seed + 78, 0.9)
       ink(context, robe.slice(0, 8), seed + 81, 1, 'rgba(60, 46, 38, 0.5)')
@@ -1372,16 +1384,16 @@
       ink(context, [[px(0.737), py(0.26)], [px(0.745), py(0.267)]], seed + 183, 0.9, INK_DARK)
 
       /* faces of the company, each one legible */
-      tinyFace(context, px(0.73), py(0.115), unit * 0.015, HAIR_AUBURN, -0.4, seed + 82)
-      tinyFace(context, px(0.782), py(0.1), unit * 0.014, HAIR_GOLD, -0.3, seed + 83)
-      tinyFace(context, px(0.862), py(0.225), unit * 0.019, HAIR_GOLD, -0.7, seed + 84)
-      tinyFace(context, px(0.9), py(0.33), unit * 0.015, HAIR_AUBURN, -0.5, seed + 85)
-      tinyFace(context, px(0.915), py(0.28), unit * 0.014, HAIR_BROWN, -0.4, seed + 86)
-      tinyFace(context, px(0.928), py(0.42), unit * 0.013, HAIR_BROWN, -0.5, seed + 87)
-      tinyFace(context, px(0.617), py(0.43), unit * 0.015, HAIR_BROWN, -0.2, seed + 88)
+      tinyFace(context, px(0.73), py(0.115), unit * 0.012, HAIR_AUBURN, -0.4, seed + 82)
+      tinyFace(context, px(0.782), py(0.1), unit * 0.011, HAIR_GOLD, -0.3, seed + 83)
+      tinyFace(context, px(0.862), py(0.225), unit * 0.015, HAIR_GOLD, -0.7, seed + 84)
+      tinyFace(context, px(0.9), py(0.33), unit * 0.012, HAIR_AUBURN, -0.5, seed + 85)
+      tinyFace(context, px(0.915), py(0.28), unit * 0.011, HAIR_BROWN, -0.4, seed + 86)
+      tinyFace(context, px(0.928), py(0.42), unit * 0.0105, HAIR_BROWN, -0.5, seed + 87)
+      tinyFace(context, px(0.617), py(0.43), unit * 0.012, HAIR_BROWN, -0.2, seed + 88)
       /* the carried putto below, curls of gold */
       soften(context, ringPoints(px(0.71), py(0.565), unit * 0.026, 1.15), CHERUB_FLESH, seed + wave + 89, { passes: 4, jitter: unit * 0.0025 })
-      tinyFace(context, px(0.687), py(0.515), unit * 0.017, HAIR_GOLD, -0.6, seed + 90)
+      tinyFace(context, px(0.687), py(0.515), unit * 0.014, HAIR_GOLD, -0.6, seed + 90)
       limb(context, [[px(0.702), py(0.6)], [px(0.678), py(0.68)]], unit * 0.012, unit * 0.007, CHERUB_FLESH, seed + 91, { jitter: unit * 0.002 })
       limb(context, [[px(0.725), py(0.605)], [px(0.71), py(0.69)]], unit * 0.011, unit * 0.007, CHERUB_FLESH, seed + 92, { jitter: unit * 0.002 })
 
@@ -1391,16 +1403,20 @@
 
       /* God: the great arm, then the head that means it */
       modelLimb(context, [[px(0.645), py(0.248)], [px(0.598), py(0.288)], [px(0.548), py(0.328)], [px(0.5), py(0.358)], [px(0.458), py(0.375)]], unit * 0.036, unit * 0.013, seed + wave + 95, { jitter: unit * 0.0026 })
-      limb(context, [[px(0.458), py(0.375)], [px(0.436), py(0.384)]], unit * 0.012, unit * 0.008, FLESH, seed + wave + 96, { jitter: unit * 0.002 })
-      ink(context, [[px(0.437), py(0.385)], [px(0.401), py(0.396)]], seed + 97, 1.6, INK_DARK)
-      ink(context, [[px(0.44), py(0.393)], [px(0.425), py(0.4)]], seed + 98, 1, INK_DARK)
+      limb(context, [[px(0.458), py(0.375)], [px(0.441), py(0.381)]], unit * 0.013, unit * 0.01, FLESH, seed + wave + 96, { jitter: unit * 0.002 })
+      /* the hand, and the finger that gives */
+      soften(context, ringPoints(px(0.432), py(0.386), unit * 0.011, 1.1), FLESH, seed + 250, { passes: 4, jitter: unit * 0.0015, dust: false })
+      limb(context, [[px(0.423), py(0.385)], [px(0.399), py(0.3935)]], unit * 0.006, unit * 0.0035, FLESH, seed + 251, { jitter: unit * 0.0012 })
+      limb(context, [[px(0.426), py(0.393)], [px(0.413), py(0.399)]], unit * 0.005, unit * 0.0035, FLESH, seed + 252, { jitter: unit * 0.0012 })
+      ink(context, [[px(0.424), py(0.383)], [px(0.398), py(0.3925)]], seed + 97, 1.3, INK_DARK)
+      ink(context, [[px(0.427), py(0.391)], [px(0.4125), py(0.398)]], seed + 98, 1, INK_DARK)
       ink(context, [[px(0.649), py(0.24)], [px(0.598), py(0.286)], [px(0.548), py(0.328)], [px(0.5), py(0.358)], [px(0.44), py(0.382)]], seed + 99, 1)
 
       /* neck and shoulder, then the head */
       soften(context, [
         [px(0.63), py(0.222)], [px(0.648), py(0.212)], [px(0.664), py(0.222)], [px(0.658), py(0.248)], [px(0.638), py(0.252)],
       ], FLESH, seed + 175, { passes: 4, jitter: unit * 0.002, dust: false })
-      soften(context, ringPoints(px(0.628), py(0.21), unit * 0.024, 1.1), FLESH, seed + wave + 100, { passes: 5, jitter: unit * 0.002 })
+      soften(context, ringPoints(px(0.629), py(0.211), unit * 0.028, 1.1), FLESH, seed + wave + 100, { passes: 5, jitter: unit * 0.002 })
       /* the face turns: shadow under the brow and jaw */
       soften(context, [
         [px(0.612), py(0.222)], [px(0.632), py(0.226)], [px(0.644), py(0.24)], [px(0.626), py(0.242)], [px(0.608), py(0.232)],
@@ -1410,8 +1426,8 @@
       ], FLESH_HI, seed + 177, { passes: 3, jitter: unit * 0.0015, alpha: 0.14, dust: false })
       /* the full beard, hanging from the jaw and streaming down-left */
       soften(context, [
-        [px(0.605), py(0.234)], [px(0.63), py(0.228)], [px(0.641), py(0.252)], [px(0.636), py(0.29)],
-        [px(0.622), py(0.325)], [px(0.601), py(0.34)], [px(0.588), py(0.305)], [px(0.593), py(0.26)],
+        [px(0.603), py(0.236)], [px(0.632), py(0.23)], [px(0.645), py(0.254)], [px(0.639), py(0.295)],
+        [px(0.623), py(0.335)], [px(0.6), py(0.352)], [px(0.585), py(0.312)], [px(0.591), py(0.262)],
       ], BEARD, seed + 102, { passes: 4, jitter: unit * 0.002 })
       /* grey hair sweeping back with the speed of arrival */
       soften(context, [
