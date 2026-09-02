@@ -1161,39 +1161,77 @@
     }
 
     function buildCourtButterfly(span) {
-      var wingWidth = Math.round(span * 0.6)
-      var wingHeight = Math.round(span * 0.9)
+      var wingWidth = Math.round(span * 0.58)
+      var wingHeight = Math.round(span * 0.92)
       var wing = document.createElement('canvas')
       wing.width = wingWidth * 2
       wing.height = wingHeight * 2
       var context = wing.getContext('2d')
       context.setTransform(2, 0, 0, 2, 0, 0)
+      var random = SKETCH.rng(5417)
 
-      /* two lobes of wet ochre, two of plum-grey — proper washes with
-         bleed, drying edges, and granulation, nothing rounded or clean */
-      SKETCH.wash(context, wingWidth * 0.02, wingHeight * 0.05, wingWidth * 0.66, wingHeight * 0.42, '#b98b3f', { seed: 5420, alpha: 0.6, layers: 4 })
-      SKETCH.wash(context, wingWidth * 0.4, wingHeight * 0.0, wingWidth * 0.5, wingHeight * 0.3, '#a37a35', { seed: 5421, alpha: 0.42, layers: 3 })
-      SKETCH.wash(context, wingWidth * 0.0, wingHeight * 0.48, wingWidth * 0.56, wingHeight * 0.44, '#77657a', { seed: 5422, alpha: 0.55, layers: 4 })
-      SKETCH.wash(context, wingWidth * 0.3, wingHeight * 0.56, wingWidth * 0.4, wingHeight * 0.32, '#655668', { seed: 5423, alpha: 0.38, layers: 3 })
-      /* the scene's own green breathed into the wet paint */
-      SKETCH.wash(context, wingWidth * 0.16, wingHeight * 0.3, wingWidth * 0.42, wingHeight * 0.32, '#8a9573', { seed: 5424, alpha: 0.2, layers: 2, edge: false })
+      var fore = [
+        [2, wingHeight * 0.48], [wingWidth * 0.2, wingHeight * 0.16], [wingWidth * 0.62, wingHeight * 0.03],
+        [wingWidth * 0.93, wingHeight * 0.1], [wingWidth * 0.9, wingHeight * 0.32], [wingWidth * 0.62, wingHeight * 0.46],
+        [wingWidth * 0.24, wingHeight * 0.5],
+      ]
+      var hind = [
+        [2, wingHeight * 0.52], [wingWidth * 0.42, wingHeight * 0.5], [wingWidth * 0.66, wingHeight * 0.6],
+        [wingWidth * 0.6, wingHeight * 0.82], [wingWidth * 0.34, wingHeight * 0.97], [wingWidth * 0.1, wingHeight * 0.86],
+        [wingWidth * 0.02, wingHeight * 0.66],
+      ]
+
+      /* a wing: the true silhouette, filled with wet pigment, held by a
+         darker drying edge in its own colour — never an ink outline */
+      function paintWing(shape, fill, pool, edge, seed) {
+        var jagged = shape.map(function (point) {
+          return [point[0] + (random() - 0.5) * 3, point[1] + (random() - 0.5) * 3]
+        })
+        context.save()
+        smoothPath(context, jagged)
+        context.clip()
+        context.globalAlpha = 0.62
+        context.fillStyle = fill
+        context.fillRect(0, 0, wingWidth, wingHeight)
+        /* the paint pools unevenly while it dries */
+        for (var puddle = 0; puddle < 5; puddle += 1) {
+          context.globalAlpha = 0.1 + random() * 0.14
+          context.fillStyle = puddle % 2 ? pool : fill
+          context.beginPath()
+          context.ellipse(
+            wingWidth * (0.2 + random() * 0.6), wingHeight * (0.1 + random() * 0.8),
+            wingWidth * (0.14 + random() * 0.2), wingHeight * (0.08 + random() * 0.12),
+            random() * 3, 0, Math.PI * 2,
+          )
+          context.fill()
+        }
+        /* granulation */
+        context.fillStyle = pool
+        for (var grain = 0; grain < 130; grain += 1) {
+          context.globalAlpha = 0.08 + random() * 0.16
+          context.fillRect(random() * wingWidth, random() * wingHeight, 1 + random() * 1.5, 1 + random())
+        }
+        context.restore()
+        SKETCH.stroke(context, jagged.concat([jagged[0]]), { seed: seed, color: edge, width: 1.7, amp: 1.8, step: 5 })
+      }
+
+      paintWing(fore, '#c98f2f', '#8a5d1c', 'rgba(122, 80, 22, 0.75)', 5440)
+      paintWing(hind, '#63496a', '#413049', 'rgba(58, 41, 66, 0.75)', 5441)
+
       /* pale spots lifted out while wet */
-      SKETCH.wash(context, wingWidth * 0.52, wingHeight * 0.14, wingWidth * 0.17, wingHeight * 0.12, '#e9e2cc', { seed: 5425, alpha: 0.55, layers: 3, grain: false })
-      SKETCH.wash(context, wingWidth * 0.32, wingHeight * 0.66, wingWidth * 0.14, wingHeight * 0.11, '#e2dac2', { seed: 5426, alpha: 0.45, layers: 2, grain: false })
-      /* a faint pencil vein or two, almost gone */
-      SKETCH.pencil(context, [[3, wingHeight * 0.5], [wingWidth * 0.55, wingHeight * 0.2]], { seed: 5427, color: 'rgba(74, 60, 44, 0.4)', width: 1, amp: 1 })
-      SKETCH.pencil(context, [[3, wingHeight * 0.53], [wingWidth * 0.48, wingHeight * 0.74]], { seed: 5428, color: 'rgba(74, 60, 44, 0.35)', width: 1, amp: 1 })
+      SKETCH.wash(context, wingWidth * 0.56, wingHeight * 0.12, wingWidth * 0.18, wingHeight * 0.12, '#ecdfc0', { seed: 5442, alpha: 0.6, layers: 3, grain: false })
+      SKETCH.wash(context, wingWidth * 0.3, wingHeight * 0.64, wingWidth * 0.13, wingHeight * 0.1, '#ddd2b8', { seed: 5443, alpha: 0.5, layers: 2, grain: false })
 
       var body = document.createElement('canvas')
       var bodyWidth = Math.round(span * 0.1)
-      var bodyHeight = Math.round(span * 0.5)
+      var bodyHeight = Math.round(span * 0.52)
       body.width = bodyWidth * 2
       body.height = bodyHeight * 2
       var bodyContext = body.getContext('2d')
       bodyContext.setTransform(2, 0, 0, 2, 0, 0)
-      SKETCH.wash(bodyContext, bodyWidth * 0.24, bodyHeight * 0.1, bodyWidth * 0.52, bodyHeight * 0.84, '#453a30', { seed: 5430, alpha: 0.7, layers: 3 })
-      SKETCH.pencil(bodyContext, [[bodyWidth * 0.44, bodyHeight * 0.12], [bodyWidth * 0.14, bodyHeight * 0.0]], { seed: 5431, color: 'rgba(69, 58, 48, 0.55)', width: 1, amp: 0.8 })
-      SKETCH.pencil(bodyContext, [[bodyWidth * 0.56, bodyHeight * 0.12], [bodyWidth * 0.86, bodyHeight * 0.0]], { seed: 5432, color: 'rgba(69, 58, 48, 0.55)', width: 1, amp: 0.8 })
+      SKETCH.wash(bodyContext, bodyWidth * 0.26, bodyHeight * 0.12, bodyWidth * 0.48, bodyHeight * 0.8, '#3c322a', { seed: 5444, alpha: 0.85, layers: 3 })
+      SKETCH.pencil(bodyContext, [[bodyWidth * 0.44, bodyHeight * 0.12], [bodyWidth * 0.1, bodyHeight * 0.0]], { seed: 5445, color: 'rgba(60, 50, 42, 0.8)', width: 1.2, amp: 0.8 })
+      SKETCH.pencil(bodyContext, [[bodyWidth * 0.56, bodyHeight * 0.12], [bodyWidth * 0.9, bodyHeight * 0.0]], { seed: 5446, color: 'rgba(60, 50, 42, 0.8)', width: 1.2, amp: 0.8 })
 
       return { wing: wing, body: body, wingWidth: wingWidth, wingHeight: wingHeight, bodyWidth: bodyWidth, bodyHeight: bodyHeight, span: span }
     }
@@ -1247,7 +1285,7 @@
       }
 
       /* the one butterfly, fuzzy as breathed pigment, over the clearing */
-      var span = frame.width * 0.105
+      var span = frame.width * 0.125
       if (!state.butterfly || Math.abs(state.butterfly.span - span) > 2) {
         state.butterfly = buildCourtButterfly(span)
       }
@@ -1258,16 +1296,23 @@
       state.butterflyPhase = (state.butterflyPhase || 0) + dt * (3.5 + 9.5 * effort)
       var fold = Math.sin(state.butterflyPhase)
       var spread = 0.2 + 0.8 * Math.abs(fold)
-      var butterflyX = frame.x + frame.width * (0.47 + Math.sin(t * 0.16) * 0.05 + Math.sin(t * 0.051 + 2) * 0.025)
-      var butterflyY = frame.y + frame.height * (0.56 + Math.sin(t * 0.21 + 1) * 0.045) + fold * 2.5 - effort * 5
+      var butterflyX = frame.x + frame.width * (0.47 + Math.sin(t * 0.16) * 0.045 + Math.sin(t * 0.051 + 2) * 0.02)
+      var butterflyY = frame.y + frame.height * (0.6 + Math.sin(t * 0.21 + 1) * 0.035) + fold * 2.5 - effort * 5
       var tilt = Math.cos(t * 0.16) * 0.13 + Math.sin(t * 0.08) * 0.07
+
+      /* a soft shadow on the grass beneath it */
+      context.save()
+      context.globalAlpha = 0.12
+      context.fillStyle = '#2e3a26'
+      context.beginPath()
+      context.ellipse(butterflyX, frame.y + frame.height * 0.72, parts.span * 0.34 * spread, parts.span * 0.06, 0, 0, Math.PI * 2)
+      context.fill()
+      context.restore()
 
       context.save()
       context.translate(butterflyX, butterflyY)
       context.rotate(tilt)
-      /* the pigment sinks into the painting underneath */
-      context.globalCompositeOperation = 'multiply'
-      context.globalAlpha = 0.85
+      context.globalAlpha = 0.95
       context.save()
       context.scale(-spread, 1)
       context.drawImage(parts.wing, 0, -parts.wingHeight / 2, parts.wingWidth, parts.wingHeight)
@@ -1276,8 +1321,6 @@
       context.scale(spread, 1)
       context.drawImage(parts.wing, 0, -parts.wingHeight / 2, parts.wingWidth, parts.wingHeight)
       context.restore()
-      context.globalCompositeOperation = 'source-over'
-      context.globalAlpha = 0.9
       context.drawImage(parts.body, -parts.bodyWidth / 2, -parts.bodyHeight * 0.36, parts.bodyWidth, parts.bodyHeight)
       context.restore()
     }

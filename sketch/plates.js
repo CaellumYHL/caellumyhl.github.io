@@ -219,7 +219,7 @@
         sheetTitle(context, 'SELECTED WORK', data.date, 26, 26, width)
 
         var compact = width < 430
-        var s = typeScale(width)
+        var s = Math.min(typeScale(width), SKETCH.clamp(height / 560, 0.85, 1.55))
         data.projects.forEach(function (project, index) {
           var top = HEAD + index * ENTRY
           var textX = width * 0.21
@@ -244,6 +244,7 @@
             var floor = top + ENTRY - 16
             var maxWidth = width - textX - 36
             wrapLines(project.line, 9.5 * s, maxWidth).forEach(function (line) {
+              if (y > floor - 4) return
               write(context, line, textX, y, { size: 9.5 * s, seed: project.seed + 5 + y })
               y += 19 * s
             })
@@ -285,7 +286,7 @@
         sheetTitle(context, 'EXPERIENCE', data.date, 26, 26, width)
 
         var compact = width < 430
-        var s = typeScale(width)
+        var s = Math.min(typeScale(width), SKETCH.clamp(height / 560, 0.85, 1.55))
         var factSize = (compact ? 7.5 : 8.5) * s
         var rowH = Math.max(104, (height - 140) / data.rows.length)
         data.rows.forEach(function (row, index) {
