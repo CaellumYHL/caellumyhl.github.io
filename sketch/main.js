@@ -25,9 +25,9 @@
 
     faces: { date: shortDate },
 
-    tangle: { title: 'RULED ON THE DESK', date: shortDate },
-
     room: { title: 'TREES IN THE BACK ROOM', date: shortDate },
+
+    court: { title: 'THE SUNKEN COURT', date: shortDate },
 
     work: {
       date: shortDate,
@@ -181,8 +181,8 @@
       { id: 'washes', tab: 'SKILLS', spec: SKETCH.plates.washes(DATA.washes) },
       { id: 'faces', tab: 'FACES', spec: SKETCH.plates.faces(DATA.faces) },
       { id: 'paint', tab: 'PAINT', spec: SKETCH.watercolor.spec() },
-      { id: 'tangle', tab: 'ART', spec: SKETCH.art.tangle(DATA.tangle) },
       { id: 'room', tab: 'ART', spec: SKETCH.art.room(DATA.room) },
+      { id: 'court', tab: 'ART', spec: SKETCH.art.court(DATA.court) },
       { id: 'ledger', tab: 'END', spec: SKETCH.ledger.spec(DATA.ledger) },
     ])
   }
