@@ -150,6 +150,11 @@
     return points
   }
 
+  function deviceRatio(canvas) {
+    var bounds = canvas.getBoundingClientRect()
+    return bounds.width ? canvas.width / bounds.width : 1
+  }
+
   /* A boiled copy of a drawn page: the image sliced into strips, each
      strip nudged a hair — the lines waver as if redrawn by hand. */
   function boiledCopy(source, variant) {
@@ -197,7 +202,7 @@
         state.lastBoil = now
       }
       var liveApi = state.idleApi
-      var ratio = liveApi.canvas.width / liveApi.width
+      var ratio = deviceRatio(liveApi.canvas)
       var region = { x: 0, y: 58, width: liveApi.width - 16, height: liveApi.height - 58 - 96 }
       var context = liveApi.canvas.getContext('2d')
       context.save()
@@ -1157,43 +1162,27 @@
 
     function buildCourtButterfly(span) {
       var wingWidth = Math.round(span * 0.6)
-      var wingHeight = Math.round(span * 0.86)
+      var wingHeight = Math.round(span * 0.9)
       var wing = document.createElement('canvas')
       wing.width = wingWidth * 2
       wing.height = wingHeight * 2
       var context = wing.getContext('2d')
       context.setTransform(2, 0, 0, 2, 0, 0)
-      var random = SKETCH.rng(5417)
 
-      var fore = [
-        [2, wingHeight * 0.5], [wingWidth * 0.22, wingHeight * 0.14], [wingWidth * 0.68, wingHeight * 0.05],
-        [wingWidth * 0.94, wingHeight * 0.22], [wingWidth * 0.8, wingHeight * 0.45], [wingWidth * 0.34, wingHeight * 0.52],
-      ]
-      var hind = [
-        [2, wingHeight * 0.54], [wingWidth * 0.5, wingHeight * 0.5], [wingWidth * 0.7, wingHeight * 0.65],
-        [wingWidth * 0.56, wingHeight * 0.87], [wingWidth * 0.27, wingHeight * 0.95], [wingWidth * 0.06, wingHeight * 0.73],
-      ]
-      /* soft pigment, no hard edge anywhere */
-      soften(context, fore, '#e6d6ac', 5420, { passes: 9, jitter: wingWidth * 0.05, alpha: 0.13 })
-      soften(context, fore, '#d9a441', 5421, { passes: 6, jitter: wingWidth * 0.04, alpha: 0.1, dust: false })
-      soften(context, hind, '#9b8a9e', 5422, { passes: 9, jitter: wingWidth * 0.05, alpha: 0.13 })
-      soften(context, hind, '#6d4a5e', 5423, { passes: 5, jitter: wingWidth * 0.045, alpha: 0.09, dust: false })
-      /* pale spots breathed on, and a dusty rim */
-      soften(context, ringPoints(wingWidth * 0.62, wingHeight * 0.22, wingWidth * 0.09, 1), '#f2ead2', 5424, { passes: 5, jitter: wingWidth * 0.03, alpha: 0.16, dust: false })
-      soften(context, ringPoints(wingWidth * 0.4, wingHeight * 0.72, wingWidth * 0.07, 1), '#e8dcc2', 5425, { passes: 4, jitter: wingWidth * 0.03, alpha: 0.14, dust: false })
-      context.fillStyle = 'rgba(74, 58, 50, 1)'
-      for (var speck = 0; speck < 70; speck += 1) {
-        var edge = random() > 0.5 ? fore : hind
-        var at = Math.floor(random() * (edge.length - 1))
-        var along = random()
-        context.globalAlpha = 0.06 + random() * 0.12
-        context.fillRect(
-          edge[at][0] + (edge[at + 1][0] - edge[at][0]) * along + (random() - 0.5) * 5,
-          edge[at][1] + (edge[at + 1][1] - edge[at][1]) * along + (random() - 0.5) * 5,
-          1 + random() * 1.4, 1 + random(),
-        )
-      }
-      context.globalAlpha = 1
+      /* two lobes of wet ochre, two of plum-grey — proper washes with
+         bleed, drying edges, and granulation, nothing rounded or clean */
+      SKETCH.wash(context, wingWidth * 0.02, wingHeight * 0.05, wingWidth * 0.66, wingHeight * 0.42, '#b98b3f', { seed: 5420, alpha: 0.6, layers: 4 })
+      SKETCH.wash(context, wingWidth * 0.4, wingHeight * 0.0, wingWidth * 0.5, wingHeight * 0.3, '#a37a35', { seed: 5421, alpha: 0.42, layers: 3 })
+      SKETCH.wash(context, wingWidth * 0.0, wingHeight * 0.48, wingWidth * 0.56, wingHeight * 0.44, '#77657a', { seed: 5422, alpha: 0.55, layers: 4 })
+      SKETCH.wash(context, wingWidth * 0.3, wingHeight * 0.56, wingWidth * 0.4, wingHeight * 0.32, '#655668', { seed: 5423, alpha: 0.38, layers: 3 })
+      /* the scene's own green breathed into the wet paint */
+      SKETCH.wash(context, wingWidth * 0.16, wingHeight * 0.3, wingWidth * 0.42, wingHeight * 0.32, '#8a9573', { seed: 5424, alpha: 0.2, layers: 2, edge: false })
+      /* pale spots lifted out while wet */
+      SKETCH.wash(context, wingWidth * 0.52, wingHeight * 0.14, wingWidth * 0.17, wingHeight * 0.12, '#e9e2cc', { seed: 5425, alpha: 0.55, layers: 3, grain: false })
+      SKETCH.wash(context, wingWidth * 0.32, wingHeight * 0.66, wingWidth * 0.14, wingHeight * 0.11, '#e2dac2', { seed: 5426, alpha: 0.45, layers: 2, grain: false })
+      /* a faint pencil vein or two, almost gone */
+      SKETCH.pencil(context, [[3, wingHeight * 0.5], [wingWidth * 0.55, wingHeight * 0.2]], { seed: 5427, color: 'rgba(74, 60, 44, 0.4)', width: 1, amp: 1 })
+      SKETCH.pencil(context, [[3, wingHeight * 0.53], [wingWidth * 0.48, wingHeight * 0.74]], { seed: 5428, color: 'rgba(74, 60, 44, 0.35)', width: 1, amp: 1 })
 
       var body = document.createElement('canvas')
       var bodyWidth = Math.round(span * 0.1)
@@ -1202,13 +1191,9 @@
       body.height = bodyHeight * 2
       var bodyContext = body.getContext('2d')
       bodyContext.setTransform(2, 0, 0, 2, 0, 0)
-      soften(bodyContext, [
-        [bodyWidth * 0.36, bodyHeight * 0.16], [bodyWidth * 0.64, bodyHeight * 0.16],
-        [bodyWidth * 0.6, bodyHeight * 0.6], [bodyWidth * 0.52, bodyHeight * 0.94],
-        [bodyWidth * 0.48, bodyHeight * 0.94], [bodyWidth * 0.4, bodyHeight * 0.6],
-      ], '#453a30', 5430, { passes: 6, jitter: bodyWidth * 0.1, alpha: 0.2, dust: false })
-      SKETCH.stroke(bodyContext, [[bodyWidth * 0.44, bodyHeight * 0.14], [bodyWidth * 0.16, bodyHeight * 0.02]], { seed: 5431, color: 'rgba(69, 58, 48, 0.6)', width: 1, amp: 0.8 })
-      SKETCH.stroke(bodyContext, [[bodyWidth * 0.56, bodyHeight * 0.14], [bodyWidth * 0.84, bodyHeight * 0.02]], { seed: 5432, color: 'rgba(69, 58, 48, 0.6)', width: 1, amp: 0.8 })
+      SKETCH.wash(bodyContext, bodyWidth * 0.24, bodyHeight * 0.1, bodyWidth * 0.52, bodyHeight * 0.84, '#453a30', { seed: 5430, alpha: 0.7, layers: 3 })
+      SKETCH.pencil(bodyContext, [[bodyWidth * 0.44, bodyHeight * 0.12], [bodyWidth * 0.14, bodyHeight * 0.0]], { seed: 5431, color: 'rgba(69, 58, 48, 0.55)', width: 1, amp: 0.8 })
+      SKETCH.pencil(bodyContext, [[bodyWidth * 0.56, bodyHeight * 0.12], [bodyWidth * 0.86, bodyHeight * 0.0]], { seed: 5432, color: 'rgba(69, 58, 48, 0.55)', width: 1, amp: 0.8 })
 
       return { wing: wing, body: body, wingWidth: wingWidth, wingHeight: wingHeight, bodyWidth: bodyWidth, bodyHeight: bodyHeight, span: span }
     }
@@ -1273,14 +1258,16 @@
       state.butterflyPhase = (state.butterflyPhase || 0) + dt * (3.5 + 9.5 * effort)
       var fold = Math.sin(state.butterflyPhase)
       var spread = 0.2 + 0.8 * Math.abs(fold)
-      var butterflyX = frame.x + frame.width * (0.46 + Math.sin(t * 0.16) * 0.06 + Math.sin(t * 0.051 + 2) * 0.03)
-      var butterflyY = frame.y + frame.height * (0.44 + Math.sin(t * 0.21 + 1) * 0.05) + fold * 2.5 - effort * 5
+      var butterflyX = frame.x + frame.width * (0.47 + Math.sin(t * 0.16) * 0.05 + Math.sin(t * 0.051 + 2) * 0.025)
+      var butterflyY = frame.y + frame.height * (0.56 + Math.sin(t * 0.21 + 1) * 0.045) + fold * 2.5 - effort * 5
       var tilt = Math.cos(t * 0.16) * 0.13 + Math.sin(t * 0.08) * 0.07
 
       context.save()
       context.translate(butterflyX, butterflyY)
       context.rotate(tilt)
-      context.globalAlpha = 0.92
+      /* the pigment sinks into the painting underneath */
+      context.globalCompositeOperation = 'multiply'
+      context.globalAlpha = 0.85
       context.save()
       context.scale(-spread, 1)
       context.drawImage(parts.wing, 0, -parts.wingHeight / 2, parts.wingWidth, parts.wingHeight)
@@ -1289,6 +1276,8 @@
       context.scale(spread, 1)
       context.drawImage(parts.wing, 0, -parts.wingHeight / 2, parts.wingWidth, parts.wingHeight)
       context.restore()
+      context.globalCompositeOperation = 'source-over'
+      context.globalAlpha = 0.9
       context.drawImage(parts.body, -parts.bodyWidth / 2, -parts.bodyHeight * 0.36, parts.bodyWidth, parts.bodyHeight)
       context.restore()
     }
@@ -1319,7 +1308,7 @@
   /* The Creation of Adam, traced from the fresco and repainted soft: low
      dark banks, Adam large and bright, the wine-dark cloak swept around
      God and his company, and the two hands not quite touching. The panel
-     idles: haze drifts, birds cross, the paint gently wavers. */
+     idles: haze drifts and the paint gently wavers. */
 
   ART.adam = function (data) {
     var state = {
@@ -1767,7 +1756,7 @@
       if (state.frameKey === key && state.frames) return
       state.frames = []
       state.frameKey = key
-      var ratio = api.canvas.width / api.width
+      var ratio = deviceRatio(api.canvas)
       var count = reducedMotion ? 1 : 3
       for (var frame = 0; frame < count; frame += 1) {
         var offscreen = document.createElement('canvas')
@@ -1780,18 +1769,13 @@
       }
       if (!state.drifters) {
         var random = SKETCH.rng(state.seed + 5)
-        /* birds wheel in the open plaster only — the gap between the
+        /* haze drifts in the open plaster only — the gap between the
            figures, and the sky above the hill */
         state.drifters = {
           clouds: [
             { x: 0.42, y: 0.2, speed: 0.003 + random() * 0.002, scale: 0.8 + random() * 0.4 },
             { x: 0.46, y: 0.62, speed: 0.002 + random() * 0.002, scale: 0.7 + random() * 0.4 },
             { x: 0.16, y: 0.1, speed: 0.003 + random() * 0.002, scale: 0.6 + random() * 0.3 },
-          ],
-          birds: [
-            { cx: 0.435, cy: 0.22, rx: 0.05, ry: 0.05, speed: 0.28 + random() * 0.15, phase: random() * 7, size: 3.4 + random() * 1.6 },
-            { cx: 0.46, cy: 0.55, rx: 0.045, ry: 0.07, speed: 0.22 + random() * 0.15, phase: random() * 7, size: 3 + random() * 1.4 },
-            { cx: 0.2, cy: 0.11, rx: 0.07, ry: 0.03, speed: 0.24 + random() * 0.12, phase: random() * 7, size: 2.6 + random() * 1.2 },
           ],
         }
       }
@@ -1800,7 +1784,7 @@
     function blitFrame(api, index) {
       var context = api.canvas.getContext('2d')
       var layout = state.layout
-      var ratio = api.canvas.width / api.width
+      var ratio = deviceRatio(api.canvas)
       context.save()
       context.setTransform(1, 0, 0, 1, 0, 0)
       var sx = Math.max(0, (layout.frameX - 8) * ratio)
@@ -1814,7 +1798,7 @@
     function drawLife(api, now) {
       var context = api.canvas.getContext('2d')
       var layout = state.layout
-      var ratio = api.canvas.width / api.width
+      var ratio = deviceRatio(api.canvas)
       context.save()
       context.setTransform(ratio, 0, 0, ratio, 0, 0)
       /* only the open plaster: the gap between the figures, and the sky
@@ -1835,23 +1819,6 @@
           context.ellipse(cloudX + puff * 26 * cloud.scale, cloudY + (puff % 2) * 6, 46 * cloud.scale, 13 * cloud.scale, 0, 0, Math.PI * 2)
           context.fill()
         }
-      })
-
-      /* small birds wheeling in the distance */
-      context.globalAlpha = 0.6
-      state.drifters.birds.forEach(function (bird) {
-        var angle = now * 0.001 * bird.speed + bird.phase
-        var birdX = layout.frameX + (bird.cx + Math.cos(angle) * bird.rx) * layout.frameWidth
-        var birdY = layout.frameY + (bird.cy + Math.sin(angle * 0.8) * bird.ry) * layout.frameHeight
-        var flap = Math.sin(now * 0.009 + bird.phase * 3) * bird.size * 0.6
-        context.strokeStyle = 'rgba(72, 64, 54, 0.65)'
-        context.lineWidth = 1
-        context.lineCap = 'round'
-        context.beginPath()
-        context.moveTo(birdX - bird.size, birdY + flap)
-        context.quadraticCurveTo(birdX, birdY - bird.size * 0.2, birdX, birdY)
-        context.quadraticCurveTo(birdX, birdY - bird.size * 0.2, birdX + bird.size, birdY + flap)
-        context.stroke()
       })
 
       /* the gap between the hands, breathing */
@@ -1886,7 +1853,7 @@
 
     return {
       state: state,
-      aria: 'An artwork: a soft repainting of Michelangelo’s Creation of Adam — Adam bright on the low green bank, God and his company swept along in the wine-dark cloak, birds and haze drifting while the two hands never quite touch. Repainted on every click.',
+      aria: 'An artwork: a soft repainting of Michelangelo’s Creation of Adam — Adam bright on the low green bank, God and his company swept along in the wine-dark cloak, haze drifting while the two hands never quite touch. Repainted on every click.',
       height: function (width) { return width * 1.05 },
       draw: function (context, width, height, api) {
         ensureFrames(api)

@@ -309,7 +309,12 @@
     function blit(api) {
       if (!state.paper || state.hidden) return
       var context = api.canvas.getContext('2d')
+      var bounds = api.canvas.getBoundingClientRect()
+      var ratio = bounds.width ? api.canvas.width / bounds.width : 1
       context.save()
+      /* the book's flip animation leaves the transform at identity —
+         always set our own before drawing */
+      context.setTransform(ratio, 0, 0, ratio, 0, 0)
       context.imageSmoothingEnabled = true
       context.drawImage(sim.canvas, state.paper.x, state.paper.y, state.paper.width, state.paper.height)
       context.restore()
@@ -390,7 +395,12 @@
 
     function drawControlsOn(api) {
       var context = api.canvas.getContext('2d')
+      var bounds = api.canvas.getBoundingClientRect()
+      var ratio = bounds.width ? api.canvas.width / bounds.width : 1
+      context.save()
+      context.setTransform(ratio, 0, 0, ratio, 0, 0)
       drawControls(context, api.width, api.height)
+      context.restore()
     }
 
     return {
