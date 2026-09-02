@@ -1190,7 +1190,7 @@
         context.save()
         smoothPath(context, jagged)
         context.clip()
-        context.globalAlpha = 0.62
+        context.globalAlpha = 0.5
         context.fillStyle = fill
         context.fillRect(0, 0, wingWidth, wingHeight)
         /* the paint pools unevenly while it dries */
@@ -1215,8 +1215,8 @@
         SKETCH.stroke(context, jagged.concat([jagged[0]]), { seed: seed, color: edge, width: 1.7, amp: 1.8, step: 5 })
       }
 
-      paintWing(fore, '#c98f2f', '#8a5d1c', 'rgba(122, 80, 22, 0.75)', 5440)
-      paintWing(hind, '#63496a', '#413049', 'rgba(58, 41, 66, 0.75)', 5441)
+      paintWing(fore, '#b39a5e', '#8a744a', 'rgba(122, 102, 66, 0.55)', 5440)
+      paintWing(hind, '#8a7d92', '#655a72', 'rgba(88, 78, 100, 0.55)', 5441)
 
       /* pale spots lifted out while wet */
       SKETCH.wash(context, wingWidth * 0.56, wingHeight * 0.12, wingWidth * 0.18, wingHeight * 0.12, '#ecdfc0', { seed: 5442, alpha: 0.6, layers: 3, grain: false })
@@ -1285,20 +1285,35 @@
       }
 
       /* the one butterfly, fuzzy as breathed pigment, over the clearing */
-      var span = frame.width * 0.125
+      var span = frame.width * 0.085
       if (!state.butterfly || Math.abs(state.butterfly.span - span) > 2) {
         state.butterfly = buildCourtButterfly(span)
       }
       var parts = state.butterfly
       var dt = Math.min(0.06, (now - (state.butterflyLast || now)) / 1000)
       state.butterflyLast = now
-      var effort = 0.5 + 0.5 * Math.sin(t * 0.8 + Math.sin(t * 0.29) * 1.7)
-      state.butterflyPhase = (state.butterflyPhase || 0) + dt * (3.5 + 9.5 * effort)
-      var fold = Math.sin(state.butterflyPhase)
-      var spread = 0.2 + 0.8 * Math.abs(fold)
-      var butterflyX = frame.x + frame.width * (0.47 + Math.sin(t * 0.16) * 0.045 + Math.sin(t * 0.051 + 2) * 0.02)
-      var butterflyY = frame.y + frame.height * (0.6 + Math.sin(t * 0.21 + 1) * 0.035) + fold * 2.5 - effort * 5
-      var tilt = Math.cos(t * 0.16) * 0.13 + Math.sin(t * 0.08) * 0.07
+
+      /* it beats in bursts and glides between them */
+      var flutter = Math.pow(Math.max(0, Math.sin(t * 0.55 + Math.sin(t * 0.21) * 1.4)), 2)
+      state.butterflyPhase = (state.butterflyPhase || 0) + dt * (2 + 15 * flutter)
+      /* the wings snap shut quickly and open slowly */
+      var beat = state.butterflyPhase
+      var warped = beat + 0.7 * Math.sin(beat)
+      var flapDepth = 0.12 + 0.72 * flutter
+      var spread = 1 - flapDepth * (0.5 + 0.5 * Math.sin(warped))
+      var fold = Math.sin(warped)
+
+      /* the bursts lift it; the glides let it settle */
+      state.butterflyLift = (state.butterflyLift || 0) + (flutter - 0.42) * dt * frame.height * 0.05
+      state.butterflyLift = SKETCH.clamp(state.butterflyLift, -frame.height * 0.03, frame.height * 0.035)
+
+      var driftX = Math.sin(t * 0.16) * 0.045 + Math.sin(t * 0.051 + 2) * 0.02
+      var butterflyX = frame.x + frame.width * (0.47 + driftX)
+      var butterflyY = frame.y + frame.height * (0.6 + Math.sin(t * 0.21 + 1) * 0.025)
+        - state.butterflyLift + fold * 2 * flutter
+      /* it leans the way it drifts, and rocks with each beat */
+      var heading = Math.cos(t * 0.16) * 0.045 + Math.cos(t * 0.051 + 2) * 0.02
+      var tilt = SKETCH.clamp(heading * 4, -0.22, 0.22) + fold * 0.05 * flutter
 
       /* a soft shadow on the grass beneath it */
       context.save()
