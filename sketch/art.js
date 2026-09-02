@@ -1187,6 +1187,30 @@
       context.fillStyle = glow
       context.fillRect(px(0.28), py(0.2), unit * 0.22, panelHeight * 0.4)
 
+      /* soft cloud banks painted into the sky, far behind everyone */
+      var cloudBanks = [
+        [0.44, 0.16, 1.1], [0.40, 0.5, 0.9], [0.5, 0.78, 1.0], [0.17, 0.1, 0.8],
+      ]
+      cloudBanks.forEach(function (bank, bankIndex) {
+        var bankX = px(bank[0])
+        var bankY = py(bank[1])
+        var bankScale = bank[2] * unit / 1300
+        for (var puff = 0; puff < 5; puff += 1) {
+          context.globalAlpha = 0.12 - puff * 0.014
+          context.fillStyle = '#e8e5d3'
+          context.beginPath()
+          context.ellipse(bankX + (puff - 2) * 34 * bankScale, bankY + Math.abs(puff - 2) * 6, 60 * bankScale, 16 * bankScale, 0, 0, Math.PI * 2)
+          context.fill()
+        }
+        context.globalAlpha = 0.07
+        context.fillStyle = '#b4b1a0'
+        context.beginPath()
+        context.ellipse(bankX, bankY + 14, 66 * bankScale, 8 * bankScale, 0, 0, Math.PI * 2)
+        context.fill()
+        context.globalAlpha = 1
+        void bankIndex
+      })
+
       /* dark strips of the surrounding ceiling */
       context.fillStyle = '#565549'
       context.fillRect(frameX, frameY, frameWidth, stripHeight)
@@ -1337,34 +1361,60 @@
       ink(context, [[px(0.44), py(0.393)], [px(0.425), py(0.4)]], seed + 98, 1, INK_DARK)
       ink(context, [[px(0.649), py(0.24)], [px(0.598), py(0.286)], [px(0.548), py(0.328)], [px(0.5), py(0.358)], [px(0.44), py(0.382)]], seed + 99, 1)
 
-      /* head: flesh, swept grey hair, the streaming beard */
+      /* head: flesh first */
       soften(context, ringPoints(px(0.628), py(0.21), unit * 0.024, 1.1), FLESH, seed + wave + 100, { passes: 5, jitter: unit * 0.002 })
+      /* the full beard, hanging from the jaw and streaming down-left */
       soften(context, [
-        [px(0.612), py(0.185)], [px(0.63), py(0.158)], [px(0.663), py(0.155)], [px(0.678), py(0.185)],
-        [px(0.658), py(0.2)], [px(0.632), py(0.202)],
-      ], BEARD, seed + 101, { passes: 4, jitter: unit * 0.002, dust: false })
-      soften(context, [
-        [px(0.607), py(0.235)], [px(0.633), py(0.23)], [px(0.638), py(0.28)], [px(0.625), py(0.33)],
-        [px(0.601), py(0.345)], [px(0.588), py(0.31)], [px(0.594), py(0.265)],
+        [px(0.605), py(0.234)], [px(0.63), py(0.228)], [px(0.641), py(0.252)], [px(0.636), py(0.29)],
+        [px(0.622), py(0.325)], [px(0.601), py(0.34)], [px(0.588), py(0.305)], [px(0.593), py(0.26)],
       ], BEARD, seed + 102, { passes: 4, jitter: unit * 0.002 })
+      /* grey hair sweeping back with the speed of arrival */
+      soften(context, [
+        [px(0.606), py(0.196)], [px(0.614), py(0.166)], [px(0.64), py(0.152)], [px(0.669), py(0.158)],
+        [px(0.689), py(0.178)], [px(0.703), py(0.198)], [px(0.678), py(0.204)], [px(0.648), py(0.198)], [px(0.622), py(0.203)],
+      ], BEARD, seed + 101, { passes: 4, jitter: unit * 0.002, dust: false })
       context.save()
       context.lineCap = 'round'
       for (var whisker = 0; whisker < 12; whisker += 1) {
         context.strokeStyle = whisker % 3 ? 'rgba(226, 226, 230, 0.85)' : 'rgba(148, 152, 160, 0.85)'
         context.lineWidth = 0.9 + random()
         context.beginPath()
-        var whiskerY = py(0.245 + random() * 0.08)
-        context.moveTo(px(0.622), whiskerY)
-        context.quadraticCurveTo(px(0.606), whiskerY + unit * 0.01, px(0.588 + random() * 0.012), whiskerY + unit * (0.014 + random() * 0.01))
+        var whiskerY = py(0.25 + random() * 0.07)
+        context.moveTo(px(0.617), whiskerY)
+        context.quadraticCurveTo(px(0.602), whiskerY + unit * 0.009, px(0.586 + random() * 0.012), whiskerY + unit * (0.013 + random() * 0.009))
+        context.stroke()
+      }
+      /* and a few hair strands trailing behind */
+      for (var strand = 0; strand < 6; strand += 1) {
+        context.strokeStyle = strand % 2 ? 'rgba(226, 226, 230, 0.8)' : 'rgba(148, 152, 160, 0.8)'
+        context.lineWidth = 0.9 + random()
+        context.beginPath()
+        var strandY = py(0.168 + random() * 0.03)
+        context.moveTo(px(0.664), strandY)
+        context.quadraticCurveTo(px(0.69), strandY + unit * 0.004, px(0.706 + random() * 0.014), strandY + unit * (0.007 + random() * 0.006))
         context.stroke()
       }
       context.restore()
-      /* the stern face: brows down, eyes fixed on Adam */
-      ink(context, [[px(0.612), py(0.196)], [px(0.624), py(0.2)]], seed + 103, 1.3, INK_DARK)
-      ink(context, [[px(0.63), py(0.2)], [px(0.642), py(0.198)]], seed + 104, 1.3, INK_DARK)
-      SKETCH.dot(context, px(0.616), py(0.207), 1.3, INK_DARK, seed + 105)
-      SKETCH.dot(context, px(0.634), py(0.206), 1.3, INK_DARK, seed + 106)
-      ink(context, [[px(0.606), py(0.213)], [px(0.6), py(0.222)]], seed + 107, 1)
+      /* the stern face, turned down toward Adam: brows knotted, eyes as
+         dashes looking left, the nose, the moustache joining the beard */
+      ink(context, [[px(0.609), py(0.202)], [px(0.62), py(0.199)]], seed + 103, 1.4, INK_DARK)
+      ink(context, [[px(0.626), py(0.199)], [px(0.637), py(0.201)]], seed + 104, 1.4, INK_DARK)
+      ink(context, [[px(0.6105), py(0.2075)], [px(0.617), py(0.208)]], seed + 105, 1.2, INK_DARK)
+      ink(context, [[px(0.627), py(0.208)], [px(0.6335), py(0.2075)]], seed + 106, 1.2, INK_DARK)
+      SKETCH.dot(context, px(0.6115), py(0.2075), 0.9, INK_DARK, seed + 118)
+      SKETCH.dot(context, px(0.628), py(0.208), 0.9, INK_DARK, seed + 119)
+      ink(context, [[px(0.6205), py(0.207)], [px(0.6155), py(0.221)], [px(0.6205), py(0.2255)]], seed + 107, 1)
+      context.save()
+      context.lineCap = 'round'
+      context.strokeStyle = 'rgba(226, 226, 230, 0.9)'
+      context.lineWidth = 1.4
+      context.beginPath()
+      context.moveTo(px(0.6185), py(0.2295))
+      context.quadraticCurveTo(px(0.609), py(0.231), px(0.6), py(0.2415))
+      context.moveTo(px(0.6235), py(0.2305))
+      context.quadraticCurveTo(px(0.633), py(0.2335), px(0.6365), py(0.2455))
+      context.stroke()
+      context.restore()
 
       /* the cloak found once in ink */
       ink(context, [[px(0.552), py(0.34)], [px(0.56), py(0.18)], [px(0.63), py(0.08)], [px(0.75), py(0.045)], [px(0.87), py(0.075)], [px(0.945), py(0.16)]], seed + 108, 1.1)
@@ -1434,13 +1484,19 @@
       }
       if (!state.drifters) {
         var random = SKETCH.rng(state.seed + 5)
+        /* birds wheel in the open plaster only — the gap between the
+           figures, and the sky above the hill */
         state.drifters = {
-          clouds: [0, 1, 2].map(function (index) {
-            return { x: random(), y: 0.16 + index * 0.1 + random() * 0.06, speed: 0.004 + random() * 0.004, scale: 0.7 + random() }
-          }),
-          birds: [0, 1, 2].map(function (index) {
-            return { x: random(), y: 0.14 + random() * 0.2, speed: 0.014 + random() * 0.01, phase: random() * 7, size: 4 + random() * 3 }
-          }),
+          clouds: [
+            { x: 0.42, y: 0.2, speed: 0.003 + random() * 0.002, scale: 0.8 + random() * 0.4 },
+            { x: 0.46, y: 0.62, speed: 0.002 + random() * 0.002, scale: 0.7 + random() * 0.4 },
+            { x: 0.16, y: 0.1, speed: 0.003 + random() * 0.002, scale: 0.6 + random() * 0.3 },
+          ],
+          birds: [
+            { cx: 0.435, cy: 0.22, rx: 0.05, ry: 0.05, speed: 0.28 + random() * 0.15, phase: random() * 7, size: 3.4 + random() * 1.6 },
+            { cx: 0.46, cy: 0.55, rx: 0.045, ry: 0.07, speed: 0.22 + random() * 0.15, phase: random() * 7, size: 3 + random() * 1.4 },
+            { cx: 0.2, cy: 0.11, rx: 0.07, ry: 0.03, speed: 0.24 + random() * 0.12, phase: random() * 7, size: 2.6 + random() * 1.2 },
+          ],
         }
       }
     }
@@ -1465,32 +1521,35 @@
       var ratio = api.canvas.width / api.width
       context.save()
       context.setTransform(ratio, 0, 0, ratio, 0, 0)
+      /* only the open plaster: the gap between the figures, and the sky
+         over the hill — never in front of anyone */
       context.beginPath()
-      context.rect(layout.frameX + 4, layout.frameY + layout.frameHeight * 0.11, layout.frameWidth - 8, layout.frameHeight * 0.78)
+      context.rect(layout.frameX + layout.frameWidth * 0.345, layout.frameY + layout.frameHeight * 0.12, layout.frameWidth * 0.2, layout.frameHeight * 0.76)
+      context.rect(layout.frameX + layout.frameWidth * 0.02, layout.frameY + layout.frameHeight * 0.115, layout.frameWidth * 0.32, layout.frameHeight * 0.1)
       context.clip()
 
-      /* haze drifting across the plaster */
+      /* haze drifting through the gap */
       state.drifters.clouds.forEach(function (cloud, index) {
-        var cloudX = layout.frameX + ((cloud.x + now * 0.001 * cloud.speed) % 1.2 - 0.1) * layout.frameWidth
-        var cloudY = layout.frameY + cloud.y * layout.frameHeight
+        var cloudX = layout.frameX + (cloud.x + Math.sin(now * 0.0002 + index) * 0.02) * layout.frameWidth
+        var cloudY = layout.frameY + (cloud.y + Math.sin(now * 0.00013 + index * 2) * 0.015) * layout.frameHeight
         for (var puff = 0; puff < 3; puff += 1) {
           context.globalAlpha = 0.05 - puff * 0.012
           context.fillStyle = '#f4f0e0'
           context.beginPath()
-          context.ellipse(cloudX + puff * 30 * cloud.scale, cloudY + (puff % 2) * 6, 52 * cloud.scale, 15 * cloud.scale, 0, 0, Math.PI * 2)
+          context.ellipse(cloudX + puff * 26 * cloud.scale, cloudY + (puff % 2) * 6, 46 * cloud.scale, 13 * cloud.scale, 0, 0, Math.PI * 2)
           context.fill()
         }
-        void index
       })
 
-      /* birds crossing, far off */
-      context.globalAlpha = 0.65
+      /* small birds wheeling in the distance */
+      context.globalAlpha = 0.6
       state.drifters.birds.forEach(function (bird) {
-        var birdX = layout.frameX + ((bird.x + now * 0.001 * bird.speed) % 1.1 - 0.05) * layout.frameWidth
-        var birdY = layout.frameY + bird.y * layout.frameHeight + Math.sin(now * 0.001 + bird.phase) * 5
-        var flap = Math.sin(now * 0.008 + bird.phase) * bird.size * 0.7
-        context.strokeStyle = 'rgba(72, 64, 54, 0.7)'
-        context.lineWidth = 1.1
+        var angle = now * 0.001 * bird.speed + bird.phase
+        var birdX = layout.frameX + (bird.cx + Math.cos(angle) * bird.rx) * layout.frameWidth
+        var birdY = layout.frameY + (bird.cy + Math.sin(angle * 0.8) * bird.ry) * layout.frameHeight
+        var flap = Math.sin(now * 0.009 + bird.phase * 3) * bird.size * 0.6
+        context.strokeStyle = 'rgba(72, 64, 54, 0.65)'
+        context.lineWidth = 1
         context.lineCap = 'round'
         context.beginPath()
         context.moveTo(birdX - bird.size, birdY + flap)
