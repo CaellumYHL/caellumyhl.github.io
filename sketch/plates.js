@@ -50,7 +50,15 @@
     var KINDS = ['rose', 'poppy', 'tulip', 'daisy', 'lavender']
 
     function gardenBox(width, height) {
-      return { y: Math.round(height * 0.42), bottom: Math.round(height - 96), pivot: height * 0.93 }
+      /* inset from the corners so the dog-ears stay untouched, and deep
+         enough that no flower loses its feet */
+      return {
+        x: 120,
+        width: width - 240,
+        y: Math.round(height * 0.42),
+        bottom: Math.round(Math.min(height - 26, height * 0.965)),
+        pivot: height * 0.93,
+      }
     }
 
     function drawGarden(context, width, height) {
@@ -75,20 +83,20 @@
           context.setTransform(1, 0, 0, 1, 0, 0)
           context.drawImage(
             state.base,
-            0, box.y * ratio, liveApi.width * ratio, (box.bottom - box.y) * ratio,
-            0, box.y * ratio, liveApi.width * ratio, (box.bottom - box.y) * ratio,
+            box.x * ratio, box.y * ratio, box.width * ratio, (box.bottom - box.y) * ratio,
+            box.x * ratio, box.y * ratio, box.width * ratio, (box.bottom - box.y) * ratio,
           )
           context.setTransform(ratio, 0, 0, ratio, 0, 0)
           context.beginPath()
-          context.rect(0, box.y, liveApi.width, box.bottom - box.y)
+          context.rect(box.x, box.y, box.width, box.bottom - box.y)
           context.clip()
-          /* the flowers hold stiffer than the trees, but the same wind */
-          var lean = (SKETCH.windAt ? SKETCH.windAt(now * 0.001) : 0) * 0.35
+          /* the flowers take the same wind as the trees, a little softer */
+          var lean = (SKETCH.windAt ? SKETCH.windAt(now * 0.001) : 0) * 1.15
           var shear = Math.tan(lean * Math.PI / 180)
           context.translate(0, box.pivot)
           context.transform(1, 0, shear, 1, 0, 0)
           context.translate(0, -box.pivot)
-          context.drawImage(state.sprite, 0, box.y, liveApi.width, box.bottom - box.y)
+          context.drawImage(state.sprite, box.x, box.y, box.width, box.bottom - box.y)
           context.restore()
           state.raf = requestAnimationFrame(tick)
         }
@@ -162,15 +170,15 @@
         var ratio = bounds.width ? api.canvas.width / bounds.width : 1
         var box = gardenBox(width, height)
         var sprite = document.createElement('canvas')
-        sprite.width = Math.round(width * ratio)
+        sprite.width = Math.round(box.width * ratio)
         sprite.height = Math.round((box.bottom - box.y) * ratio)
         var spriteContext = sprite.getContext('2d')
         spriteContext.setTransform(ratio, 0, 0, ratio, 0, 0)
-        spriteContext.translate(0, -box.y)
+        spriteContext.translate(-box.x, -box.y)
         drawGarden(spriteContext, width, height)
         state.sprite = sprite
 
-        context.drawImage(sprite, 0, box.y, width, box.bottom - box.y)
+        context.drawImage(sprite, box.x, box.y, box.width, box.bottom - box.y)
         startSway(api)
       },
       onPointer: function (type, x, y, api) {
