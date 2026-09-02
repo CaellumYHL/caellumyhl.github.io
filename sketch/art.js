@@ -1005,36 +1005,46 @@
   }
 
   /* ---------------------------------------------------------------- adam */
-  /* The Creation of Adam, blurred but true: the fresco's own palette and
-     poses, every shape soft at the edges, found again with a little ink. */
+  /* The Creation of Adam, traced from the fresco and repainted soft: low
+     dark banks, Adam large and bright, the wine-dark cloak swept around
+     God and his company, and the two hands not quite touching. The panel
+     idles: haze drifts, birds cross, the paint gently wavers. */
 
   ART.adam = function (data) {
-    var state = { seed: 1526 }
+    var state = {
+      seed: 1526,
+      frames: null,
+      frameKey: '',
+      frameIndex: 0,
+      lastBoil: 0,
+      raf: 0,
+      layout: null,
+      drifters: null,
+    }
 
     /* the fresco's palette */
-    var PLASTER_A = '#ccc9b8'
-    var PLASTER_B = '#dbd8c7'
-    var SLOPE_BLUE = '#5b6f85'
-    var BANK_GREEN = '#4a5a40'
-    var BANK_BROWN = '#6d5a44'
-    var LEDGE = '#423c31'
-    var TEAL = '#2e5148'
-    var FLESH = '#c69a72'
-    var FLESH_HI = '#e3bd93'
-    var FLESH_SH = '#8a5f42'
+    var FLESH = '#d9b28c'
+    var FLESH_SH = '#a97e58'
+    var FLESH_HI = '#efd0a8'
+    var CHERUB_FLESH = '#c99772'
     var HAIR_BROWN = '#6b4a2f'
-    var SHELL = '#96525a'
-    var SHELL_IN = '#a2646a'
-    var SHELL_RIM = '#6d3540'
-    var CLOAK_RED = '#7c2f2f'
-    var TUNIC = '#e4d2cc'
-    var TUNIC_SH = '#c3a8a4'
-    var BEARD = '#d3d3d6'
-    var CHERUB = '#a9724c'
-    var CHERUB_D = '#8e5236'
+    var HAIR_GOLD = '#c8963c'
+    var HAIR_AUBURN = '#9a5a33'
+    var HILL = '#7b8790'
+    var BANK = '#66705a'
+    var ROCK = '#4a4136'
+    var TEAL = '#2c4a42'
+    var SHELL_RIM = '#5e2c28'
+    var SHELL = '#7d3b32'
+    var SHELL_WARM = '#8d4a3c'
+    var CLOAK_RED = '#6b2722'
+    var TUNIC = '#e6d8d2'
+    var TUNIC_SH = '#c1a49e'
+    var BEARD = '#d6d6d8'
     var SASH = '#3f7a55'
     var SASH_HI = '#6fa878'
-    var INK = 'rgba(66, 52, 42, 0.55)'
+    var INK = 'rgba(60, 46, 38, 0.6)'
+    var INK_DARK = 'rgba(48, 38, 30, 0.85)'
 
     function smoothPath(context, points) {
       context.beginPath()
@@ -1047,14 +1057,12 @@
       context.closePath()
     }
 
-    /* A shape painted soft: the true silhouette filled several times with
-       a small drift, so the edge blurs but the form holds. */
     function soften(context, points, color, seed, options) {
       options = options || {}
       var random = SKETCH.rng(seed)
-      var passes = options.passes || 6
+      var passes = options.passes || 5
       var jitter = options.jitter === undefined ? 4 : options.jitter
-      var alpha = options.alpha === undefined ? 0.16 : options.alpha
+      var alpha = options.alpha === undefined ? 0.2 : options.alpha
       context.save()
       context.fillStyle = color
       for (var pass = 0; pass < passes; pass += 1) {
@@ -1066,12 +1074,11 @@
         }))
         context.fill()
       }
-      /* a little pigment dust off the edges */
       if (options.dust !== false) {
         for (var dust = 0; dust < points.length * 2; dust += 1) {
           var at = Math.floor(random() * (points.length - 1))
           var t = random()
-          context.globalAlpha = 0.08 + random() * 0.14
+          context.globalAlpha = 0.07 + random() * 0.12
           context.fillRect(
             points[at][0] + (points[at + 1][0] - points[at][0]) * t + (random() - 0.5) * jitter * 3,
             points[at][1] + (points[at + 1][1] - points[at][1]) * t + (random() - 0.5) * jitter * 3,
@@ -1082,7 +1089,6 @@
       context.restore()
     }
 
-    /* A limb as a tapered tube, painted soft. */
     function tubePoints(line, startWidth, endWidth) {
       var left = []
       var right = []
@@ -1108,22 +1114,40 @@
 
     function ringPoints(centerX, centerY, radius, squashY) {
       var points = []
-      for (var index = 0; index < 10; index += 1) {
-        var angle = (index / 10) * Math.PI * 2
+      for (var index = 0; index < 12; index += 1) {
+        var angle = (index / 12) * Math.PI * 2
         points.push([centerX + Math.cos(angle) * radius, centerY + Math.sin(angle) * radius * (squashY || 1)])
       }
       return points
     }
 
-    /* a single quiet ink line, slipped a touch off the paint */
-    function ink(context, points, seed, width) {
-      SKETCH.stroke(context, points.map(function (point) {
-        return [point[0] + 1.2, point[1] - 1]
-      }), { seed: seed, color: INK, width: width || 1.2, amp: 1, step: 8 })
+    function ink(context, points, seed, width, color) {
+      SKETCH.stroke(context, points, { seed: seed, color: color || INK, width: width || 1.2, amp: 0.9, step: 8 })
     }
 
-    function drawAdamPanel(context, width, height, seed) {
-      var random = SKETCH.rng(seed)
+    /* A small clear face: clean disc, hair, two eyes that read. */
+    function tinyFace(context, x, y, radius, hair, look, seed) {
+      soften(context, ringPoints(x, y, radius, 1.08), CHERUB_FLESH, seed, { passes: 4, jitter: radius * 0.09, alpha: 0.3, dust: false })
+      ink(context, ringPoints(x, y, radius * 1.02, 1.08).concat([[x + radius * 1.02, y]]), seed + 1, 0.9, 'rgba(60, 46, 38, 0.45)')
+      /* hair cap */
+      soften(context, [
+        [x - radius * 0.95, y - radius * 0.25], [x - radius * 0.6, y - radius * 0.95],
+        [x + radius * 0.25, y - radius * 1.15], [x + radius * 0.9, y - radius * 0.55],
+        [x + radius * 0.55, y - radius * 0.4], [x - radius * 0.2, y - radius * 0.5],
+      ], hair, seed + 2, { passes: 3, jitter: radius * 0.08, alpha: 0.32, dust: false })
+      /* eyes, brows, mouth */
+      var eyeOffset = look * radius * 0.18
+      SKETCH.dot(context, x - radius * 0.32 + eyeOffset, y - radius * 0.05, Math.max(0.9, radius * 0.09), INK_DARK, seed + 3)
+      SKETCH.dot(context, x + radius * 0.32 + eyeOffset, y - radius * 0.05, Math.max(0.9, radius * 0.09), INK_DARK, seed + 4)
+      ink(context, [[x - radius * 0.45 + eyeOffset, y - radius * 0.28], [x - radius * 0.15 + eyeOffset, y - radius * 0.32]], seed + 5, 0.8)
+      ink(context, [[x + radius * 0.15 + eyeOffset, y - radius * 0.32], [x + radius * 0.45 + eyeOffset, y - radius * 0.28]], seed + 6, 0.8)
+      ink(context, [[x - radius * 0.16 + eyeOffset * 0.6, y + radius * 0.42], [x + radius * 0.16 + eyeOffset * 0.6, y + radius * 0.44]], seed + 7, 0.9)
+    }
+
+    /* ------------------------------------------------------- the panel */
+
+    function drawAdamPanel(context, width, height, seed, boil) {
+      var random = SKETCH.rng(seed + boil * 7717)
       var paperTone = '#efece1'
       SKETCH.plainPaper(context, width, height, { seed: 1503, tone: paperTone })
 
@@ -1132,227 +1156,228 @@
       var frameWidth = width * 0.89
       var frameHeight = height * 0.84
       var unit = frameWidth
+      var wave = boil * 3301
+
+      state.layout = { frameX: frameX, frameY: frameY, frameWidth: frameWidth, frameHeight: frameHeight }
 
       context.save()
       context.beginPath()
       context.rect(frameX, frameY, frameWidth, frameHeight)
       context.clip()
 
-      /* the surrounding fresco, cropped: dark strips above and below */
       var stripHeight = frameHeight * 0.1
       var panelTop = frameY + stripHeight
       var panelHeight = frameHeight - stripHeight * 2
       var px = function (t) { return frameX + frameWidth * t }
       var py = function (t) { return panelTop + panelHeight * t }
 
-      /* plaster, grey-green like the ceiling */
+      /* plaster */
       var plaster = context.createLinearGradient(frameX, panelTop, frameX + frameWidth, panelTop + panelHeight)
-      plaster.addColorStop(0, PLASTER_A)
-      plaster.addColorStop(0.45, PLASTER_B)
-      plaster.addColorStop(1, PLASTER_A)
+      plaster.addColorStop(0, '#ccc9b8')
+      plaster.addColorStop(0.45, '#dcd9c8')
+      plaster.addColorStop(1, '#c6c3b1')
       context.fillStyle = plaster
       context.fillRect(frameX, frameY, frameWidth, frameHeight)
-      softBloom(context, px(0.45), py(0.2), unit * 0.13, unit * 0.07, '#b9b6a2', seed + 2)
-      softBloom(context, px(0.35), py(0.75), unit * 0.11, unit * 0.06, '#c2bfae', seed + 3)
+      softBloom(context, px(0.42), py(0.16), unit * 0.1, unit * 0.05, '#cbc8b6', seed + 2)
+      softBloom(context, px(0.5), py(0.82), unit * 0.09, unit * 0.04, '#cfccba', seed + 3)
+      /* a pale breath around where the hands will meet */
+      var glow = context.createRadialGradient(px(0.386), py(0.39), 6, px(0.386), py(0.39), unit * 0.09)
+      glow.addColorStop(0, 'rgba(242, 236, 216, 0.35)')
+      glow.addColorStop(1, 'rgba(242, 236, 216, 0)')
+      context.fillStyle = glow
+      context.fillRect(px(0.28), py(0.2), unit * 0.22, panelHeight * 0.4)
 
+      /* dark strips of the surrounding ceiling */
       context.fillStyle = '#565549'
       context.fillRect(frameX, frameY, frameWidth, stripHeight)
       context.fillRect(frameX, frameY + frameHeight - stripHeight, frameWidth, stripHeight)
       SKETCH.stroke(context, [[frameX, panelTop], [frameX + frameWidth, panelTop + 2]], { seed: seed + 10, color: 'rgba(48, 46, 40, 0.7)', width: 1.5, amp: 1, step: 12 })
       SKETCH.stroke(context, [[frameX, panelTop + panelHeight], [frameX + frameWidth, panelTop + panelHeight - 2]], { seed: seed + 11, color: 'rgba(48, 46, 40, 0.7)', width: 1.5, amp: 1, step: 12 })
 
-      /* -------------------------------------------------- the earth side */
-      /* the blue-grey slope behind Adam's head */
+      /* ------------------------------------------------------ the earth */
+      /* a hazy hill far behind his head */
       soften(context, [
-        [px(0), py(0.20)], [px(0.05), py(0.10)], [px(0.13), py(0.09)], [px(0.185), py(0.17)],
-        [px(0.16), py(0.30)], [px(0.06), py(0.34)], [px(0), py(0.31)],
-      ], SLOPE_BLUE, seed + 20, { passes: 5, jitter: unit * 0.004 })
-      /* the green bank he lies on */
+        [px(0), py(0.16)], [px(0.06), py(0.2)], [px(0.115), py(0.3)], [px(0.1), py(0.42)], [px(0), py(0.46)],
+      ], HILL, seed + wave + 20, { passes: 4, jitter: unit * 0.005, alpha: 0.13 })
+      /* the low green bank he lies on */
       soften(context, [
-        [px(0), py(0.98)], [px(0), py(0.34)], [px(0.06), py(0.28)], [px(0.14), py(0.31)],
-        [px(0.24), py(0.45)], [px(0.335), py(0.63)], [px(0.40), py(0.83)], [px(0.41), py(0.98)],
-      ], BANK_GREEN, seed + 21, { passes: 6, jitter: unit * 0.004 })
+        [px(0), py(0.98)], [px(0), py(0.4)], [px(0.045), py(0.42)], [px(0.09), py(0.5)],
+        [px(0.16), py(0.6)], [px(0.24), py(0.7)], [px(0.315), py(0.8)], [px(0.365), py(0.92)], [px(0.37), py(0.98)],
+      ], BANK, seed + wave + 21, { passes: 6, jitter: unit * 0.004 })
+      /* dark rock under his seat and legs */
       soften(context, [
-        [px(0.05), py(0.45)], [px(0.16), py(0.48)], [px(0.26), py(0.6)], [px(0.2), py(0.66)], [px(0.08), py(0.58)],
-      ], BANK_BROWN, seed + 22, { passes: 4, jitter: unit * 0.004, alpha: 0.12 })
-      /* the dark ledge below him */
+        [px(0.04), py(1)], [px(0.08), py(0.76)], [px(0.16), py(0.78)], [px(0.27), py(0.87)], [px(0.37), py(0.97)], [px(0.38), py(1)],
+      ], ROCK, seed + wave + 22, { passes: 6, jitter: unit * 0.004 })
+      /* the teal scrap at the corner */
       soften(context, [
-        [px(0), py(1.0)], [px(0), py(0.74)], [px(0.10), py(0.70)], [px(0.26), py(0.74)],
-        [px(0.385), py(0.86)], [px(0.42), py(1.0)],
-      ], LEDGE, seed + 23, { passes: 6, jitter: unit * 0.004 })
-      /* a scrap of teal cloth at the corner */
-      soften(context, [
-        [px(0.02), py(0.97)], [px(0.06), py(0.90)], [px(0.12), py(0.93)], [px(0.10), py(1.0)], [px(0.03), py(1.0)],
-      ], TEAL, seed + 24, { passes: 4, jitter: unit * 0.003 })
+        [px(0.01), py(0.9)], [px(0.05), py(0.855)], [px(0.1), py(0.885)], [px(0.09), py(0.96)], [px(0.03), py(0.97)],
+      ], TEAL, seed + 23, { passes: 4, jitter: unit * 0.003 })
 
-      /* ------------------------------------------------------------ adam */
-      /* extended right leg, down the bank */
-      limb(context, [[px(0.165), py(0.66)], [px(0.27), py(0.77)], [px(0.352), py(0.885)]], unit * 0.032, unit * 0.014, FLESH, seed + 30, { jitter: unit * 0.003 })
-      limb(context, [[px(0.352), py(0.885)], [px(0.376), py(0.9)]], unit * 0.013, unit * 0.008, FLESH, seed + 31, { jitter: unit * 0.002 })
-      /* bent left leg, knee raised */
-      limb(context, [[px(0.185), py(0.635)], [px(0.245), py(0.52)]], unit * 0.033, unit * 0.026, FLESH, seed + 32, { jitter: unit * 0.003 })
-      limb(context, [[px(0.245), py(0.52)], [px(0.256), py(0.68)], [px(0.246), py(0.82)]], unit * 0.023, unit * 0.011, FLESH, seed + 33, { jitter: unit * 0.003 })
-      limb(context, [[px(0.246), py(0.82)], [px(0.272), py(0.845)]], unit * 0.011, unit * 0.007, FLESH, seed + 34, { jitter: unit * 0.002 })
-      /* torso, leaning back into the bank */
+      /* ---------------------------------------------------------- adam */
+      /* support arm behind, resting into the bank */
+      limb(context, [[px(0.07), py(0.42)], [px(0.038), py(0.5)], [px(0.03), py(0.575)], [px(0.02), py(0.635)]], unit * 0.024, unit * 0.013, FLESH, seed + wave + 30, { jitter: unit * 0.0028 })
+      /* extended leg running down the rock */
+      limb(context, [[px(0.105), py(0.685)], [px(0.16), py(0.77)], [px(0.225), py(0.875)], [px(0.283), py(0.94)]], unit * 0.038, unit * 0.016, FLESH, seed + wave + 31, { jitter: unit * 0.003 })
+      limb(context, [[px(0.283), py(0.94)], [px(0.315), py(0.945)]], unit * 0.014, unit * 0.009, FLESH, seed + wave + 32, { jitter: unit * 0.002 })
+      /* raised leg: thigh up, calf down, the foot set flat */
+      limb(context, [[px(0.125), py(0.655)], [px(0.2), py(0.53)], [px(0.256), py(0.46)]], unit * 0.038, unit * 0.028, FLESH, seed + wave + 33, { jitter: unit * 0.003 })
+      limb(context, [[px(0.256), py(0.46)], [px(0.293), py(0.6)], [px(0.303), py(0.73)], [px(0.31), py(0.82)]], unit * 0.026, unit * 0.012, FLESH, seed + wave + 34, { jitter: unit * 0.003 })
+      limb(context, [[px(0.31), py(0.82)], [px(0.338), py(0.833)]], unit * 0.012, unit * 0.008, FLESH, seed + wave + 35, { jitter: unit * 0.002 })
+      /* torso, broad at the chest */
       soften(context, [
-        [px(0.075), py(0.445)], [px(0.10), py(0.405)], [px(0.13), py(0.415)], [px(0.155), py(0.47)],
-        [px(0.175), py(0.555)], [px(0.19), py(0.64)], [px(0.15), py(0.675)], [px(0.11), py(0.60)], [px(0.083), py(0.52)],
-      ], FLESH, seed + 35, { jitter: unit * 0.0035 })
-      /* light along the chest, shadow under the flank */
+        [px(0.088), py(0.35)], [px(0.118), py(0.315)], [px(0.138), py(0.36)], [px(0.156), py(0.42)],
+        [px(0.152), py(0.5)], [px(0.138), py(0.6)], [px(0.125), py(0.665)], [px(0.098), py(0.7)],
+        [px(0.08), py(0.66)], [px(0.068), py(0.575)], [px(0.066), py(0.47)], [px(0.074), py(0.4)],
+      ], FLESH, seed + wave + 36, { jitter: unit * 0.0032 })
+      /* modelling: light on the chest, shade along the flank */
       soften(context, [
-        [px(0.095), py(0.43)], [px(0.125), py(0.44)], [px(0.15), py(0.49)], [px(0.125), py(0.5)], [px(0.10), py(0.46)],
-      ], FLESH_HI, seed + 36, { passes: 3, jitter: unit * 0.003, alpha: 0.14, dust: false })
+        [px(0.092), py(0.37)], [px(0.125), py(0.345)], [px(0.142), py(0.4)], [px(0.12), py(0.44)], [px(0.095), py(0.42)],
+      ], FLESH_HI, seed + 37, { passes: 3, jitter: unit * 0.0025, alpha: 0.16, dust: false })
       soften(context, [
-        [px(0.12), py(0.60)], [px(0.17), py(0.62)], [px(0.185), py(0.655)], [px(0.14), py(0.66)],
-      ], FLESH_SH, seed + 37, { passes: 3, jitter: unit * 0.003, alpha: 0.14, dust: false })
-      /* supporting right arm, elbow into the bank */
-      limb(context, [[px(0.085), py(0.47)], [px(0.052), py(0.585)], [px(0.068), py(0.665)]], unit * 0.018, unit * 0.011, FLESH, seed + 38, { jitter: unit * 0.003 })
-      /* the reaching arm, draped over the knee */
-      limb(context, [[px(0.125), py(0.445)], [px(0.215), py(0.48)], [px(0.30), py(0.447)], [px(0.351), py(0.452)]], unit * 0.018, unit * 0.008, FLESH, seed + 39, { jitter: unit * 0.0028 })
-      /* the limp hand */
-      limb(context, [[px(0.351), py(0.452)], [px(0.362), py(0.456)]], unit * 0.008, unit * 0.005, FLESH, seed + 40, { jitter: unit * 0.002 })
-      SKETCH.stroke(context, [[px(0.362), py(0.451)], [px(0.371), py(0.4535)]], { seed: seed + 41, color: INK, width: 1.4, amp: 0.3 })
-      SKETCH.stroke(context, [[px(0.361), py(0.457)], [px(0.3705), py(0.461)]], { seed: seed + 42, color: INK, width: 1.1, amp: 0.3 })
-      SKETCH.stroke(context, [[px(0.359), py(0.462)], [px(0.366), py(0.468)]], { seed: seed + 43, color: INK, width: 1, amp: 0.3 })
-      /* the head, turned to watch the hand */
-      soften(context, ringPoints(px(0.106), py(0.36), unit * 0.019, 1.15), FLESH, seed + 44, { passes: 5, jitter: unit * 0.0025 })
+        [px(0.075), py(0.52)], [px(0.09), py(0.62)], [px(0.11), py(0.68)], [px(0.088), py(0.68)], [px(0.07), py(0.6)],
+      ], FLESH_SH, seed + 38, { passes: 3, jitter: unit * 0.0025, alpha: 0.15, dust: false })
+      /* the reaching arm, carried high across the knee */
+      limb(context, [[px(0.125), py(0.385)], [px(0.2), py(0.345)], [px(0.27), py(0.34)], [px(0.333), py(0.36)]], unit * 0.028, unit * 0.012, FLESH, seed + wave + 39, { jitter: unit * 0.0026 })
+      limb(context, [[px(0.333), py(0.36)], [px(0.353), py(0.372)]], unit * 0.011, unit * 0.007, FLESH, seed + wave + 40, { jitter: unit * 0.002 })
+      /* the limp fingers */
+      ink(context, [[px(0.354), py(0.37)], [px(0.371), py(0.389)]], seed + 41, 1.5, INK_DARK)
+      ink(context, [[px(0.352), py(0.377)], [px(0.368), py(0.398)]], seed + 42, 1.2, INK_DARK)
+      ink(context, [[px(0.349), py(0.383)], [px(0.362), py(0.405)]], seed + 43, 1, INK_DARK)
+      /* head, tipped back to watch */
+      soften(context, ringPoints(px(0.105), py(0.315), unit * 0.026, 1.12), FLESH, seed + wave + 44, { passes: 5, jitter: unit * 0.002 })
       soften(context, [
-        [px(0.088), py(0.335)], [px(0.10), py(0.315)], [px(0.118), py(0.318)], [px(0.124), py(0.345)],
-        [px(0.112), py(0.36)], [px(0.094), py(0.355)],
-      ], HAIR_BROWN, seed + 45, { passes: 4, jitter: unit * 0.002 })
-      /* profile: brow, eye, mouth */
-      ink(context, [[px(0.118), py(0.345)], [px(0.124), py(0.355)], [px(0.121), py(0.366)]], seed + 46, 1.1)
-      SKETCH.dot(context, px(0.114), py(0.352), 1.1, 'rgba(50, 40, 32, 0.85)', seed + 47)
-      SKETCH.stroke(context, [[px(0.116), py(0.372)], [px(0.121), py(0.372)]], { seed: seed + 48, color: INK, width: 1, amp: 0.2 })
-      /* Adam found again in ink: the long line of back and leg */
-      ink(context, [[px(0.078), py(0.44)], [px(0.115), py(0.585)], [px(0.165), py(0.655)], [px(0.27), py(0.765)], [px(0.35), py(0.88)]], seed + 49, 1.2)
-      ink(context, [[px(0.128), py(0.44)], [px(0.218), py(0.472)], [px(0.302), py(0.44)], [px(0.35), py(0.447)]], seed + 50, 1.1)
+        [px(0.082), py(0.29)], [px(0.09), py(0.256)], [px(0.113), py(0.248)], [px(0.128), py(0.27)],
+        [px(0.122), py(0.295)], [px(0.098), py(0.3)],
+      ], HAIR_BROWN, seed + 45, { passes: 4, jitter: unit * 0.002, dust: false })
+      /* his face: brow, eye, nose, mouth, all legible */
+      ink(context, [[px(0.108), py(0.296)], [px(0.121), py(0.298)]], seed + 46, 1)
+      SKETCH.dot(context, px(0.114), py(0.308), 1.3, INK_DARK, seed + 47)
+      ink(context, [[px(0.124), py(0.305)], [px(0.128), py(0.32)], [px(0.122), py(0.326)]], seed + 48, 1)
+      ink(context, [[px(0.112), py(0.336)], [px(0.122), py(0.337)]], seed + 49, 1)
+      /* the long line of him, found once in ink */
+      ink(context, [[px(0.088), py(0.36)], [px(0.07), py(0.47)], [px(0.08), py(0.62)], [px(0.104), py(0.69)], [px(0.16), py(0.775)], [px(0.225), py(0.878)], [px(0.283), py(0.938)]], seed + 50, 1.1)
+      ink(context, [[px(0.128), py(0.383)], [px(0.202), py(0.343)], [px(0.272), py(0.34)], [px(0.334), py(0.361)]], seed + 52, 1)
 
-      /* ---------------------------------------------------------- god */
-      /* the shell of figures: rim, body, inner light */
+      /* ------------------------------------------------------ the host */
+      /* the swept cloak, deep and irregular, open at the left */
+      var shellOuter = [
+        [px(0.545), py(0.21)], [px(0.565), py(0.135)], [px(0.625), py(0.075)], [px(0.7), py(0.042)],
+        [px(0.78), py(0.035)], [px(0.86), py(0.06)], [px(0.925), py(0.115)], [px(0.965), py(0.21)],
+        [px(0.975), py(0.32)], [px(0.955), py(0.44)], [px(0.905), py(0.55)], [px(0.83), py(0.64)],
+        [px(0.745), py(0.7)], [px(0.66), py(0.7)], [px(0.6), py(0.63)], [px(0.565), py(0.52)], [px(0.548), py(0.38)],
+      ]
+      soften(context, shellOuter, SHELL_RIM, seed + wave + 60, { passes: 6, jitter: unit * 0.004 })
+      soften(context, shellOuter.map(function (point) {
+        return [point[0] * 0.9 + px(0.758) * 0.1, point[1] * 0.88 + py(0.37) * 0.12]
+      }), SHELL, seed + wave + 61, { passes: 5, jitter: unit * 0.004 })
+      soften(context, ringPoints(px(0.79), py(0.35), unit * 0.11, 1.3), SHELL_WARM, seed + 62, { passes: 4, jitter: unit * 0.005, alpha: 0.12, dust: false })
+      /* the red folds flying off it */
       soften(context, [
-        [px(0.525), py(0.44)], [px(0.545), py(0.25)], [px(0.615), py(0.12)], [px(0.73), py(0.07)],
-        [px(0.85), py(0.09)], [px(0.94), py(0.18)], [px(0.972), py(0.34)], [px(0.95), py(0.53)],
-        [px(0.87), py(0.67)], [px(0.74), py(0.73)], [px(0.625), py(0.665)], [px(0.55), py(0.56)],
-      ], SHELL_RIM, seed + 60, { passes: 6, jitter: unit * 0.004 })
+        [px(0.9), py(0.06)], [px(0.965), py(0.045)], [px(1.0), py(0.1)], [px(0.995), py(0.23)], [px(0.945), py(0.16)],
+      ], CLOAK_RED, seed + wave + 63, { passes: 5, jitter: unit * 0.004 })
       soften(context, [
-        [px(0.555), py(0.43)], [px(0.575), py(0.26)], [px(0.64), py(0.15)], [px(0.74), py(0.105)],
-        [px(0.845), py(0.125)], [px(0.92), py(0.21)], [px(0.945), py(0.35)], [px(0.92), py(0.51)],
-        [px(0.85), py(0.63)], [px(0.74), py(0.68)], [px(0.64), py(0.62)], [px(0.578), py(0.53)],
-      ], SHELL, seed + 61, { passes: 6, jitter: unit * 0.004 })
-      soften(context, [
-        [px(0.60), py(0.40)], [px(0.63), py(0.26)], [px(0.71), py(0.18)], [px(0.81), py(0.2)],
-        [px(0.88), py(0.29)], [px(0.885), py(0.43)], [px(0.82), py(0.55)], [px(0.70), py(0.57)], [px(0.625), py(0.5)],
-      ], SHELL_IN, seed + 62, { passes: 5, jitter: unit * 0.004, alpha: 0.13 })
-      /* the deep red cloak flying off the shell */
-      soften(context, [
-        [px(0.875), py(0.08)], [px(0.95), py(0.05)], [px(0.99), py(0.12)], [px(0.98), py(0.26)], [px(0.92), py(0.19)],
-      ], CLOAK_RED, seed + 63, { passes: 5, jitter: unit * 0.004 })
-      soften(context, [
-        [px(0.955), py(0.36)], [px(0.998), py(0.42)], [px(0.993), py(0.6)], [px(0.94), py(0.55)],
+        [px(0.965), py(0.3)], [px(1.0), py(0.35)], [px(0.995), py(0.5)], [px(0.95), py(0.44)],
       ], CLOAK_RED, seed + 64, { passes: 5, jitter: unit * 0.004 })
 
-      /* the company crowded along the shell */
-      var cherubs = [
-        [0.66, 0.19, 0.015], [0.725, 0.15, 0.017], [0.79, 0.185, 0.015],
-        [0.845, 0.26, 0.016], [0.868, 0.38, 0.014], [0.578, 0.43, 0.014],
-      ]
-      cherubs.forEach(function (cherub, index) {
-        var cherubX = px(cherub[0])
-        var cherubY = py(cherub[1])
-        var cherubRadius = unit * cherub[2]
-        soften(context, ringPoints(cherubX + cherubRadius * 0.4, cherubY + cherubRadius * 1.6, cherubRadius * 1.4, 1.2), index % 2 ? CHERUB_D : CHERUB, seed + 70 + index, { passes: 4, jitter: unit * 0.0025, alpha: 0.13 })
-        soften(context, ringPoints(cherubX, cherubY, cherubRadius, 1.1), CHERUB, seed + 80 + index, { passes: 4, jitter: unit * 0.002 })
-        soften(context, [
-          [cherubX - cherubRadius, cherubY - cherubRadius * 0.4], [cherubX - cherubRadius * 0.3, cherubY - cherubRadius * 1.2],
-          [cherubX + cherubRadius * 0.7, cherubY - cherubRadius * 0.9], [cherubX + cherubRadius * 0.4, cherubY - cherubRadius * 0.3],
-        ], index === 1 ? '#c8963c' : HAIR_BROWN, seed + 90 + index, { passes: 3, jitter: unit * 0.002, dust: false })
-        if (index < 3) {
-          SKETCH.dot(context, cherubX - cherubRadius * 0.3, cherubY, 0.9, 'rgba(50, 40, 32, 0.8)', seed + 100 + index)
-          SKETCH.dot(context, cherubX + cherubRadius * 0.25, cherubY, 0.9, 'rgba(50, 40, 32, 0.8)', seed + 105 + index)
-        }
-      })
-      /* the big curly-haired cherub carried under his legs */
-      soften(context, ringPoints(px(0.715), py(0.63), unit * 0.026, 1.2), CHERUB, seed + 110, { passes: 5, jitter: unit * 0.003 })
+      /* the company: bodies first, then faces that read */
       soften(context, [
-        [px(0.695), py(0.585)], [px(0.71), py(0.565)], [px(0.73), py(0.572)], [px(0.735), py(0.60)], [px(0.71), py(0.61)],
-      ], '#c8963c', seed + 111, { passes: 4, jitter: unit * 0.002 })
-      limb(context, [[px(0.72), py(0.66)], [px(0.73), py(0.76)]], unit * 0.011, unit * 0.007, CHERUB_D, seed + 112, { jitter: unit * 0.002 })
-      limb(context, [[px(0.745), py(0.65)], [px(0.765), py(0.74)]], unit * 0.01, unit * 0.006, CHERUB_D, seed + 113, { jitter: unit * 0.002 })
+        [px(0.79), py(0.14)], [px(0.87), py(0.17)], [px(0.93), py(0.26)], [px(0.94), py(0.38)],
+        [px(0.9), py(0.5)], [px(0.83), py(0.55)], [px(0.78), py(0.47)], [px(0.77), py(0.33)], [px(0.765), py(0.22)],
+      ], CHERUB_FLESH, seed + wave + 65, { passes: 4, jitter: unit * 0.004, alpha: 0.14 })
+      soften(context, [
+        [px(0.6), py(0.43)], [px(0.67), py(0.45)], [px(0.71), py(0.54)], [px(0.67), py(0.62)], [px(0.61), py(0.6)], [px(0.585), py(0.51)],
+      ], '#8e5236', seed + wave + 66, { passes: 4, jitter: unit * 0.004, alpha: 0.16 })
 
-      /* God: legs first, stretched away to the right inside the shell */
-      limb(context, [[px(0.745), py(0.51)], [px(0.81), py(0.585)], [px(0.852), py(0.635)]], unit * 0.024, unit * 0.012, TUNIC_SH, seed + 120, { jitter: unit * 0.003 })
-      limb(context, [[px(0.755), py(0.465)], [px(0.832), py(0.545)], [px(0.888), py(0.605)]], unit * 0.028, unit * 0.014, TUNIC, seed + 121, { jitter: unit * 0.003 })
-      limb(context, [[px(0.895), py(0.61)], [px(0.921), py(0.638)]], unit * 0.011, unit * 0.008, FLESH, seed + 122, { jitter: unit * 0.002 })
-      limb(context, [[px(0.858), py(0.645)], [px(0.882), py(0.672)]], unit * 0.01, unit * 0.007, FLESH, seed + 123, { jitter: unit * 0.002 })
-      /* his body driving forward: the tunic is a diagonal capsule */
-      limb(context, [
-        [px(0.646), py(0.36)], [px(0.706), py(0.4)], [px(0.758), py(0.455)],
-      ], unit * 0.05, unit * 0.042, TUNIC_SH, seed + 125, { jitter: unit * 0.003, alpha: 0.11, dust: false })
-      limb(context, [
-        [px(0.602), py(0.272)], [px(0.655), py(0.305)], [px(0.71), py(0.35)], [px(0.752), py(0.405)], [px(0.775), py(0.46)],
-      ], unit * 0.054, unit * 0.044, TUNIC, seed + 124, { jitter: unit * 0.0035 })
-      /* the open chest at the neck of it */
+      /* God's legs, stretched to the right edge of the cloak */
+      limb(context, [[px(0.79), py(0.47)], [px(0.86), py(0.55)], [px(0.915), py(0.615)]], unit * 0.032, unit * 0.016, TUNIC_SH, seed + wave + 70, { jitter: unit * 0.003 })
+      limb(context, [[px(0.915), py(0.615)], [px(0.952), py(0.645)]], unit * 0.014, unit * 0.009, FLESH, seed + wave + 71, { jitter: unit * 0.002 })
+      limb(context, [[px(0.8), py(0.4)], [px(0.868), py(0.462)]], unit * 0.046, unit * 0.038, TUNIC, seed + wave + 72, { jitter: unit * 0.003 })
+      limb(context, [[px(0.868), py(0.462)], [px(0.93), py(0.517)], [px(0.972), py(0.542)]], unit * 0.032, unit * 0.014, FLESH, seed + wave + 73, { jitter: unit * 0.0028 })
+      limb(context, [[px(0.972), py(0.542)], [px(0.996), py(0.55)]], unit * 0.013, unit * 0.008, FLESH, seed + 74, { jitter: unit * 0.002 })
+
+      /* the pale tunic driving forward */
       soften(context, [
-        [px(0.612), py(0.30)], [px(0.632), py(0.276)], [px(0.652), py(0.288)], [px(0.638), py(0.322)], [px(0.618), py(0.325)],
-      ], FLESH, seed + 1240, { passes: 4, jitter: unit * 0.002, dust: false })
-      /* his left arm thrown over the one who waits */
-      limb(context, [[px(0.648), py(0.295)], [px(0.678), py(0.318)], [px(0.7), py(0.335)]], unit * 0.013, unit * 0.007, FLESH, seed + 126, { jitter: unit * 0.002 })
-      soften(context, ringPoints(px(0.669), py(0.3), unit * 0.0135, 1.1), FLESH, seed + 127, { passes: 4, jitter: unit * 0.002 })
+        [px(0.652), py(0.155)], [px(0.7), py(0.15)], [px(0.755), py(0.2)], [px(0.8), py(0.28)],
+        [px(0.835), py(0.38)], [px(0.83), py(0.47)], [px(0.77), py(0.475)], [px(0.715), py(0.415)],
+        [px(0.66), py(0.33)], [px(0.628), py(0.245)], [px(0.632), py(0.185)],
+      ], TUNIC, seed + wave + 75, { passes: 6, jitter: unit * 0.0035 })
       soften(context, [
-        [px(0.657), py(0.285)], [px(0.667), py(0.273)], [px(0.682), py(0.279)], [px(0.683), py(0.295)], [px(0.667), py(0.297)],
-      ], '#b58a4a', seed + 128, { passes: 3, jitter: unit * 0.0018, dust: false })
-      SKETCH.dot(context, px(0.665), py(0.298), 0.9, 'rgba(50, 40, 32, 0.8)', seed + 129)
-      /* the reaching right arm — the one straight line in the sky */
-      limb(context, [[px(0.615), py(0.315)], [px(0.545), py(0.375)], [px(0.475), py(0.43)], [px(0.428), py(0.452)]], unit * 0.017, unit * 0.008, FLESH, seed + 130, { jitter: unit * 0.0028 })
-      limb(context, [[px(0.428), py(0.452)], [px(0.413), py(0.456)]], unit * 0.008, unit * 0.005, FLESH, seed + 131, { jitter: unit * 0.002 })
-      SKETCH.stroke(context, [[px(0.414), py(0.4545)], [px(0.399), py(0.458)]], { seed: seed + 132, color: INK, width: 1.5, amp: 0.3 })
-      SKETCH.stroke(context, [[px(0.416), py(0.461)], [px(0.406), py(0.465)]], { seed: seed + 133, color: INK, width: 1, amp: 0.3 })
-      /* his head, hair and beard streaming back with the speed of it */
-      soften(context, ringPoints(px(0.607), py(0.263), unit * 0.02, 1.1), FLESH, seed + 134, { passes: 5, jitter: unit * 0.0025 })
+        [px(0.69), py(0.32)], [px(0.75), py(0.38)], [px(0.79), py(0.45)], [px(0.73), py(0.44)], [px(0.675), py(0.36)],
+      ], TUNIC_SH, seed + 76, { passes: 3, jitter: unit * 0.003, alpha: 0.14, dust: false })
+      /* fold lines in the tunic */
+      ink(context, [[px(0.66), py(0.2)], [px(0.72), py(0.26)], [px(0.775), py(0.35)]], seed + 77, 1)
+      ink(context, [[px(0.648), py(0.25)], [px(0.7), py(0.32)], [px(0.75), py(0.42)]], seed + 78, 0.9)
+
+      /* his left arm reaching back over the one who waits */
+      limb(context, [[px(0.7), py(0.2)], [px(0.73), py(0.245)], [px(0.75), py(0.285)]], unit * 0.016, unit * 0.009, FLESH, seed + wave + 79, { jitter: unit * 0.002 })
+      tinyFace(context, px(0.737), py(0.3), unit * 0.017, HAIR_BROWN, -0.6, seed + 80)
+
+      /* faces of the company, each one legible */
+      tinyFace(context, px(0.73), py(0.115), unit * 0.015, HAIR_AUBURN, -0.4, seed + 82)
+      tinyFace(context, px(0.782), py(0.1), unit * 0.014, HAIR_GOLD, -0.3, seed + 83)
+      tinyFace(context, px(0.834), py(0.26), unit * 0.02, HAIR_GOLD, -0.7, seed + 84)
+      tinyFace(context, px(0.877), py(0.35), unit * 0.015, HAIR_AUBURN, -0.5, seed + 85)
+      tinyFace(context, px(0.915), py(0.28), unit * 0.014, HAIR_BROWN, -0.4, seed + 86)
+      tinyFace(context, px(0.928), py(0.42), unit * 0.013, HAIR_BROWN, -0.5, seed + 87)
+      tinyFace(context, px(0.617), py(0.43), unit * 0.015, HAIR_BROWN, -0.2, seed + 88)
+      /* the carried putto below, curls of gold */
+      soften(context, ringPoints(px(0.71), py(0.565), unit * 0.026, 1.15), CHERUB_FLESH, seed + wave + 89, { passes: 4, jitter: unit * 0.0025 })
+      tinyFace(context, px(0.687), py(0.515), unit * 0.017, HAIR_GOLD, -0.6, seed + 90)
+      limb(context, [[px(0.702), py(0.6)], [px(0.678), py(0.68)]], unit * 0.012, unit * 0.007, CHERUB_FLESH, seed + 91, { jitter: unit * 0.002 })
+      limb(context, [[px(0.725), py(0.605)], [px(0.71), py(0.69)]], unit * 0.011, unit * 0.007, CHERUB_FLESH, seed + 92, { jitter: unit * 0.002 })
+
+      /* the green sash swinging under it all */
+      limb(context, [[px(0.705), py(0.52)], [px(0.665), py(0.6)], [px(0.648), py(0.7)], [px(0.668), py(0.8)], [px(0.7), py(0.855)]], unit * 0.019, unit * 0.008, SASH, seed + wave + 93, { jitter: unit * 0.0026 })
+      limb(context, [[px(0.698), py(0.545)], [px(0.664), py(0.63)], [px(0.655), py(0.72)]], unit * 0.006, unit * 0.004, SASH_HI, seed + 94, { jitter: unit * 0.002, dust: false })
+
+      /* God: the great arm, then the head that means it */
+      limb(context, [[px(0.648), py(0.245)], [px(0.598), py(0.29)], [px(0.548), py(0.332)], [px(0.5), py(0.362)], [px(0.458), py(0.378)]], unit * 0.03, unit * 0.013, FLESH, seed + wave + 95, { jitter: unit * 0.0026 })
+      limb(context, [[px(0.458), py(0.378)], [px(0.436), py(0.386)]], unit * 0.012, unit * 0.008, FLESH, seed + wave + 96, { jitter: unit * 0.002 })
+      ink(context, [[px(0.437), py(0.385)], [px(0.401), py(0.396)]], seed + 97, 1.6, INK_DARK)
+      ink(context, [[px(0.44), py(0.393)], [px(0.425), py(0.4)]], seed + 98, 1, INK_DARK)
+      ink(context, [[px(0.649), py(0.24)], [px(0.598), py(0.286)], [px(0.548), py(0.328)], [px(0.5), py(0.358)], [px(0.44), py(0.382)]], seed + 99, 1)
+
+      /* head: flesh, swept grey hair, the streaming beard */
+      soften(context, ringPoints(px(0.628), py(0.21), unit * 0.024, 1.1), FLESH, seed + wave + 100, { passes: 5, jitter: unit * 0.002 })
       soften(context, [
-        [px(0.591), py(0.238)], [px(0.609), py(0.218)], [px(0.634), py(0.223)], [px(0.644), py(0.248)],
-        [px(0.624), py(0.258)], [px(0.601), py(0.255)],
-      ], BEARD, seed + 135, { passes: 4, jitter: unit * 0.002 })
+        [px(0.612), py(0.185)], [px(0.63), py(0.158)], [px(0.663), py(0.155)], [px(0.678), py(0.185)],
+        [px(0.658), py(0.2)], [px(0.632), py(0.202)],
+      ], BEARD, seed + 101, { passes: 4, jitter: unit * 0.002, dust: false })
       soften(context, [
-        [px(0.592), py(0.275)], [px(0.614), py(0.271)], [px(0.612), py(0.313)], [px(0.599), py(0.363)],
-        [px(0.581), py(0.348)], [px(0.585), py(0.303)],
-      ], BEARD, seed + 136, { passes: 4, jitter: unit * 0.002 })
+        [px(0.607), py(0.235)], [px(0.633), py(0.23)], [px(0.638), py(0.28)], [px(0.625), py(0.33)],
+        [px(0.601), py(0.345)], [px(0.588), py(0.31)], [px(0.594), py(0.265)],
+      ], BEARD, seed + 102, { passes: 4, jitter: unit * 0.002 })
       context.save()
       context.lineCap = 'round'
-      for (var whisker = 0; whisker < 10; whisker += 1) {
-        context.strokeStyle = whisker % 3 ? 'rgba(226, 226, 230, 0.8)' : 'rgba(140, 144, 152, 0.8)'
-        context.lineWidth = 0.8 + random()
+      for (var whisker = 0; whisker < 12; whisker += 1) {
+        context.strokeStyle = whisker % 3 ? 'rgba(226, 226, 230, 0.85)' : 'rgba(148, 152, 160, 0.85)'
+        context.lineWidth = 0.9 + random()
         context.beginPath()
-        var whiskerY = py(0.275 + random() * 0.07)
-        context.moveTo(px(0.605), whiskerY)
-        context.quadraticCurveTo(px(0.594), whiskerY + unit * 0.008, px(0.582 + random() * 0.01), whiskerY + unit * (0.012 + random() * 0.008))
+        var whiskerY = py(0.245 + random() * 0.08)
+        context.moveTo(px(0.622), whiskerY)
+        context.quadraticCurveTo(px(0.606), whiskerY + unit * 0.01, px(0.588 + random() * 0.012), whiskerY + unit * (0.014 + random() * 0.01))
         context.stroke()
       }
       context.restore()
-      /* the stern face */
-      SKETCH.dot(context, px(0.603), py(0.258), 1, 'rgba(50, 40, 32, 0.85)', seed + 137)
-      SKETCH.dot(context, px(0.613), py(0.256), 1, 'rgba(50, 40, 32, 0.85)', seed + 138)
-      ink(context, [[px(0.599), py(0.251)], [px(0.616), py(0.249)]], seed + 139, 1.1)
-      /* God found again in ink: the arm, and the roll of the shell */
-      ink(context, [[px(0.617), py(0.31)], [px(0.546), py(0.372)], [px(0.474), py(0.428)], [px(0.414), py(0.4535)]], seed + 140, 1.2)
-      ink(context, [
-        [px(0.555), py(0.5)], [px(0.55), py(0.3)], [px(0.62), py(0.15)], [px(0.75), py(0.095)],
-        [px(0.88), py(0.13)], [px(0.955), py(0.27)],
-      ], seed + 141, 1.1)
-      /* the green sash swinging beneath */
-      limb(context, [[px(0.705), py(0.585)], [px(0.685), py(0.68)], [px(0.663), py(0.77)], [px(0.685), py(0.86)]], unit * 0.019, unit * 0.009, SASH, seed + 142, { jitter: unit * 0.0028 })
-      limb(context, [[px(0.699), py(0.62)], [px(0.68), py(0.71)], [px(0.668), py(0.78)]], unit * 0.007, unit * 0.004, SASH_HI, seed + 143, { jitter: unit * 0.002, dust: false })
+      /* the stern face: brows down, eyes fixed on Adam */
+      ink(context, [[px(0.612), py(0.196)], [px(0.624), py(0.2)]], seed + 103, 1.3, INK_DARK)
+      ink(context, [[px(0.63), py(0.2)], [px(0.642), py(0.198)]], seed + 104, 1.3, INK_DARK)
+      SKETCH.dot(context, px(0.616), py(0.207), 1.3, INK_DARK, seed + 105)
+      SKETCH.dot(context, px(0.634), py(0.206), 1.3, INK_DARK, seed + 106)
+      ink(context, [[px(0.606), py(0.213)], [px(0.6), py(0.222)]], seed + 107, 1)
 
-      /* the cracks the ceiling remembers */
+      /* the cloak found once in ink */
+      ink(context, [[px(0.552), py(0.34)], [px(0.56), py(0.18)], [px(0.63), py(0.08)], [px(0.75), py(0.045)], [px(0.87), py(0.075)], [px(0.945), py(0.16)]], seed + 108, 1.1)
+
+      /* cracks in the plaster */
       SKETCH.pencil(context, [
-        [px(0.435), panelTop], [px(0.42), py(0.3)], [px(0.44), py(0.52)], [px(0.425), py(0.78)], [px(0.435), py(1)],
+        [px(0.43), panelTop], [px(0.415), py(0.3)], [px(0.435), py(0.52)], [px(0.42), py(0.78)], [px(0.43), py(1)],
       ], { seed: seed + 150, color: 'rgba(96, 92, 78, 0.45)', width: 0.9, amp: 1.8 })
       SKETCH.pencil(context, [
-        [px(0.63), panelTop], [px(0.615), py(0.08)],
+        [px(0.63), panelTop], [px(0.617), py(0.06)],
       ], { seed: seed + 151, color: 'rgba(96, 92, 78, 0.4)', width: 0.9, amp: 1.2 })
 
-      /* the light of the ceiling, warm from the right */
+      /* warm light from the right */
       var warmth = context.createLinearGradient(frameX + frameWidth, frameY, frameX, frameY + frameHeight)
       warmth.addColorStop(0, 'rgba(240, 224, 190, 0.1)')
       warmth.addColorStop(0.6, 'rgba(240, 224, 190, 0)')
@@ -1386,23 +1411,149 @@
       context.restore()
     }
 
+    /* -------------------------------------------------- the idle life */
+
+    var reducedMotion = window.matchMedia
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    function ensureFrames(api) {
+      var key = state.seed + ':' + api.width + 'x' + api.height
+      if (state.frameKey === key && state.frames) return
+      state.frames = []
+      state.frameKey = key
+      var ratio = api.canvas.width / api.width
+      var count = reducedMotion ? 1 : 3
+      for (var frame = 0; frame < count; frame += 1) {
+        var offscreen = document.createElement('canvas')
+        offscreen.width = api.canvas.width
+        offscreen.height = api.canvas.height
+        var offscreenContext = offscreen.getContext('2d')
+        offscreenContext.setTransform(ratio, 0, 0, ratio, 0, 0)
+        drawAdamPanel(offscreenContext, api.width, api.height, state.seed, frame)
+        state.frames.push(offscreen)
+      }
+      if (!state.drifters) {
+        var random = SKETCH.rng(state.seed + 5)
+        state.drifters = {
+          clouds: [0, 1, 2].map(function (index) {
+            return { x: random(), y: 0.16 + index * 0.1 + random() * 0.06, speed: 0.004 + random() * 0.004, scale: 0.7 + random() }
+          }),
+          birds: [0, 1, 2].map(function (index) {
+            return { x: random(), y: 0.14 + random() * 0.2, speed: 0.014 + random() * 0.01, phase: random() * 7, size: 4 + random() * 3 }
+          }),
+        }
+      }
+    }
+
+    function blitFrame(api, index) {
+      var context = api.canvas.getContext('2d')
+      var layout = state.layout
+      var ratio = api.canvas.width / api.width
+      context.save()
+      context.setTransform(1, 0, 0, 1, 0, 0)
+      var sx = Math.max(0, (layout.frameX - 8) * ratio)
+      var sy = Math.max(0, (layout.frameY - 8) * ratio)
+      var sw = (layout.frameWidth + 16) * ratio
+      var sh = (layout.frameHeight + 16) * ratio
+      context.drawImage(state.frames[index], sx, sy, sw, sh, sx, sy, sw, sh)
+      context.restore()
+    }
+
+    function drawLife(api, now) {
+      var context = api.canvas.getContext('2d')
+      var layout = state.layout
+      var ratio = api.canvas.width / api.width
+      context.save()
+      context.setTransform(ratio, 0, 0, ratio, 0, 0)
+      context.beginPath()
+      context.rect(layout.frameX + 4, layout.frameY + layout.frameHeight * 0.11, layout.frameWidth - 8, layout.frameHeight * 0.78)
+      context.clip()
+
+      /* haze drifting across the plaster */
+      state.drifters.clouds.forEach(function (cloud, index) {
+        var cloudX = layout.frameX + ((cloud.x + now * 0.001 * cloud.speed) % 1.2 - 0.1) * layout.frameWidth
+        var cloudY = layout.frameY + cloud.y * layout.frameHeight
+        for (var puff = 0; puff < 3; puff += 1) {
+          context.globalAlpha = 0.05 - puff * 0.012
+          context.fillStyle = '#f4f0e0'
+          context.beginPath()
+          context.ellipse(cloudX + puff * 30 * cloud.scale, cloudY + (puff % 2) * 6, 52 * cloud.scale, 15 * cloud.scale, 0, 0, Math.PI * 2)
+          context.fill()
+        }
+        void index
+      })
+
+      /* birds crossing, far off */
+      context.globalAlpha = 0.65
+      state.drifters.birds.forEach(function (bird) {
+        var birdX = layout.frameX + ((bird.x + now * 0.001 * bird.speed) % 1.1 - 0.05) * layout.frameWidth
+        var birdY = layout.frameY + bird.y * layout.frameHeight + Math.sin(now * 0.001 + bird.phase) * 5
+        var flap = Math.sin(now * 0.008 + bird.phase) * bird.size * 0.7
+        context.strokeStyle = 'rgba(72, 64, 54, 0.7)'
+        context.lineWidth = 1.1
+        context.lineCap = 'round'
+        context.beginPath()
+        context.moveTo(birdX - bird.size, birdY + flap)
+        context.quadraticCurveTo(birdX, birdY - bird.size * 0.2, birdX, birdY)
+        context.quadraticCurveTo(birdX, birdY - bird.size * 0.2, birdX + bird.size, birdY + flap)
+        context.stroke()
+      })
+
+      /* the gap between the hands, breathing */
+      var pulse = 0.08 + 0.05 * Math.sin(now * 0.0012)
+      var glowX = layout.frameX + layout.frameWidth * 0.386
+      var glowY = layout.frameY + layout.frameHeight * 0.1 + (layout.frameHeight * 0.8) * 0.39
+      var glow = context.createRadialGradient(glowX, glowY, 4, glowX, glowY, layout.frameWidth * 0.07)
+      glow.addColorStop(0, 'rgba(246, 240, 216, ' + pulse + ')')
+      glow.addColorStop(1, 'rgba(246, 240, 216, 0)')
+      context.globalAlpha = 1
+      context.fillStyle = glow
+      context.fillRect(glowX - layout.frameWidth * 0.08, glowY - layout.frameWidth * 0.08, layout.frameWidth * 0.16, layout.frameWidth * 0.16)
+
+      context.restore()
+    }
+
+    function startLife(api) {
+      if (reducedMotion || state.raf) return
+      var tick = function (now) {
+        state.raf = 0
+        if (state.hidden || !state.frames) return
+        if (now - state.lastBoil > 640) {
+          state.frameIndex = (state.frameIndex + 1) % state.frames.length
+          state.lastBoil = now
+        }
+        blitFrame(api, state.frameIndex)
+        drawLife(api, now)
+        state.raf = requestAnimationFrame(tick)
+      }
+      state.raf = requestAnimationFrame(tick)
+    }
+
     return {
       state: state,
-      aria: 'An artwork: a soft-focus rendition of Michelangelo’s Creation of Adam in the fresco’s own palette — Adam on the green bank, the shell of figures in the mauve cloak, and the two hands not quite touching. Repainted on every click.',
+      aria: 'An artwork: a soft repainting of Michelangelo’s Creation of Adam — Adam bright on the low green bank, God and his company swept along in the wine-dark cloak, birds and haze drifting while the two hands never quite touch. Repainted on every click.',
       height: function (width) { return width * 1.05 },
-      draw: function (context, width, height) {
-        drawAdamPanel(context, width, height, state.seed)
+      draw: function (context, width, height, api) {
+        ensureFrames(api)
+        context.save()
+        context.setTransform(1, 0, 0, 1, 0, 0)
+        context.drawImage(state.frames[0], 0, 0)
+        context.restore()
         write(context, data.title, 26, 30, { size: 12, media: 'pencil', seed: 1601, tracking: 0.4, width: 2 })
         SKETCH.rule(context, 24, 40, 26 + measure(data.title, 12, 0.4) + 8, { seed: 1602, color: SKETCH.PENCIL, width: 1.1 })
         write(context, data.note, 26 + measure(data.title, 12, 0.4) + 20, 30, { size: 8, color: SKETCH.GREEN_PEN, seed: 1603 })
         write(context, data.date, width - 26, 30, { size: 8.5, media: 'pencil', seed: 1604, align: 'right' })
         write(context, 'CLICK TO REPAINT', width - 26, 46, { size: 7, color: SKETCH.GREEN_PEN, seed: 1605, align: 'right' })
         SKETCH.artifacts(context, width, height, 1606 + state.seed)
+        startLife(api)
       },
       onPointer: function (type, x, y, api) {
         if (type === 'move') { api.canvas.style.cursor = 'pointer'; return }
         if (type !== 'down') return
         state.seed = Math.floor(Math.random() * 999983)
+        state.frames = null
+        state.frameKey = ''
+        state.drifters = null
         api.redraw()
       },
     }
