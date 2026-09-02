@@ -1,0 +1,90 @@
+/* sketch.css — the desk the sheets are lying on. Everything visible is
+   drawn onto canvases; this file only lays the sheets out. */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #eee9dd;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 8px;
+  overflow: hidden;
+}
+
+/* the drawn grove behind the book */
+#grove {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+}
+
+#page {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* a small book on the desk: sized to sit inside the viewport
+   (book.js refines this width from the real window size) */
+.book {
+  position: relative;
+  line-height: 0;
+  width: min(94vw, 600px);
+}
+
+.book canvas {
+  display: block;
+  width: 100%;
+  filter:
+    drop-shadow(0 1px 3px rgba(52, 42, 26, 0.3))
+    drop-shadow(0 8px 26px rgba(52, 42, 26, 0.24));
+}
+
+.hotspots a {
+  position: absolute;
+  display: block;
+}
+
+.hotspots a:focus-visible {
+  outline: 2px dashed rgba(178, 72, 54, 0.85);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.noscript {
+  background: #efe9da;
+  padding: 2rem;
+  font-family: Georgia, serif;
+  color: #2f2b26;
+  line-height: 1.6;
+}
+
+.noscript a {
+  color: #a04432;
+}
+
+@media (max-width: 560px) {
+  body {
+    padding: 18px 8px 48px;
+  }
+
+  #page {
+    gap: 22px;
+  }
+}

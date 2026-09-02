@@ -3,23 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#d8cfbd" />
+    <meta name="theme-color" content="#c9c0ac" />
     <meta
       name="description"
-      content="Explore Caellum Yip Hoi-Lee’s Archive, an interactive 3D portfolio of software engineering, AI, games, and award-winning projects."
+      content="Caellum Yip Hoi-Lee — a hand-drawn JavaScript portfolio. Every mark on the page is drawn in code at load: the paper, the lettering, the faces, the watercolor."
     />
-    <meta property="og:title" content="Caellum Yip Hoi-Lee’s Archive" />
-    <meta
-      property="og:description"
-      content="A playable watercolor gallery built from Caellum's slime simulation work."
-    />
+    <meta property="og:title" content="Caellum Yip Hoi-Lee" />
+    <meta property="og:description" content="A portfolio drawn entirely in JavaScript. No images, no fonts, no frameworks." />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href="https://caellumyhl.github.io/" />
-    <title>Caellum Yip Hoi-Lee’s Archive</title>
+    <title>Caellum Yip Hoi-Lee</title>
+    <link rel="stylesheet" href="sketch.css" />
     <link
       rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4C27 16 11 22 11 40a21 21 0 1042 0C53 22 37 16 32 4z' fill='%233e6f91'/%3E%3Ccircle cx='25' cy='38' r='2.5' fill='%23231f25'/%3E%3Ccircle cx='39' cy='38' r='2.5' fill='%23231f25'/%3E%3C/svg%3E"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23efe9da'/%3E%3Cellipse cx='32' cy='36' rx='15' ry='18' fill='none' stroke='%232a2724' stroke-width='2'/%3E%3Ccircle cx='26' cy='33' r='2' fill='%232a2724'/%3E%3Ccircle cx='38' cy='33' r='2' fill='%232a2724'/%3E%3Cpath d='M27 44q5 4 10 0' fill='none' stroke='%232a2724' stroke-width='2'/%3E%3C/svg%3E"
     />
     <script type="application/ld+json">
       {
@@ -41,15 +38,41 @@
     </script>
   </head>
   <body>
-    <div id="root">
+    <header class="visually-hidden">
+      <h1>Caellum Yip Hoi-Lee</h1>
+      <p>
+        Computer Science at the University of Toronto. Founding Engineer at Chatforce.
+        This portfolio is drawn entirely in JavaScript at load time — no images, no fonts.
+      </p>
+    </header>
+    <main id="page">
       <noscript>
-        <main style="max-width: 48rem; margin: 4rem auto; padding: 1.5rem; font-family: system-ui, sans-serif">
-          <h1>Caellum Yip Hoi-Lee</h1>
-          <p>Founding Engineer, game developer, and Computer Science student at the University of Toronto.</p>
-          <p><a href="mailto:cyiphoilee@mail.utoronto.ca">Email Caellum</a> · <a href="https://github.com/CaellumYHL">GitHub</a></p>
-        </main>
+        <div class="noscript">
+          <h2>Caellum Yip Hoi-Lee</h2>
+          <p>This page draws itself with JavaScript. Without it, here are the facts:</p>
+          <p>
+            Founding Engineer at Chatforce · CS at the University of Toronto ·
+            Paper Cuts (1st overall, Cal Hacks) · Ensemble (top 5, Hack the Six) ·
+            Auctopus (2 track firsts, SOON) · Twin Universe (2.8M+ Roblox visits)
+          </p>
+          <p>
+            <a href="mailto:cyiphoilee@mail.utoronto.ca">Email</a> ·
+            <a href="https://github.com/CaellumYHL">GitHub</a> ·
+            <a href="https://www.linkedin.com/in/caellum-yip-hoi-lee-29242b30b">LinkedIn</a> ·
+            <a href="Resume_Latex.pdf">Résumé (PDF)</a>
+          </p>
+        </div>
       </noscript>
-    </div>
-    <script type="module" src="/src/main.tsx"></script>
+    </main>
+    <script src="sketch/tools.js"></script>
+    <script src="sketch/lettering.js"></script>
+    <script src="sketch/grove.js"></script>
+    <script src="sketch/faces.js"></script>
+    <script src="sketch/watercolor.js"></script>
+    <script src="sketch/ledger.js"></script>
+    <script src="sketch/art.js"></script>
+    <script src="sketch/plates.js"></script>
+    <script src="sketch/book.js"></script>
+    <script src="sketch/main.js"></script>
   </body>
 </html>

@@ -1,68 +1,64 @@
-# Caellum Yip Hoi-Lee's Archive
+# Caellum Yip Hoi-Lee — the sketchbook
 
-Caellum Yip Hoi-Lee's playable 3D portfolio: a watercolor gallery built with React, Three.js, React Three Fiber, and GLSL. The player is a living drop of pigment adapted from the neighboring `slimesim` project.
+A portfolio drawn entirely in JavaScript. There are no images, no fonts, and
+no frameworks: every mark on the page — the paper grain, the printed ledger
+rules, the lettering, the watercolor, the faces — is drawn onto canvases when
+the page loads.
+
+The site is a small flippable scrapbook. Use the index tabs on the right
+edge, the dog-eared page corners, or the arrow keys to turn pages.
+
+## Pages
+
+1. **Cover** — name, role, links
+2. **Selected work** — projects, each with a drawn doodle and a real link
+3. **Experience** — the CV ledger, thumbprint-stamped
+4. **Twenty-five washes** — skills painted as watercolor squares
+5. **Naive faces** — a generated portrait sheet; click a face to redraw it
+6. **Wet paper** — an interactive watercolor simulation after Curtis et al.,
+   *Computer-Generated Watercolor* (SIGGRAPH 1997); drag on the paper to paint
+7. **Two artworks** — a re-tangleable ink knot, and regrowable leaded leaves
+8. **Visitor ledger** — a shared visit count, hand-drawn
 
 ## Run locally
 
-```bash
-npm install
-npm run dev
-```
-
-Open <http://127.0.0.1:5173/>.
-
-- `WASD` or arrow keys — move
-- Click the floor — set a destination
-- `Space` — jump
-- `E` — inspect a nearby exhibit
-- `M` — open the catalogue
-- `F` — open the résumé
-- `Esc` — close the current panel
-
-Useful direct views:
-
-- `/?mode=gallery` — skip the introduction
-- `/?mode=catalogue` — open the catalogue
-- `/?mode=resume` — recruiter-friendly résumé
-- `/?exhibit=paper-cuts` — open a specific project
-- `/?mode=gallery&room=work` — start in the work room
-- `/?mode=gallery&studio=watercolor` — open the full watercolor study
-- `/?mode=gallery&studio=faces` — open the full generative portrait study
-
-## Verify a production build
+There is no build step. Serve the folder and open it:
 
 ```bash
-npm test
-npm run build
-npm run preview
+python3 -m http.server 8000
+# open http://127.0.0.1:8000/
 ```
 
-The production output is written to `dist/`.
+Everything lives in plain script files under `sketch/`:
 
-## Watercolor study
-
-The back-wall pigment piece is a compact interactive interpretation of the layered model described by Curtis et al. in *Computer-Generated Watercolor* (SIGGRAPH 1997): an uneven paper field, water transport, suspended pigment, deposition, resuspension, drying edges, and subtractive color mixing. It is an artistic browser study, not a line-for-line reproduction of the paper.
-
-Original project: <https://grail.cs.washington.edu/projects/watercolor/>
+- `tools.js` — paper stocks, ink/pencil/gouache strokes, washes, splatter,
+  thumbprints, scan artifacts, the canvas mounting framework
+- `lettering.js` — a naive single-stroke letterform set (the "font")
+- `faces.js` — the portrait generator
+- `watercolor.js` — the paint simulation
+- `art.js` — the tangle and leaves artworks
+- `plates.js` — the cover, work, CV, and skills pages
+- `ledger.js` — the GoatCounter visitor ledger
+- `book.js` — the flippable book: tabs, corners, keyboard
+- `main.js` — the portfolio facts and page order
 
 ## Visitor ledger
 
-GitHub Pages is static, so the basin's shared visit count is read from GoatCounter.
-Local development displays a clearly labelled preview; the live site records visits.
+GitHub Pages is static, so the shared visit count is read from GoatCounter
+(`caellumyhl.goatcounter.com`). Localhost is never counted and shows a
+labelled preview. In GoatCounter, **Settings → Site settings → Allow adding
+visitor counts on your website** must be enabled for the public
+`/counter/TOTAL.json` value to be readable.
 
-1. Register the account name `caellumyhl` at <https://www.goatcounter.com/signup>
-   and use `https://caellumyhl.github.io` as the site domain.
-2. In GoatCounter, open **Settings → Site settings** and enable
-   **Allow adding visitor counts on your website**.
-3. The production build then records one canonical visit and reads the public
-   `/counter/` JSON value into the basin. No GitHub secret or rebuild is needed.
+## Deploying
 
-The app defaults to `caellumyhl.goatcounter.com`. To use another account, add an
-Actions repository variable named `VITE_GOATCOUNTER_CODE` containing its short
-site code (or full `https://…goatcounter.com` URL), then redeploy.
+`.github/workflows/deploy.yml` checks the scripts parse, copies
+`index.html`, `sketch.css`, `sketch/`, and the résumé PDF into an artifact,
+and publishes it to GitHub Pages on every push to `main`. The
+`old-pipeline/` folder is not part of the published site.
 
-No API secret is shipped to the browser.
+## The old pipeline
 
-## Publish on GitHub Pages
-
-The workflow in `.github/workflows/deploy.yml` tests and builds `dist/` on pushes to `main`, then publishes that artifact. In the repository's **Settings → Pages**, set **Source** to **GitHub Actions** once.
+The previous site — a playable 3D watercolor gallery built with React,
+Three.js, and React Three Fiber — is archived in [`old-pipeline/`](old-pipeline/)
+with its own README. It is kept for reference and is no longer served.
