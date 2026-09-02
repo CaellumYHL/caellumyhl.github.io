@@ -28,15 +28,6 @@ body {
   pointer-events: none;
 }
 
-/* the one butterfly, above everything, touching nothing */
-#butterfly {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 3;
-  pointer-events: none;
-}
 
 #weather-toggle {
   position: fixed;

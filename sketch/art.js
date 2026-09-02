@@ -75,28 +75,135 @@
   var REDUCED_MOTION = window.matchMedia
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-  /* Snapshot a freshly drawn page and keep a quiet overlay moving on it —
-     the base art stays still, only the air moves. */
+  function smoothPath(context, points) {
+    context.beginPath()
+    context.moveTo(points[0][0], points[0][1])
+    for (var index = 1; index < points.length - 1; index += 1) {
+      var midX = (points[index][0] + points[index + 1][0]) / 2
+      var midY = (points[index][1] + points[index + 1][1]) / 2
+      context.quadraticCurveTo(points[index][0], points[index][1], midX, midY)
+    }
+    context.closePath()
+  }
+
+  function soften(context, points, color, seed, options) {
+    options = options || {}
+    var random = SKETCH.rng(seed)
+    var passes = options.passes || 5
+    var jitter = options.jitter === undefined ? 4 : options.jitter
+    var alpha = options.alpha === undefined ? 0.2 : options.alpha
+    context.save()
+    context.fillStyle = color
+    for (var pass = 0; pass < passes; pass += 1) {
+      var driftX = (random() - 0.5) * jitter * 2
+      var driftY = (random() - 0.5) * jitter * 2
+      context.globalAlpha = alpha * (0.75 + random() * 0.5)
+      smoothPath(context, points.map(function (point) {
+        return [point[0] + driftX + (random() - 0.5) * jitter, point[1] + driftY + (random() - 0.5) * jitter]
+      }))
+      context.fill()
+    }
+    if (options.dust !== false) {
+      for (var dust = 0; dust < points.length * 2; dust += 1) {
+        var at = Math.floor(random() * (points.length - 1))
+        var t = random()
+        context.globalAlpha = 0.07 + random() * 0.12
+        context.fillRect(
+          points[at][0] + (points[at + 1][0] - points[at][0]) * t + (random() - 0.5) * jitter * 3,
+          points[at][1] + (points[at + 1][1] - points[at][1]) * t + (random() - 0.5) * jitter * 3,
+          0.9 + random() * 1.6, 0.8 + random() * 1.4,
+        )
+      }
+    }
+    context.restore()
+  }
+
+  function tubePoints(line, startWidth, endWidth) {
+    var left = []
+    var right = []
+    for (var index = 0; index < line.length; index += 1) {
+      var previous = line[Math.max(0, index - 1)]
+      var next = line[Math.min(line.length - 1, index + 1)]
+      var dirX = next[0] - previous[0]
+      var dirY = next[1] - previous[1]
+      var length = Math.hypot(dirX, dirY) || 1
+      var normalX = -dirY / length
+      var normalY = dirX / length
+      var t = index / (line.length - 1)
+      var halfWidth = (startWidth + (endWidth - startWidth) * t) / 2
+      left.push([line[index][0] + normalX * halfWidth, line[index][1] + normalY * halfWidth])
+      right.push([line[index][0] - normalX * halfWidth, line[index][1] - normalY * halfWidth])
+    }
+    return left.concat(right.reverse())
+  }
+
+  function limb(context, line, startWidth, endWidth, color, seed, options) {
+    soften(context, tubePoints(line, startWidth, endWidth), color, seed, options)
+  }
+
+  function ringPoints(centerX, centerY, radius, squashY) {
+    var points = []
+    for (var index = 0; index < 12; index += 1) {
+      var angle = (index / 12) * Math.PI * 2
+      points.push([centerX + Math.cos(angle) * radius, centerY + Math.sin(angle) * radius * (squashY || 1)])
+    }
+    return points
+  }
+
+  /* A boiled copy of a drawn page: the image sliced into strips, each
+     strip nudged a hair — the lines waver as if redrawn by hand. */
+  function boiledCopy(source, variant) {
+    var copy = document.createElement('canvas')
+    copy.width = source.width
+    copy.height = source.height
+    var context = copy.getContext('2d')
+    var random = SKETCH.rng(9000 + variant * 131)
+    context.drawImage(source, 0, 0)
+    var strip = Math.max(18, Math.round(source.width / 46))
+    for (var x = 0; x < source.width; x += strip) {
+      var give = (random() - 0.5) * 3.2
+      context.drawImage(source, x, 0, strip, source.height, x, give, strip, source.height)
+    }
+    var mid = document.createElement('canvas')
+    mid.width = source.width
+    mid.height = source.height
+    var midContext = mid.getContext('2d')
+    midContext.drawImage(copy, 0, 0)
+    for (var y = 0; y < source.height; y += strip) {
+      var giveX = (random() - 0.5) * 3.2
+      midContext.drawImage(copy, 0, y, source.width, strip, giveX, y, source.width, strip)
+    }
+    return mid
+  }
+
+  /* Snapshot a freshly drawn page and keep it alive: the drawing boils
+     between re-wobbled frames while a quiet overlay moves on top. */
   function beginIdle(state, api, overlay) {
     if (REDUCED_MOTION) return
     var snap = document.createElement('canvas')
     snap.width = api.canvas.width
     snap.height = api.canvas.height
     snap.getContext('2d').drawImage(api.canvas, 0, 0)
-    state.snap = snap
+    state.frames = [snap, boiledCopy(snap, 1), boiledCopy(snap, 2)]
+    state.frameIndex = 0
+    state.lastBoil = 0
     state.idleApi = api
     if (state.raf) return
     var tick = function (now) {
       state.raf = 0
-      if (state.hidden || !state.snap) return
+      if (state.hidden || !state.frames) return
+      if (now - state.lastBoil > 640) {
+        state.frameIndex = (state.frameIndex + 1) % state.frames.length
+        state.lastBoil = now
+      }
       var liveApi = state.idleApi
       var ratio = liveApi.canvas.width / liveApi.width
-      var region = { x: 0, y: 58, width: liveApi.width, height: liveApi.height - 58 - 96 }
+      var region = { x: 0, y: 58, width: liveApi.width - 16, height: liveApi.height - 58 - 96 }
       var context = liveApi.canvas.getContext('2d')
       context.save()
       context.setTransform(1, 0, 0, 1, 0, 0)
       context.drawImage(
-        state.snap,
+        state.frames[state.frameIndex],
         region.x * ratio, region.y * ratio, region.width * ratio, region.height * ratio,
         region.x * ratio, region.y * ratio, region.width * ratio, region.height * ratio,
       )
@@ -1048,6 +1155,64 @@
       SKETCH.texture(context, width, height, seed)
     }
 
+    function buildCourtButterfly(span) {
+      var wingWidth = Math.round(span * 0.6)
+      var wingHeight = Math.round(span * 0.86)
+      var wing = document.createElement('canvas')
+      wing.width = wingWidth * 2
+      wing.height = wingHeight * 2
+      var context = wing.getContext('2d')
+      context.setTransform(2, 0, 0, 2, 0, 0)
+      var random = SKETCH.rng(5417)
+
+      var fore = [
+        [2, wingHeight * 0.5], [wingWidth * 0.22, wingHeight * 0.14], [wingWidth * 0.68, wingHeight * 0.05],
+        [wingWidth * 0.94, wingHeight * 0.22], [wingWidth * 0.8, wingHeight * 0.45], [wingWidth * 0.34, wingHeight * 0.52],
+      ]
+      var hind = [
+        [2, wingHeight * 0.54], [wingWidth * 0.5, wingHeight * 0.5], [wingWidth * 0.7, wingHeight * 0.65],
+        [wingWidth * 0.56, wingHeight * 0.87], [wingWidth * 0.27, wingHeight * 0.95], [wingWidth * 0.06, wingHeight * 0.73],
+      ]
+      /* soft pigment, no hard edge anywhere */
+      soften(context, fore, '#e6d6ac', 5420, { passes: 9, jitter: wingWidth * 0.05, alpha: 0.13 })
+      soften(context, fore, '#d9a441', 5421, { passes: 6, jitter: wingWidth * 0.04, alpha: 0.1, dust: false })
+      soften(context, hind, '#9b8a9e', 5422, { passes: 9, jitter: wingWidth * 0.05, alpha: 0.13 })
+      soften(context, hind, '#6d4a5e', 5423, { passes: 5, jitter: wingWidth * 0.045, alpha: 0.09, dust: false })
+      /* pale spots breathed on, and a dusty rim */
+      soften(context, ringPoints(wingWidth * 0.62, wingHeight * 0.22, wingWidth * 0.09, 1), '#f2ead2', 5424, { passes: 5, jitter: wingWidth * 0.03, alpha: 0.16, dust: false })
+      soften(context, ringPoints(wingWidth * 0.4, wingHeight * 0.72, wingWidth * 0.07, 1), '#e8dcc2', 5425, { passes: 4, jitter: wingWidth * 0.03, alpha: 0.14, dust: false })
+      context.fillStyle = 'rgba(74, 58, 50, 1)'
+      for (var speck = 0; speck < 70; speck += 1) {
+        var edge = random() > 0.5 ? fore : hind
+        var at = Math.floor(random() * (edge.length - 1))
+        var along = random()
+        context.globalAlpha = 0.06 + random() * 0.12
+        context.fillRect(
+          edge[at][0] + (edge[at + 1][0] - edge[at][0]) * along + (random() - 0.5) * 5,
+          edge[at][1] + (edge[at + 1][1] - edge[at][1]) * along + (random() - 0.5) * 5,
+          1 + random() * 1.4, 1 + random(),
+        )
+      }
+      context.globalAlpha = 1
+
+      var body = document.createElement('canvas')
+      var bodyWidth = Math.round(span * 0.1)
+      var bodyHeight = Math.round(span * 0.5)
+      body.width = bodyWidth * 2
+      body.height = bodyHeight * 2
+      var bodyContext = body.getContext('2d')
+      bodyContext.setTransform(2, 0, 0, 2, 0, 0)
+      soften(bodyContext, [
+        [bodyWidth * 0.36, bodyHeight * 0.16], [bodyWidth * 0.64, bodyHeight * 0.16],
+        [bodyWidth * 0.6, bodyHeight * 0.6], [bodyWidth * 0.52, bodyHeight * 0.94],
+        [bodyWidth * 0.48, bodyHeight * 0.94], [bodyWidth * 0.4, bodyHeight * 0.6],
+      ], '#453a30', 5430, { passes: 6, jitter: bodyWidth * 0.1, alpha: 0.2, dust: false })
+      SKETCH.stroke(bodyContext, [[bodyWidth * 0.44, bodyHeight * 0.14], [bodyWidth * 0.16, bodyHeight * 0.02]], { seed: 5431, color: 'rgba(69, 58, 48, 0.6)', width: 1, amp: 0.8 })
+      SKETCH.stroke(bodyContext, [[bodyWidth * 0.56, bodyHeight * 0.14], [bodyWidth * 0.84, bodyHeight * 0.02]], { seed: 5432, color: 'rgba(69, 58, 48, 0.6)', width: 1, amp: 0.8 })
+
+      return { wing: wing, body: body, wingWidth: wingWidth, wingHeight: wingHeight, bodyWidth: bodyWidth, bodyHeight: bodyHeight, span: span }
+    }
+
     function courtOverlay(context, now) {
       var frame = state.frame
       if (!frame) return
@@ -1095,6 +1260,37 @@
         context.stroke()
         context.restore()
       }
+
+      /* the one butterfly, fuzzy as breathed pigment, over the clearing */
+      var span = frame.width * 0.105
+      if (!state.butterfly || Math.abs(state.butterfly.span - span) > 2) {
+        state.butterfly = buildCourtButterfly(span)
+      }
+      var parts = state.butterfly
+      var dt = Math.min(0.06, (now - (state.butterflyLast || now)) / 1000)
+      state.butterflyLast = now
+      var effort = 0.5 + 0.5 * Math.sin(t * 0.8 + Math.sin(t * 0.29) * 1.7)
+      state.butterflyPhase = (state.butterflyPhase || 0) + dt * (3.5 + 9.5 * effort)
+      var fold = Math.sin(state.butterflyPhase)
+      var spread = 0.2 + 0.8 * Math.abs(fold)
+      var butterflyX = frame.x + frame.width * (0.46 + Math.sin(t * 0.16) * 0.06 + Math.sin(t * 0.051 + 2) * 0.03)
+      var butterflyY = frame.y + frame.height * (0.44 + Math.sin(t * 0.21 + 1) * 0.05) + fold * 2.5 - effort * 5
+      var tilt = Math.cos(t * 0.16) * 0.13 + Math.sin(t * 0.08) * 0.07
+
+      context.save()
+      context.translate(butterflyX, butterflyY)
+      context.rotate(tilt)
+      context.globalAlpha = 0.92
+      context.save()
+      context.scale(-spread, 1)
+      context.drawImage(parts.wing, 0, -parts.wingHeight / 2, parts.wingWidth, parts.wingHeight)
+      context.restore()
+      context.save()
+      context.scale(spread, 1)
+      context.drawImage(parts.wing, 0, -parts.wingHeight / 2, parts.wingWidth, parts.wingHeight)
+      context.restore()
+      context.drawImage(parts.body, -parts.bodyWidth / 2, -parts.bodyHeight * 0.36, parts.bodyWidth, parts.bodyHeight)
+      context.restore()
     }
 
     return {
@@ -1161,72 +1357,6 @@
     var INK = 'rgba(60, 46, 38, 0.6)'
     var INK_DARK = 'rgba(48, 38, 30, 0.85)'
 
-    function smoothPath(context, points) {
-      context.beginPath()
-      context.moveTo(points[0][0], points[0][1])
-      for (var index = 1; index < points.length - 1; index += 1) {
-        var midX = (points[index][0] + points[index + 1][0]) / 2
-        var midY = (points[index][1] + points[index + 1][1]) / 2
-        context.quadraticCurveTo(points[index][0], points[index][1], midX, midY)
-      }
-      context.closePath()
-    }
-
-    function soften(context, points, color, seed, options) {
-      options = options || {}
-      var random = SKETCH.rng(seed)
-      var passes = options.passes || 5
-      var jitter = options.jitter === undefined ? 4 : options.jitter
-      var alpha = options.alpha === undefined ? 0.2 : options.alpha
-      context.save()
-      context.fillStyle = color
-      for (var pass = 0; pass < passes; pass += 1) {
-        var driftX = (random() - 0.5) * jitter * 2
-        var driftY = (random() - 0.5) * jitter * 2
-        context.globalAlpha = alpha * (0.75 + random() * 0.5)
-        smoothPath(context, points.map(function (point) {
-          return [point[0] + driftX + (random() - 0.5) * jitter, point[1] + driftY + (random() - 0.5) * jitter]
-        }))
-        context.fill()
-      }
-      if (options.dust !== false) {
-        for (var dust = 0; dust < points.length * 2; dust += 1) {
-          var at = Math.floor(random() * (points.length - 1))
-          var t = random()
-          context.globalAlpha = 0.07 + random() * 0.12
-          context.fillRect(
-            points[at][0] + (points[at + 1][0] - points[at][0]) * t + (random() - 0.5) * jitter * 3,
-            points[at][1] + (points[at + 1][1] - points[at][1]) * t + (random() - 0.5) * jitter * 3,
-            0.9 + random() * 1.6, 0.8 + random() * 1.4,
-          )
-        }
-      }
-      context.restore()
-    }
-
-    function tubePoints(line, startWidth, endWidth) {
-      var left = []
-      var right = []
-      for (var index = 0; index < line.length; index += 1) {
-        var previous = line[Math.max(0, index - 1)]
-        var next = line[Math.min(line.length - 1, index + 1)]
-        var dirX = next[0] - previous[0]
-        var dirY = next[1] - previous[1]
-        var length = Math.hypot(dirX, dirY) || 1
-        var normalX = -dirY / length
-        var normalY = dirX / length
-        var t = index / (line.length - 1)
-        var halfWidth = (startWidth + (endWidth - startWidth) * t) / 2
-        left.push([line[index][0] + normalX * halfWidth, line[index][1] + normalY * halfWidth])
-        right.push([line[index][0] - normalX * halfWidth, line[index][1] - normalY * halfWidth])
-      }
-      return left.concat(right.reverse())
-    }
-
-    function limb(context, line, startWidth, endWidth, color, seed, options) {
-      soften(context, tubePoints(line, startWidth, endWidth), color, seed, options)
-    }
-
     /* a flesh limb with the light on it: lit along the top, core shadow
        along the underside — the form turns instead of lying flat */
     function modelLimb(context, line, startWidth, endWidth, seed, options) {
@@ -1240,16 +1370,6 @@
         startWidth * 0.4, endWidth * 0.38, FLESH_HI, seed + 502,
         { jitter: options.jitter, alpha: 0.12, dust: false, passes: 3 })
     }
-
-    function ringPoints(centerX, centerY, radius, squashY) {
-      var points = []
-      for (var index = 0; index < 12; index += 1) {
-        var angle = (index / 12) * Math.PI * 2
-        points.push([centerX + Math.cos(angle) * radius, centerY + Math.sin(angle) * radius * (squashY || 1)])
-      }
-      return points
-    }
-
     function ink(context, points, seed, width, color) {
       SKETCH.stroke(context, points, { seed: seed, color: color || INK, width: width || 1.2, amp: 0.9, step: 8 })
     }

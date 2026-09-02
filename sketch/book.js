@@ -127,8 +127,6 @@
         var tabX = pageW - 12
         var tabRight = active ? width - 2 : hovered ? width - 4 : width - 8
         context.save()
-        context.globalAlpha = active ? 0.92 : hovered ? 0.82 : 0.6
-        context.fillStyle = color
         var random = SKETCH.rng(4000 + index)
         context.beginPath()
         context.moveTo(tabX, tabY + (random() - 0.5) * 2)
@@ -136,6 +134,11 @@
         context.quadraticCurveTo(tabRight, tabY + tabH / 2, tabRight - 4, tabY + tabH + (random() - 0.5) * 2)
         context.lineTo(tabX, tabY + tabH)
         context.closePath()
+        /* paper first, so the grove never shows through the wash */
+        context.fillStyle = '#ece5d2'
+        context.fill()
+        context.globalAlpha = active ? 0.92 : hovered ? 0.82 : 0.6
+        context.fillStyle = color
         context.fill()
         /* wash grain on the tab */
         context.globalAlpha = 0.2
@@ -229,7 +232,13 @@
           link: mountApi.link,
           redraw: mountApi.redraw,
         }
+        /* a page may paint exuberantly; it stays inside its edges */
+        context.save()
+        context.beginPath()
+        context.rect(0, 0, pageW, height)
+        context.clip()
         page.spec.draw(context, pageW, height, pageApi)
+        context.restore()
         drawChrome(context, pageW, width, height)
       },
       onPointer: function (type, x, y, mountApi, event) {
